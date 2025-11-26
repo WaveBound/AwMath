@@ -1,99 +1,1225 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<title>DPS Calculator</title>
-<style>
-  body { background:#111; color:white; font-family:Arial; display:flex; justify-content:center; padding:40px; }
-  .card { background:#1d1d1d; padding:30px; width:420px; border-radius:14px; box-shadow:0 0 20px #000; }
-  input, select, button { padding:10px; border-radius:6px; border:none; font-size:16px; }
-  .row { display:flex; gap:10px; margin-top:12px; }
-  .mode-btn { flex:1; cursor:pointer; background:#333; color:#ccc; }
-  .mode-btn.active { background:#4a5cff; color:white; }
-  #resultBox { margin-top:20px; background:#222; padding:18px; border-radius:10px; text-align:center; font-size:20px; }
-  .small { font-size:13px; opacity:0.7; }
-</style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Calculator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+      :root {
+        /* --- Base Colors (Dark Theme) --- */
+        --bg-app: #09090b;
+        --bg-card: #121215; 
+        --bg-input: #18181b;
+        --border-color: #27272a;
+        
+        /* --- Default Theme Variables --- */
+        --primary: #ffffff;         
+        --primary-light: #bf00ff;
+        --primary-border: #8700bd; 
+        --primary-dim: rgba(135, 0, 189, 0.15); 
+        --primary-glow: rgba(163, 0, 222, 0.5); 
+        
+        /* Text */
+        --text-main: #ffffff;
+        --text-muted: #a1a1aa;
+        
+        /* UI Metrics */
+        --border-radius: 16px;
+        --border-radius-sm: 10px;
+        
+        /* --- Gradients & Shadows --- */
+        --active-gradient: radial-gradient(circle at center, var(--primary-dim) 0%, transparent 75%);
+        --active-gradient-tight: radial-gradient(circle at center, var(--primary-dim) 0%, transparent 60%); 
+        --active-border: 1px solid var(--primary-border);
+        --active-shadow: 0 0 30px -5px var(--primary-dim);
+      }
+
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+
+      body {
+        background-color: var(--bg-app);
+        color: var(--text-main);
+        font-family: 'Inter', sans-serif;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        padding: 20px;
+        position: relative;
+        overflow-x: hidden;
+      }
+
+      .bg-glow {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 100vw;
+        height: 100vh;
+        background: radial-gradient(circle at center, var(--primary-glow) 0%, transparent 65%);
+        opacity: 0.25; 
+        filter: blur(120px); 
+        z-index: -1;
+        pointer-events: none;
+        transition: background 0.5s ease;
+      }
+
+      /* --- Layout Wrapper --- */
+      /* This wrapper stays exactly in the center of the screen */
+      .content-wrapper {
+          position: relative;
+          width: 100%;
+          max-width: 950px; /* Matches Main UI width */
+          margin: 0 auto;
+          /* No flex here, we use absolute positioning for the side panel */
+      }
+
+      .main-container {
+        width: 100%;
+        background-color: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius);
+        box-shadow: 0 0 0 1px #27272a, 0 40px 80px -20px rgba(0, 0, 0, 0.7);
+        overflow: hidden;
+        position: relative;
+        backdrop-filter: blur(10px);
+        z-index: 2; /* Keep above side panel visually if overlapped */
+      }
+
+      /* --- Side Panel (Drops UI) --- */
+      .side-panel {
+          /* Absolute Position: Floats to the right of the wrapper */
+          position: absolute;
+          left: 100%; 
+          top: 50%;
+          transform: translateY(-50%); /* Centers it Up/Down */
+          
+          width: 300px;
+          height: fit-content; /* Only as tall as needed */
+          margin-left: 20px; /* Gap between Main and Side */
+          
+          background-color: var(--bg-card);
+          border: 1px solid var(--border-color);
+          border-radius: var(--border-radius);
+          padding: 25px;
+          
+          display: none; /* Hidden by default */
+          opacity: 0;
+          
+          box-shadow: 0 0 0 1px #27272a, 0 20px 60px -10px rgba(0, 0, 0, 0.5);
+          backdrop-filter: blur(10px);
+          z-index: 1;
+          transition: opacity 0.3s ease, transform 0.3s ease;
+      }
+
+      .side-panel.active { 
+          display: block; 
+          animation: fadeSlideIn 0.4s ease forwards;
+      }
+
+      @keyframes fadeSlideIn {
+          from { opacity: 0; transform: translate(-10px, -50%); }
+          to { opacity: 1; transform: translate(0, -50%); }
+      }
+      
+      /* --- Responsive Behavior --- */
+      /* When screen is too narrow to fit side-by-side (950 + 300 + margins), stack them */
+      @media (max-width: 1350px) {
+          .side-panel {
+              position: relative;
+              left: auto;
+              top: auto;
+              transform: none !important; /* Reset vertical centering */
+              margin: 20px auto 0; /* Center below main */
+              width: 100%;
+              max-width: 600px;
+          }
+          .side-panel.active {
+              animation: fadeInBottom 0.4s ease forwards;
+          }
+          @keyframes fadeInBottom {
+              from { opacity: 0; transform: translateY(-10px); }
+              to { opacity: 1; transform: translateY(0); }
+          }
+      }
+
+      /* Navigation */
+      .tab-nav {
+        display: flex;
+        padding: 12px;
+        gap: 8px;
+        border-bottom: 1px solid var(--border-color);
+        background-color: rgba(0,0,0,0.2);
+      }
+
+      .tab-button {
+        flex: 1;
+        padding: 12px;
+        background-color: transparent;
+        border: 1px solid transparent;
+        border-radius: 8px;
+        color: var(--text-muted);
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .tab-button:hover { color: var(--text-main); background-color: rgba(255,255,255,0.03); }
+
+      .tab-button.active {
+        background-color: #000;
+        background-image: var(--active-gradient);
+        border: var(--active-border);
+        box-shadow: var(--active-shadow);
+        color: var(--text-main);
+        text-shadow: 0 0 15px var(--primary-glow);
+      }
+
+      /* Content */
+      .tab-content {
+        display: none;
+        padding: 40px;
+        animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      .tab-content.active { display: block; }
+      @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+      
+      .tab-content h2 {
+          text-align: center;
+          margin-bottom: 30px;
+          color: var(--text-main);
+          font-weight: 700;
+      }
+
+      /* Inputs Layout */
+      .mastery-layout {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+        margin-bottom: 30px;
+      }
+      @media (max-width: 768px) {
+        .mastery-layout { grid-template-columns: 1fr; gap: 25px; }
+        .tab-content { padding: 25px; }
+      }
+
+      .input-group { margin-bottom: 25px; }
+      .input-group label {
+        display: block;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-weight: 600;
+        margin-bottom: 10px;
+        color: var(--text-muted);
+        display: flex;
+        justify-content: space-between;
+      }
+      
+      .input-row-multi { display: flex; gap: 20px; }
+      .input-col { flex: 1; }
+      .input-row { display: flex; gap: 12px; }
+      .input-row-full { width: 100%; }
+
+      /* Inputs */
+      .numeric-input {
+        width: 100%;
+        padding: 14px 16px;
+        border-radius: var(--border-radius-sm);
+        border: 1px solid var(--primary-border); 
+        font-size: 16px;
+        font-family: 'Inter', sans-serif;
+        background-color: var(--bg-input);
+        color: var(--text-main);
+        transition: all 0.2s ease;
+      }
+      .numeric-input:focus {
+        outline: none;
+        box-shadow: none; 
+        border-color: var(--primary-light); 
+        background-color: #202023;
+      }
+      input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+      /* Toggle Buttons */
+      .mode-toggle {
+        display: flex;
+        background-color: rgba(0,0,0,0.2); 
+        padding: 5px;
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
+      }
+      .mode-btn {
+        flex: 1;
+        padding: 12px;
+        cursor: pointer;
+        background-color: transparent;
+        color: var(--text-muted);
+        border: 1px solid transparent;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-align: center;
+      }
+      .mode-btn:hover { color: var(--text-main); }
+      .mode-btn.active {
+        background-color: #000;
+        background-image: var(--active-gradient-tight);
+        border: var(--active-border);
+        box-shadow: var(--active-shadow);
+        color: #fff;
+        text-shadow: 0 0 10px var(--primary-glow);
+      }
+      .mode-btn .small { display: block; font-size: 11px; opacity: 0.7; margin-top: 3px; font-weight: 400; }
+
+      /* Custom Select */
+      .custom-select {
+        position: relative;
+        width: 125px;
+        flex-shrink: 0;
+        font-family: 'Inter', sans-serif;
+      }
+      .custom-select.full-width { width: 100%; }
+      
+      .time-input-group { display: flex; gap: 8px; }
+      .time-input-group input { flex-grow: 1; padding: 14px 10px; text-align: center; font-weight: 500; }
+      .time-label { font-size: 11px; color: var(--text-muted); text-align: center; margin-top: 5px; }
+
+      .select-selected {
+        background-color: var(--bg-input);
+        color: var(--text-main);
+        padding: 14px 16px;
+        border: 1px solid var(--primary-border);
+        border-radius: var(--border-radius-sm);
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        transition: all 0.2s ease;
+      }
+      .select-selected:hover { border-color: var(--primary-light); }
+      .select-selected.select-arrow-active { border-color: var(--primary-light); background-color: #202023; }
+      .select-arrow {
+        width: 0; height: 0;
+        border-left: 5px solid transparent; border-right: 5px solid transparent;
+        border-top: 5px solid var(--text-muted); transition: transform 0.2s ease;
+      }
+      .select-selected.select-arrow-active .select-arrow { transform: rotate(180deg); border-top-color: var(--primary-light); }
+
+      .select-items {
+        position: absolute; background-color: #161619;
+        top: calc(100% + 8px); left: 0; right: 0; z-index: 99;
+        border: 1px solid var(--primary-light); border-radius: var(--border-radius-sm);
+        max-height: 250px; overflow-y: auto;
+        box-shadow: 0 0 40px -5px rgba(0,0,0,0.8);
+        padding: 1px 0; 
+      }
+      .select-items::-webkit-scrollbar { width: 6px; }
+      .select-items::-webkit-scrollbar-track { background: transparent; }
+      .select-items::-webkit-scrollbar-thumb { background-color: #555; border-radius: 4px; }
+      .select-items div { color: var(--text-main); padding: 12px 16px; cursor: pointer; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.03); }
+      .select-items div:last-child { border-bottom: none; }
+      .select-hide { display: none; }
+      .select-items div:hover, .same-as-selected { background-color: var(--primary-dim); color: var(--primary-light); }
+
+      /* --- Drops Panel Theme (Yellow) --- */
+      .drop-theme {
+        --sub-primary: #facc15;       /* Yellow */
+        --sub-border: #ca8a04;        /* Dark Yellow/Gold */
+        --sub-glow: rgba(250, 204, 21, 0.4);
+        --sub-dim: rgba(250, 204, 21, 0.1);
+        border-color: var(--sub-border);
+      }
+      
+      .sub-ui-title {
+          font-size: 11px;
+          text-transform: uppercase;
+          letter-spacing: 0.15em;
+          color: var(--sub-primary);
+          margin-bottom: 20px;
+          font-weight: 800;
+          text-align: center;
+          text-shadow: 0 0 10px var(--sub-glow);
+          border-bottom: 1px solid var(--sub-dim);
+          padding-bottom: 12px;
+      }
+
+      /* Yellow Input Overrides */
+      .drop-theme .numeric-input {
+          border-color: var(--sub-border); 
+          color: #fff;
+          font-size: 14px;
+          padding: 10px;
+      }
+      .drop-theme .numeric-input:focus {
+          border-color: var(--sub-primary);
+          box-shadow: 0 0 10px -2px var(--sub-dim);
+      }
+      .drop-theme label { color: #eab308; font-size: 11px; margin-bottom: 6px; } 
+
+      .drop-theme .result-box.mini-highlight {
+          background: radial-gradient(circle at center, rgba(250, 204, 21, 0.15) 0%, transparent 80%);
+          border: 1px solid var(--sub-border);
+          box-shadow: 0 0 15px -5px var(--sub-glow);
+          margin-top: 15px;
+          padding: 20px 15px;
+          text-align: center;
+          border-radius: 12px;
+      }
+      .drop-theme .result-box .value {
+          color: var(--sub-primary);
+          font-size: 26px;
+          font-weight: 800;
+          margin-bottom: 5px;
+          text-shadow: 0 0 15px var(--sub-glow);
+      }
+      .drop-theme .result-box .label {
+          font-size: 10px;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          font-weight: 600;
+          color: rgba(255, 255, 255, 0.6);
+      }
+
+      /* Results */
+      .result-section { margin-top: 10px; padding-top: 30px; border-top: 1px solid var(--border-color); }
+      
+      .result-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+        margin-bottom: 15px;
+      }
+      
+      .result-box {
+        background: rgba(255,255,255,0.02);
+        padding: 20px;
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,0.05);
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        transition: border-color 0.3s ease;
+      }
+      .result-box.highlight {
+        grid-column: 1 / -1; 
+        margin-top: 10px;
+        background-color: #000;
+        background-image: var(--active-gradient);
+        border: var(--active-border);
+        box-shadow: var(--active-shadow);
+      }
+      .result-box.mini-highlight {
+        background-color: #000;
+        background-image: var(--active-gradient);
+        border: var(--active-border);
+        box-shadow: var(--active-shadow);
+      }
+      
+      .result-box .value {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--primary-light);
+        margin-bottom: 6px;
+        text-shadow: 0 0 15px var(--primary-glow);
+        transition: color 0.3s ease;
+      }
+      .result-box.highlight .value { 
+          font-size: 36px; 
+          color: #fff; 
+          text-shadow: 0 0 5px var(--primary-light);
+          word-break: break-all;
+      }
+      .result-box .label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
+      .result-box.highlight .label { color: rgba(255,255,255,0.7); }
+
+      .footer { text-align: center; margin-top: 30px; color: var(--text-muted); font-size: 13px; opacity: 0.6; width: 100%; }
+      .placeholder-text { color: var(--text-muted); text-align: center; padding: 50px; border: 2px dashed var(--border-color); border-radius: var(--border-radius); background: rgba(0,0,0,0.2); }
+
+    </style>
 </head>
 <body>
-<div class="card">
-  <h2 style="text-align:center;">DPS Calculator</h2>
+    <div class="bg-glow"></div>
 
-  <div class="row" style="align-items:center;">
-    <input id="dmgInput" placeholder="Enter value..." style="flex:1;" />
-    <select id="suffixSelect" style="width:110px;">
-      <option value="none">None</option>
-      <option value="K">K</option>
-      <option value="M">M</option>
-      <option value="B">B</option>
-      <option value="T">T</option>
-      <option value="Qa">Qa</option>
-      <option value="Qi">Qi</option>
-      <option value="Sx">Sx</option>
-      <option value="Sp">Sp</option>
-      <option value="Oc">Oc</option>
-      <option value="No">No</option>
-      <option value="Dc">Dc</option>
-      <option value="Ud">Ud</option>
-      <option value="Dd">Dd</option>
-      <option value="Td">Td</option>
-      <option value="Qad">Qad</option>
-      <option value="Qid">Qid</option>
-      <option value="Sxd">Sxd</option>
-      <option value="Spd">Spd</option>
-      <option value="Ocd">Ocd</option>
-      <option value="Nod">Nod</option>
-      <option value="Vg">Vg</option>
-      <option value="Uvg">Uvg</option>
-      <option value="Dvg">Dvg</option>
-      <option value="Tvg">Tvg</option>
-    </select>
-  </div>
+    <div class="content-wrapper">
+        <!-- Main Calculator UI -->
+        <div class="main-container">
+            <nav class="tab-nav">
+                <button class="tab-button" data-tab="rank">Rank</button>
+                <button class="tab-button active" data-tab="mastery">Mastery</button>
+                <button class="tab-button" data-tab="damage">Damage</button>
+                <button class="tab-button" data-tab="gacha">Gacha</button>
+            </nav>
 
-  <div class="row">
-    <button id="fastBtn" class="mode-btn active">Fast Click <span class="small">(5.8/s)</span></button>
-    <button id="slowBtn" class="mode-btn">Slow Click <span class="small">(4.5/s)</span></button>
-  </div>
+            <div id="rank-content" class="tab-content">
+                <h2>Rank Calculator</h2>
+                <div class="placeholder-text">This feature is currently in development.</div>
+            </div>
 
-  <div id="resultBox">Result: --</div>
-</div>
+            <div id="mastery-content" class="tab-content active">
+              <div class="mastery-layout">
+                <div>
+                    <div class="input-group">
+                        <label for="dmgInput">Mastery per Click</label>
+                        <div class="input-row">
+                            <input id="dmgInput" placeholder="0" type="text" class="numeric-input" />
+                            <div class="custom-select" data-original-id="suffixSelect">
+                                <div class="select-selected"><span>None</span><div class="select-arrow"></div></div>
+                                <div class="select-items select-hide">
+                                    <div data-value="none">None</div><div data-value="K">K</div><div data-value="M">M</div><div data-value="B">B</div><div data-value="T">T</div><div data-value="Qa">Qa</div><div data-value="Qi">Qi</div><div data-value="Sx">Sx</div><div data-value="Sp">Sp</div><div data-value="Oc">Oc</div><div data-value="No">No</div><div data-value="Dc">Dc</div><div data-value="Ud">Ud</div><div data-value="Dd">Dd</div><div data-value="Td">Td</div><div data-value="Qad">Qad</div><div data-value="Qid">Qid</div><div data-value="Sxd">Sxd</div><div data-value="Spd">Spd</div><div data-value="Ocd">Ocd</div><div data-value="Nod">Nod</div><div data-value="Vg">Vg</div><div data-value="Uvg">Uvg</div><div data-value="Dvg">Dvg</div><div data-value="Tvg">Tvg</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>Click Speed Mode</label>
+                        <div class="mode-toggle">
+                            <button id="fastBtn" class="mode-btn active">Fast <span class="small">5.8/s</span></button>
+                            <button id="slowBtn" class="mode-btn">Slow <span class="small">4.5/s</span></button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <div class="input-group">
+                        <label for="currentMasteryInput">Current Mastery (Optional)</label>
+                        <div class="input-row">
+                            <input id="currentMasteryInput" placeholder="0" type="text" class="numeric-input" />
+                            <div class="custom-select" data-original-id="currentMasterySuffixSelect">
+                                <div class="select-selected"><span>None</span><div class="select-arrow"></div></div>
+                                <div class="select-items select-hide">
+                                    <div data-value="none">None</div><div data-value="K">K</div><div data-value="M">M</div><div data-value="B">B</div><div data-value="T">T</div><div data-value="Qa">Qa</div><div data-value="Qi">Qi</div><div data-value="Sx">Sx</div><div data-value="Sp">Sp</div><div data-value="Oc">Oc</div><div data-value="No">No</div><div data-value="Dc">Dc</div><div data-value="Ud">Ud</div><div data-value="Dd">Dd</div><div data-value="Td">Td</div><div data-value="Qad">Qad</div><div data-value="Qid">Qid</div><div data-value="Sxd">Sxd</div><div data-value="Spd">Spd</div><div data-value="Ocd">Ocd</div><div data-value="Nod">Nod</div><div data-value="Vg">Vg</div><div data-value="Uvg">Uvg</div><div data-value="Dvg">Dvg</div><div data-value="Tvg">Tvg</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>Time Duration (D:H:M)</label>
+                        <div class="time-input-group">
+                            <div><input id="dayInput" type="number" value="0" min="0" placeholder="0" class="numeric-input" /><div class="time-label">Days</div></div>
+                            <div><input id="hourInput" type="number" value="0" min="0" placeholder="0" class="numeric-input" /><div class="time-label">Hours</div></div>
+                            <div><input id="minuteInput" type="number" value="0" min="0" placeholder="0" class="numeric-input" /><div class="time-label">Minutes</div></div>
+                        </div>
+                    </div>
+                </div>
+              </div>
 
-<script>
-const dmgInput = document.getElementById("dmgInput");
-const suffixSelect = document.getElementById("suffixSelect");
-const resultBox = document.getElementById("resultBox");
-const fastBtn = document.getElementById("fastBtn");
-const slowBtn = document.getElementById("slowBtn");
+              <div class="result-section">
+                <div class="result-grid">
+                    <div class="result-box">
+                        <div id="resultBox" class="value">--</div>
+                        <div class="label">Mastery Per Second</div>
+                    </div>
+                    <div class="result-box">
+                        <div id="perHourResult" class="value">--</div>
+                        <div class="label">Mastery Per Hour</div>
+                    </div>
+                    <div class="result-box">
+                        <div id="perDayResult" class="value">--</div>
+                        <div class="label">Mastery Per Day</div>
+                    </div>
+                    
+                    <div class="result-box highlight">
+                        <div id="totalMasteryResult" class="value">--</div>
+                        <div class="label">Total Mastery After Duration</div>
+                    </div>
+                </div>
+              </div>
+            </div>
 
-let cps = 5.8;
+            <div id="damage-content" class="tab-content">
+                 <div class="mastery-layout">
+                    <div>
+                        <div class="input-row-multi">
+                            <div class="input-col" style="flex: 2;">
+                                <div class="input-group">
+                                    <label for="damageDmgInput">Damage per Click</label>
+                                    <div class="input-row">
+                                        <input id="damageDmgInput" placeholder="0" type="text" class="numeric-input" />
+                                        <div class="custom-select" data-original-id="damageSuffixSelect">
+                                            <div class="select-selected"><span>None</span><div class="select-arrow"></div></div>
+                                            <div class="select-items select-hide">
+                                                <div data-value="none">None</div><div data-value="K">K</div><div data-value="M">M</div><div data-value="B">B</div><div data-value="T">T</div><div data-value="Qa">Qa</div><div data-value="Qi">Qi</div><div data-value="Sx">Sx</div><div data-value="Sp">Sp</div><div data-value="Oc">Oc</div><div data-value="No">No</div><div data-value="Dc">Dc</div><div data-value="Ud">Ud</div><div data-value="Dd">Dd</div><div data-value="Td">Td</div><div data-value="Qad">Qad</div><div data-value="Qid">Qid</div><div data-value="Sxd">Sxd</div><div data-value="Spd">Spd</div><div data-value="Ocd">Ocd</div><div data-value="Nod">Nod</div><div data-value="Vg">Vg</div><div data-value="Uvg">Uvg</div><div data-value="Dvg">Dvg</div><div data-value="Tvg">Tvg</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="input-col" style="flex: 1;">
+                                <div class="input-group">
+                                    <label for="critInput">Crit %</label>
+                                    <div class="input-row">
+                                        <input id="critInput" placeholder="0" type="number" min="0" max="100" class="numeric-input" style="text-align: center;" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-fastBtn.onclick = () => { cps = 5.8; fastBtn.classList.add("active"); slowBtn.classList.remove("active"); update(); };
-slowBtn.onclick = () => { cps = 4.5; slowBtn.classList.add("active"); fastBtn.classList.remove("active"); update(); };
+                        <div class="input-group">
+                            <label>Click Speed Mode</label>
+                            <div class="mode-toggle">
+                                <button id="dmgFastBtn" class="mode-btn active">Fast <span class="small">5.8/s</span></button>
+                                <button id="dmgSlowBtn" class="mode-btn">Slow <span class="small">4.5/s</span></button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div class="input-row-multi">
+                             <div class="input-col">
+                                <div class="input-group">
+                                    <label>Map Selection</label>
+                                    <div class="custom-select full-width" data-original-id="mapSelect">
+                                        <div class="select-selected"><span>Select Map</span><div class="select-arrow"></div></div>
+                                        <div class="select-items select-hide" id="mapOptions"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="input-col">
+                                 <div class="input-group">
+                                    <label>Mob Selection</label>
+                                    <div class="custom-select full-width" data-original-id="mobSelect">
+                                        <div class="select-selected"><span>Select Mob</span><div class="select-arrow"></div></div>
+                                        <div class="select-items select-hide" id="mobOptions">
+                                            <div data-value="none">Select Map First</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-dmgInput.oninput = update;
-suffixSelect.onchange = update;
+                        <div class="input-row-multi">
+                            <div class="input-col" style="flex: 2;">
+                                <div class="input-group" style="margin-bottom: 0;">
+                                    <label>Selected Mob HP</label>
+                                    <div class="result-box mini-highlight" style="padding: 10px;">
+                                        <div id="mobHpResultBox" class="value" style="font-size: 20px;">--</div>
+                                        <div class="label">Mob HP</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="input-col" style="flex: 1;">
+                                 <div class="input-group" style="margin-bottom: 0;">
+                                    <label>Mob Count</label>
+                                    <div class="custom-select full-width" data-original-id="mobCountSelect">
+                                        <div class="select-selected"><span>1</span><div class="select-arrow"></div></div>
+                                        <div class="select-items select-hide" id="mobCountOptions">
+                                            </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-const suffixes = ["", "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc", "Ud", "Dd", "Td", "Qad", "Qid", "Sxd", "Spd", "Ocd", "Nod", "Vg", "Uvg", "Dvg", "Tvg"];
+                <div class="result-section">
+                    <div class="result-grid">
+                        <div class="result-box">
+                            <div id="dmgPerSecResult" class="value">--</div>
+                            <div class="label">Damage Per Second</div>
+                        </div>
+                        <div class="result-box">
+                            <div id="mobsPerMinuteResult" class="value">--</div>
+                            <div class="label">Mobs Killed Per Minute</div>
+                        </div>
+                        <div class="result-box">
+                            <div id="mobsPerHourResult" class="value">--</div>
+                            <div class="label">Mobs Killed Per Hour</div>
+                        </div>
+                        
+                        <div class="result-box highlight">
+                            <div id="timeToKillResult" class="value">Select Mob</div>
+                            <div class="label">Time to Kill One Mob</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-function applySuffix(num, suf) {
-  if (suf === "none") return num.toString();
-  const idx = suffixes.indexOf(suf);
-  const div = 1000 ** idx;
-  return (num / div).toFixed(2) + suf;
-}
+            <div id="gacha-content" class="tab-content">
+                <h2>Gacha Calculator</h2>
+                <div class="placeholder-text">This feature is currently in development.</div>
+            </div>
+        </div>
 
-function update() {
-  const dmg = parseFloat(dmgInput.value);
-  if (isNaN(dmg)) { resultBox.innerHTML = "Result: --"; return; }
+        <!-- Right Side Panel for Drops -->
+        <div id="sidePanel" class="side-panel drop-theme">
+            <h3 class="sub-ui-title">Drops Calculator</h3>
+            
+            <div class="input-group">
+                <label>Drop Multiplier (%)</label>
+                <input id="dropMultiInput" type="number" placeholder="100" value="100" min="0" class="numeric-input" style="text-align:center;" />
+            </div>
 
-  const dps = dmg * cps;
-  const suf = suffixSelect.value;
+            <div class="input-group">
+                <label>Drop Chance (%)</label>
+                <input id="dropChanceInput" type="number" placeholder="10" value="10" min="0" max="100" class="numeric-input" style="text-align:center;" />
+            </div>
 
-  if (suf === "none") {
-    resultBox.innerHTML = "Result: " + dps;
-  } else {
-    resultBox.innerHTML = "Result: " + applySuffix(dps, suf);
-  }
-}
-</script>
+            <div class="input-group">
+                <label>Drop Amount</label>
+                <input id="dropAmountInput" type="number" placeholder="5" value="5" min="0" class="numeric-input" style="text-align:center;" />
+            </div>
+
+            <div class="result-box mini-highlight">
+                <div id="dropsPerMinuteResult" class="value">--</div>
+                <div class="label">Drops Per Minute</div>
+            </div>
+        </div>
+
+    </div> <!-- End Content Wrapper -->
+
+    <div class="footer">
+        Designed & Built by <span style="color:var(--primary-light); font-weight:600;">@xking.</span>
+    </div>
+
+    <script>
+        const themes = {
+            rank: { 
+                primary: '#3b82f6',
+                light: '#60a5fa',
+                border: '#3b82f6',
+                dim: 'rgba(59, 130, 246, 0.15)',
+                glow: 'rgba(59, 130, 246, 0.5)'
+            },
+        
+            mastery: { 
+                primary: '#ffffff',
+                light: '#bf00ff',
+                border: '#8700bd',
+                dim: 'rgba(135, 0, 189, 0.3)',
+                glow: 'rgba(163, 0, 222, 0.5)'
+            },
+        
+            damage: {
+                primary: '#ff003c',
+                light: '#ff003c',
+                border: '#c20030',
+                dim: 'rgba(194, 0, 48, 0.25)',
+                glow: 'rgba(194, 0, 48, 0.4)'
+            },
+        
+            gacha: { 
+                primary: '#4ade80',
+                light: '#86efac',
+                border: '#4ade80',
+                dim: 'rgba(74, 222, 128, 0.15)',
+                glow: 'rgba(74, 222, 128, 0.5)'
+            }
+        };
+
+
+        const gameData = {
+            "Green Valley": [ { name: "Slime", hp: "100" }, { name: "Goblin", hp: "2500" }, { name: "Wolf", hp: "10000" } ],
+            "Dark Forest": [ { name: "Spider", hp: "500000" }, { name: "Orc", hp: "2000000" }, { name: "Troll", hp: "10000000" } ],
+            "Volcano Core": [ { name: "Fire Spirit", hp: "50000000" }, { name: "Magma Golem", hp: "250000000" }, { name: "Dragon", hp: "1000000000" } ],
+            "Frozen Peaks": [ { name: "Ice Bat", hp: "5000000000" }, { name: "Snow Yeti", hp: "25000000000" }, { name: "Frost Wyrm", hp: "100000000000" } ],
+            "Void Dimension": [ { name: "Shadow Fiend", hp: "500000000000" }, { name: "Void Walker", hp: "2500000000000" }, { name: "Eldritch Horror", hp: "10000000000000" } ]
+        };
+
+        const suffixes = { "none": 0, "K": 1, "M": 2, "B": 3, "T": 4, "Qa": 5, "Qi": 6, "Sx": 7, "Sp": 8, "Oc": 9, "No": 10, "Dc": 11, "Ud": 12, "Dd": 13, "Td": 14, "Qad": 15, "Qid": 16, "Sxd": 17, "Spd": 18, "Ocd": 19, "Nod": 20, "Vg": 21, "Uvg": 22, "Dvg": 23, "Tvg": 24 };
+        const suffixList = Object.keys(suffixes).slice(1);
+        
+        function decomposeNumber(numBigInt) {
+            if (numBigInt === 0n) return { val: "", suffix: "none" };
+            let str = numBigInt.toString();
+            let len = str.length;
+            if (len <= 3) return { val: str, suffix: "none" };
+            
+            let exponent = Math.floor((len - 1) / 3);
+            let suffixIndex = exponent - 1;
+            
+            if (suffixIndex >= suffixList.length) {
+                return { val: str, suffix: "none" }; 
+            }
+            let suffixKey = suffixList[suffixIndex];
+            let divisor = 10n ** BigInt(exponent * 3);
+            let scaled = (numBigInt * 100n) / divisor;
+            let valFloat = Number(scaled) / 100;
+            return { val: valFloat.toString(), suffix: suffixKey };
+        }
+
+        const tabs = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const root = document.documentElement;
+        const sidePanel = document.getElementById('sidePanel');
+
+        function setTheme(themeName) {
+            const theme = themes[themeName];
+            if (!theme) return;
+            root.style.setProperty('--primary', theme.primary);
+            root.style.setProperty('--primary-light', theme.light);
+            root.style.setProperty('--primary-border', theme.border);
+            root.style.setProperty('--primary-dim', theme.dim);
+            root.style.setProperty('--primary-glow', theme.glow);
+        }
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(item => item.classList.remove('active'));
+                tabContents.forEach(content => content.classList.remove('active'));
+                tab.classList.add('active');
+                const targetTab = tab.dataset.tab;
+                document.getElementById(targetTab + '-content').classList.add('active');
+                setTheme(targetTab);
+                
+                // Toggle Side Panel Visibility
+                if (targetTab === 'damage') {
+                    sidePanel.classList.add('active');
+                } else {
+                    sidePanel.classList.remove('active');
+                }
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            setTheme('mastery');
+            
+            // Map Options
+            const mapSelectItems = document.getElementById('mapOptions');
+            mapSelectItems.innerHTML = '';
+            for (const mapName in gameData) {
+                const div = document.createElement('div');
+                div.setAttribute('data-value', mapName);
+                div.textContent = mapName;
+                mapSelectItems.appendChild(div);
+            }
+
+            // Mob Count Options (1-10)
+            const mobCountItems = document.getElementById('mobCountOptions');
+            mobCountItems.innerHTML = '';
+            for (let i = 1; i <= 10; i++) {
+                const div = document.createElement('div');
+                div.setAttribute('data-value', i);
+                div.textContent = i;
+                if(i === 1) div.classList.add('same-as-selected');
+                mobCountItems.appendChild(div);
+            }
+
+            function createCustomSelects() {
+                const customSelects = document.querySelectorAll('.custom-select');
+                customSelects.forEach(select => {
+                    const selected = select.querySelector('.select-selected');
+                    const items = select.querySelector('.select-items');
+                    if(items.children.length === 0) return;
+                    const options = items.querySelectorAll('div');
+                    if (!select.dataset.value && options.length > 0) {
+                         const initialValue = options[0].getAttribute('data-value');
+                         select.setAttribute('data-value', initialValue);
+                    }
+                    selected.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        closeAllSelects(this);
+                        items.classList.toggle('select-hide');
+                        this.classList.toggle('select-arrow-active');
+                    });
+                    options.forEach(option => { bindOptionClick(select, selected, items, option); });
+                });
+            }
+            
+            function bindOptionClick(select, selected, items, option) {
+                option.addEventListener('click', function() {
+                    const value = this.getAttribute('data-value');
+                    const text = this.innerHTML;
+                    const hp = this.getAttribute('data-hp'); 
+
+                    select.setAttribute('data-value', value);
+                    if(hp) select.setAttribute('data-hp', hp);
+                    
+                    selected.querySelector('span').innerHTML = text;
+                    items.querySelectorAll('div').forEach(opt => opt.classList.remove('same-as-selected'));
+                    this.classList.add('same-as-selected');
+                    items.classList.add('select-hide');
+                    selected.classList.remove('select-arrow-active');
+                    
+                    if (select.dataset.originalId === 'mapSelect') updateMobDropdown(value);
+                    
+                    updateAll();
+                });
+            }
+
+            function updateMobDropdown(mapName) {
+                const mobSelect = document.querySelector('[data-original-id="mobSelect"]');
+                const mobSelectItems = document.getElementById('mobOptions');
+                const mobSelectedSpan = mobSelect.querySelector('.select-selected span');
+                
+                mobSelectItems.innerHTML = '';
+                const mobs = gameData[mapName] || [];
+                
+                if (mobs.length === 0) {
+                     const div = document.createElement('div');
+                     div.setAttribute('data-value', 'none');
+                     div.textContent = "No Mobs Available";
+                     mobSelectItems.appendChild(div);
+                     mobSelectedSpan.textContent = "No Mobs";
+                     mobSelect.setAttribute('data-value', 'none');
+                } else {
+                    mobs.forEach((mobObj, index) => {
+                        const div = document.createElement('div');
+                        div.setAttribute('data-value', mobObj.name);
+                        div.setAttribute('data-hp', mobObj.hp);
+                        div.textContent = mobObj.name;
+                        
+                        if (index === 0) {
+                            div.classList.add('same-as-selected');
+                            mobSelectedSpan.textContent = mobObj.name;
+                            mobSelect.setAttribute('data-value', mobObj.name);
+                            mobSelect.setAttribute('data-hp', mobObj.hp);
+                        }
+                        mobSelectItems.appendChild(div);
+                    });
+                }
+                const newOptions = mobSelectItems.querySelectorAll('div');
+                const selected = mobSelect.querySelector('.select-selected');
+                newOptions.forEach(option => { bindOptionClick(mobSelect, selected, mobSelectItems, option); });
+            }
+
+            function closeAllSelects(elmnt) {
+                const customSelects = document.querySelectorAll('.custom-select');
+                customSelects.forEach(select => {
+                    const selected = select.querySelector('.select-selected');
+                    const items = select.querySelector('.select-items');
+                    if (selected !== elmnt) {
+                        items.classList.add('select-hide');
+                        selected.classList.remove('select-arrow-active');
+                    }
+                });
+            }
+
+            createCustomSelects();
+            document.addEventListener('click', closeAllSelects);
+
+            const dmgInput = document.getElementById("dmgInput");
+            const suffixSelect = document.querySelector('[data-original-id="suffixSelect"]');
+            const resultBox = document.getElementById("resultBox");
+            const fastBtn = document.getElementById("fastBtn");
+            const slowBtn = document.getElementById("slowBtn");
+            const perHourResult = document.getElementById("perHourResult");
+            const perDayResult = document.getElementById("perDayResult");
+            const currentMasteryInput = document.getElementById("currentMasteryInput");
+            const currentMasterySuffixSelect = document.querySelector('[data-original-id="currentMasterySuffixSelect"]');
+            const dayInput = document.getElementById("dayInput");
+            const hourInput = document.getElementById("hourInput");
+            const minuteInput = document.getElementById("minuteInput");
+            const totalMasteryResult = document.getElementById("totalMasteryResult");
+
+            const damageDmgInput = document.getElementById("damageDmgInput");
+            const damageSuffixSelect = document.querySelector('[data-original-id="damageSuffixSelect"]');
+            const critInput = document.getElementById("critInput");
+            const dmgFastBtn = document.getElementById("dmgFastBtn");
+            const dmgSlowBtn = document.getElementById("dmgSlowBtn");
+            
+            const dmgPerSecResult = document.getElementById("dmgPerSecResult");
+            const mobHpResultBox = document.getElementById("mobHpResultBox"); 
+            const mobsPerMinuteResult = document.getElementById("mobsPerMinuteResult");
+            const mobsPerHourResult = document.getElementById("mobsPerHourResult");
+            const timeToKillResult = document.getElementById("timeToKillResult");
+            const mobCountSelect = document.querySelector('[data-original-id="mobCountSelect"]');
+
+            // NEW DROPS VARIABLES
+            const dropAmountInput = document.getElementById("dropAmountInput");
+            const dropMultiInput = document.getElementById("dropMultiInput");
+            const dropChanceInput = document.getElementById("dropChanceInput");
+            const dropsPerMinuteResult = document.getElementById("dropsPerMinuteResult");
+
+            let cps = 5.8;
+            let dmgCps = 5.8;
+            
+            fastBtn.onclick = () => { cps = 5.8; fastBtn.classList.add("active"); slowBtn.classList.remove("active"); updateMastery(); };
+            slowBtn.onclick = () => { cps = 4.5; slowBtn.classList.add("active"); fastBtn.classList.remove("active"); updateMastery(); };
+            dmgInput.oninput = updateMastery;
+            currentMasteryInput.oninput = updateMastery;
+            dayInput.oninput = updateMastery;
+            hourInput.oninput = updateMastery;
+            minuteInput.oninput = updateMastery;
+            
+            dmgFastBtn.onclick = () => { dmgCps = 5.8; dmgFastBtn.classList.add("active"); dmgSlowBtn.classList.remove("active"); updateDamage(); };
+            dmgSlowBtn.onclick = () => { dmgCps = 4.5; dmgSlowBtn.classList.add("active"); dmgFastBtn.classList.remove("active"); updateDamage(); };
+            damageDmgInput.oninput = updateDamage;
+            critInput.oninput = updateDamage;
+
+            // NEW DROPS LISTENERS
+            dropAmountInput.oninput = updateDamage;
+            dropMultiInput.oninput = updateDamage;
+            dropChanceInput.oninput = updateDamage;
+
+            function formatNumber(num) {
+                if (num === 0n) return "0";
+                const numStr = num.toString();
+                const Ls = numStr.length; 
+                // Scaled by 100.
+                const realLength = Ls - 2; 
+                
+                if (num < 100000n) {
+                    return (Number(num) / 100).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+                }
+                const exponent = Math.floor((realLength - 1) / 3);
+                const suffixIndex = exponent - 1;
+                if (suffixIndex < 0) return (Number(num) / 100).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+                if (suffixIndex >= suffixList.length) return (Number(num) / 100).toExponential(2);
+
+                const val = Number(num) / 100;
+                const divisor = Math.pow(10, exponent * 3);
+                const shortVal = val / divisor;
+                return shortVal.toFixed(2) + suffixList[suffixIndex];
+            }
+            
+            function formatTime(seconds) {
+                if (seconds === Infinity) return "Forever";
+                if (seconds === 0) return "Instant";
+                
+                const y = Math.floor(seconds / 31536000);
+                if (y >= 1000) return "1000+ y";
+                
+                const d = Math.floor((seconds % 31536000) / 86400);
+                const h = Math.floor((seconds % 86400) / 3600);
+                const m = Math.floor((seconds % 3600) / 60);
+                const s = Math.floor(seconds % 60);
+                
+                let timeStr = "";
+                if (y > 0) timeStr += `${y}y `;
+                if (d > 0) timeStr += `${d}d `;
+                if (h > 0) timeStr += `${h}h `;
+                if (m > 0) timeStr += `${m}m `;
+                
+                if (y === 0 && d === 0) {
+                    if (s === 0 && seconds < 1) {
+                         return seconds.toFixed(2) + "s";
+                    }
+                    timeStr += `${s}s`;
+                } else if (timeStr === "") {
+                    timeStr += `${s}s`;
+                }
+                
+                return timeStr.trim();
+            }
+            
+            function formatCompactNumber(num) {
+                return num.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+            }
+
+            function parseInput(inputEl, suffixEl) {
+                const rawValue = parseFloat(inputEl.value);
+                if (isNaN(rawValue) || rawValue < 0) return 0n; 
+                const selectedSuffix = suffixEl.getAttribute('data-value');
+                if (selectedSuffix === "none") return BigInt(Math.round(rawValue * 100));
+                const exponent = suffixes[selectedSuffix];
+                if (exponent === undefined) return 0n;
+                const multiplier = 10n ** BigInt(exponent * 3);
+                return BigInt(Math.round(rawValue * 100)) * multiplier;
+            }
+
+            function updateMastery() {
+                const baseDmg = parseInput(dmgInput, suffixSelect);
+                const currentMastery = parseInput(currentMasteryInput, currentMasterySuffixSelect);
+                
+                if (baseDmg === 0n) { 
+                    resultBox.innerHTML = "--";
+                    perHourResult.innerHTML = "--";
+                    perDayResult.innerHTML = "--";
+                    if(currentMastery > 0n) totalMasteryResult.innerHTML = formatNumber(currentMastery);
+                    else totalMasteryResult.innerHTML = "--";
+                } else {
+                    const dps = baseDmg * BigInt(Math.round(cps * 100)) / 100n;
+                    resultBox.innerHTML = formatNumber(dps); 
+                    perHourResult.innerHTML = formatNumber(dps * 3600n);
+                    perDayResult.innerHTML = formatNumber(dps * 86400n);
+                }
+
+                const days = BigInt(Math.max(0, parseInt(dayInput.value) || 0));
+                const hours = BigInt(Math.max(0, parseInt(hourInput.value) || 0));
+                const minutes = BigInt(Math.max(0, parseInt(minuteInput.value) || 0));
+                const totalSeconds = (days * 86400n) + (hours * 3600n) + (minutes * 60n);
+
+                if (baseDmg > 0n) {
+                    const dps = baseDmg * BigInt(Math.round(cps * 100)) / 100n;
+                    const gained = dps * totalSeconds;
+                    const total = currentMastery + gained;
+                    totalMasteryResult.innerHTML = formatNumber(total);
+                } else if (currentMastery > 0n) {
+                    totalMasteryResult.innerHTML = formatNumber(currentMastery);
+                }
+            }
+
+            function updateDamage() {
+                const baseDmg = parseInput(damageDmgInput, damageSuffixSelect);
+                const critPercent = parseFloat(critInput.value) || 0;
+                
+                const mobSelect = document.querySelector('[data-original-id="mobSelect"]');
+                const hpString = mobSelect.getAttribute('data-hp');
+                const mobHp = BigInt(hpString || 0) * 100n; // Scaled 100
+                
+                const mobCountVal = parseInt(mobCountSelect.getAttribute('data-value')) || 1;
+
+                if (mobHp > 0n) {
+                    mobHpResultBox.innerHTML = formatNumber(mobHp);
+                } else {
+                    mobHpResultBox.innerHTML = "--";
+                }
+
+                const multiplierScaled = BigInt(Math.round(1000 + (critPercent * 5))); // Scaled 1000
+                const cpsScaled = BigInt(Math.round(dmgCps * 100)); // Scaled 100
+                
+                // --- DPS Calculation ---
+                // Numerator = Base * CPS * Mult
+                // Scale = 100 * 100 * 1000 = 10,000,000
+                // Target Scale = 100 (for 2 decimal display) -> Div by 100,000
+                const numerator = baseDmg * cpsScaled * multiplierScaled;
+                if (baseDmg > 0n) {
+                     dmgPerSecResult.innerHTML = formatNumber(numerator / 100000n);
+                } else {
+                     dmgPerSecResult.innerHTML = "--";
+                     mobsPerMinuteResult.innerHTML = "--";
+                     mobsPerHourResult.innerHTML = "--";
+                     timeToKillResult.innerHTML = "0s";
+                     dropsPerMinuteResult.innerHTML = "--";
+                     return;
+                }
+
+                if (mobHp <= 0n) {
+                    timeToKillResult.innerHTML = "Select A Mob";
+                    mobsPerMinuteResult.innerHTML = "--";
+                    mobsPerHourResult.innerHTML = "--";
+                    dropsPerMinuteResult.innerHTML = "--";
+                    return;
+                }
+                
+                if (numerator === 0n) {
+                    timeToKillResult.innerHTML = "Forever";
+                    mobsPerMinuteResult.innerHTML = "0";
+                    mobsPerHourResult.innerHTML = "0";
+                    dropsPerMinuteResult.innerHTML = "0";
+                    return;
+                }
+
+                // --- Discrete Hits Calculation ---
+                // Damage Per Hit (DPH) = BaseDmg * Multiplier
+                // Scale DPH = 100 * 1000 = 100,000
+                // MobHP Scale = 100. To Match DPH, MobHP * 1000 = 100,000.
+                
+                const dphScaled = baseDmg * multiplierScaled; // Scale 100,000
+                const mobHpScaledForHits = mobHp * 1000n;     // Scale 100,000
+                
+                let hits = 0n;
+                if (dphScaled > 0n) {
+                     // Ceiling Division: (Num + Denom - 1) / Denom
+                     hits = (mobHpScaledForHits + dphScaled - 1n) / dphScaled;
+                }
+
+                // --- Time to Kill ONE Mob (Visual) ---
+                // Logic: 1st hit is instant (0s). 2nd hit is at 1/CPS.
+                // Time = (Hits - 1) / CPS
+                let timeSeconds = 0;
+                if (hits > 0n) {
+                    timeSeconds = Number(hits - 1n) / dmgCps;
+                }
+                
+                timeToKillResult.innerHTML = (timeSeconds < 60) ? timeSeconds.toFixed(2) + "s" : formatTime(timeSeconds);
+
+                // --- Mobs Killed Per Time (Throughput) ---
+                const spawnInterval = 1.8; // seconds
+                
+                let actualKillsPerSecond = 0;
+                const timeToKillOneMob = Number(hits) / dmgCps;
+                
+                if (timeToKillOneMob <= 0) {
+                    actualKillsPerSecond = mobCountVal / spawnInterval;
+                } else {
+                    // Check for continuous killing: can we kill other mobs during one mob's respawn time?
+                    const timeToKillOtherMobs = (mobCountVal - 1) * timeToKillOneMob;
+                    
+                    if (timeToKillOtherMobs >= spawnInterval) {
+                        // Continuous killing is possible, limited only by kill speed.
+                        actualKillsPerSecond = 1 / timeToKillOneMob;
+                    } else {
+                        // Downtime exists. Cycle time is dominated by respawn.
+                        // The time for a full cycle is the time to kill the first mob + its respawn time.
+                        const cycleTime = timeToKillOneMob + spawnInterval;
+                        // In that cycle, you kill N mobs.
+                        actualKillsPerSecond = mobCountVal / cycleTime;
+                    }
+                }
+                
+                const killsPerMin = actualKillsPerSecond * 60;
+                const killsPerHour = actualKillsPerSecond * 3600;
+                
+                mobsPerMinuteResult.innerHTML = formatCompactNumber(killsPerMin);
+                mobsPerHourResult.innerHTML = formatCompactNumber(killsPerHour);
+
+                // --- DROPS MATH ---
+                // Logic: (Mobs/Min) * (Chance/100) * (Amount * Multi)
+                const dAmount = parseFloat(dropAmountInput.value) || 0;
+                const dMulti = (parseFloat(dropMultiInput.value) || 100) / 100;
+                const dChance = parseFloat(dropChanceInput.value) || 0;
+
+                const effectiveAmount = dAmount * dMulti;
+                const chanceFactor = dChance / 100;
+                
+                const totalDropsPerMin = killsPerMin * chanceFactor * effectiveAmount;
+                dropsPerMinuteResult.innerHTML = formatCompactNumber(totalDropsPerMin);
+            }
+            
+            function updateAll() { updateMastery(); updateDamage(); }
+
+            dayInput.value = '0'; hourInput.value = '0'; minuteInput.value = '0';
+            updateAll();
+
+            const suffixMap = {
+                'k': 'K', 'm': 'M', 'b': 'B', 't': 'T', 'qa': 'Qa', 'qi': 'Qi', 'sx': 'Sx', 'sp': 'Sp',
+                'oc': 'Oc', 'no': 'No', 'dc': 'Dc', 'ud': 'Ud', 'dd': 'Dd', 'td': 'Td', 'qad': 'Qad',
+                'qid': 'Qid', 'sxd': 'Sxd', 'spd': 'Spd', 'ocd': 'Ocd', 'nod': 'Nod', 'vg': 'Vg',
+                'uvg': 'Uvg', 'dvg': 'Dvg', 'tvg': 'Tvg'
+            };
+
+            function handleSuffixInput(inputEl, selectEl, updateFunc) {
+                const rawValue = inputEl.value.trim();
+                if (rawValue === '') { updateFunc(); return; }
+                const match = rawValue.match(/^([\d\.]+)\s*([a-zA-Z]+)$/);
+                if (match) {
+                    const numberPart = match[1];
+                    const suffixPart = match[2].toLowerCase();
+                    inputEl.value = numberPart;
+                    if (suffixMap[suffixPart]) {
+                        const targetValue = suffixMap[suffixPart];
+                        const selectItems = selectEl.querySelector('.select-items');
+                        const selectedSpan = selectEl.querySelector('.select-selected span');
+                        const targetOption = selectItems.querySelector(`div[data-value="${targetValue}"]`);
+                        if (targetOption) {
+                            selectEl.setAttribute('data-value', targetValue);
+                            selectedSpan.textContent = targetOption.textContent;
+                            selectItems.querySelectorAll('div').forEach(opt => opt.classList.remove('same-as-selected'));
+                            targetOption.classList.add('same-as-selected');
+                        }
+                    }
+                }
+                updateFunc();
+            }
+
+            let isProcessingEnter = false;
+            const dmgInputBlurHandler = () => { if(!isProcessingEnter) handleSuffixInput(dmgInput, suffixSelect, updateMastery); };
+            const currentMasteryBlurHandler = () => { if(!isProcessingEnter) handleSuffixInput(currentMasteryInput, currentMasterySuffixSelect, updateMastery); };
+            dmgInput.addEventListener('blur', dmgInputBlurHandler);
+            currentMasteryInput.addEventListener('blur', currentMasteryBlurHandler);
+            dmgInput.addEventListener('keydown', (e) => { if(e.key === 'Enter') { e.preventDefault(); isProcessingEnter=true; handleSuffixInput(dmgInput, suffixSelect, updateMastery); e.target.blur(); setTimeout(()=>{isProcessingEnter=false},100); } });
+            currentMasteryInput.addEventListener('keydown', (e) => { if(e.key === 'Enter') { e.preventDefault(); isProcessingEnter=true; handleSuffixInput(currentMasteryInput, currentMasterySuffixSelect, updateMastery); e.target.blur(); setTimeout(()=>{isProcessingEnter=false},100); } });
+
+            const damageDmgInputBlurHandler = () => { if(!isProcessingEnter) handleSuffixInput(damageDmgInput, damageSuffixSelect, updateDamage); };
+            damageDmgInput.addEventListener('blur', damageDmgInputBlurHandler);
+            damageDmgInput.addEventListener('keydown', (e) => { if(e.key === 'Enter') { e.preventDefault(); isProcessingEnter=true; handleSuffixInput(damageDmgInput, damageSuffixSelect, updateDamage); e.target.blur(); setTimeout(()=>{isProcessingEnter=false},100); } });
+            
+        });
+    </script>
 </body>
 </html>
