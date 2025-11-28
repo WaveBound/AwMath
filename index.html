@@ -817,6 +817,7 @@
             <div id="damage-content" class="tab-content">
                  <div class="mastery-layout">
                     <div>
+                        <!-- Row 1: Damage + Crit (Restored to Full Widths) -->
                         <div class="input-row-multi">
                             <div class="input-col" style="flex: 2;">
                                 <div class="input-group">
@@ -837,11 +838,23 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="input-group">
-                            <label>Click Speed Mode</label>
-                            <div class="mode-toggle">
-                                <button id="dmgFastBtn" class="mode-btn active">Fast <span class="small">5.8/s</span></button>
-                                <button id="dmgSlowBtn" class="mode-btn">Slow <span class="small">4.5/s</span></button>
+
+                        <!-- Row 2: Speed Buttons + NEW Passive Input -->
+                        <div class="input-row-multi">
+                            <div class="input-col">
+                                <div class="input-group">
+                                    <label>Click Speed Mode</label>
+                                    <div class="mode-toggle">
+                                        <button id="dmgFastBtn" class="mode-btn active">Fast <span class="small">5.8/s</span></button>
+                                        <button id="dmgSlowBtn" class="mode-btn">Slow <span class="small">4.5/s</span></button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="input-col">
+                                <div class="input-group">
+                                    <label>Hero % <span style="font-size:9px; opacity:0.7;">(Hits every 0.5s)</span></label>
+                                    <input id="passiveDmgInput" placeholder="0" type="number" min="0" class="numeric-input" style="text-align: center;" />
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1045,6 +1058,7 @@
             // Damage Tab
             dmgDmg: document.getElementById('damageDmgInput'),
             crit: document.getElementById('critInput'),
+            dmgPassive: document.getElementById('passiveDmgInput'),
             mobHp: document.getElementById('mobHpResultBox'),
             dpsRes: document.getElementById('dmgPerSecResult'),
             mpmRes: document.getElementById('mobsPerMinuteResult'),
@@ -1120,7 +1134,7 @@
             setupMultiplierToggle('pot2xBtn', 'potNo2xBtn', 'potentialMult', updatePotential);
 
             // Bind Input Events
-            const inputs = [dom.dmg, dom.masCur, dom.dInput, dom.hInput, dom.mInput, dom.dmgDmg, dom.crit, dom.dropAmt, dom.dropMul, dom.dropChn, dom.rankMpc, dom.rankCur];
+            const inputs = [dom.dmg, dom.masCur, dom.dInput, dom.hInput, dom.mInput, dom.dmgDmg, dom.crit, dom.dmgPassive, dom.dropAmt, dom.dropMul, dom.dropChn, dom.rankMpc, dom.rankCur];
             inputs.forEach(el => el.addEventListener('input', updateAll));
 
             // Setup Smart Inputs
@@ -1413,25 +1427,38 @@
         }
 
         function updateDamage() {
-            // Logic from Provided Old File
+            // 1. Get Inputs
             const baseDmg = parseInput(dom.dmgDmg, 'damageSuffixSelect');
             const critPercent = parseFloat(dom.crit.value) || 0;
+            const passivePercent = parseFloat(dom.dmgPassive.value) || 0;
             
+            // 2. Mob Data
             const mobSel = document.querySelector('[data-id="mobSelect"]');
             const hpString = mobSel.getAttribute('data-hp');
             const mobHp = parseSuffixedString(hpString);
             
             dom.mobHp.textContent = hpString || "--";
-
             const mobCountVal = parseInt(document.querySelector('[data-id="mobCountSelect"]').getAttribute('data-value')) || 1;
 
+            // 3. Calculate Click DPS
+            // Existing Logic: Base * (Multiplier based on Crit) * ClickSpeed
             const multiplierScaled = BigInt(Math.round(1000 + (critPercent * 5))); 
             const cpsScaled = BigInt(Math.round(state.damageCps * 100)); 
+            const numeratorClick = baseDmg * cpsScaled * multiplierScaled;
+
+            // 4. Calculate Passive DPS
+            // Logic: It hits every 0.5s = 2 hits per second.
+            // Formula: Base * (Percent / 100) * 2
+            // Scaled to match numeratorClick (100,000 scale): Base * Percent * 2000
+            const numeratorPassive = baseDmg * BigInt(Math.round(passivePercent * 2000));
+
+            // 5. Total DPS
+            const totalNumerator = numeratorClick + numeratorPassive;
             
-            const numerator = baseDmg * cpsScaled * multiplierScaled;
-            
+            // --- DISPLAY RESULTS ---
             if (baseDmg > 0n) {
-                 dom.dpsRes.innerHTML = formatNumber(numerator / 100000n);
+                 // Divide by 100,000n to unscale
+                 dom.dpsRes.innerHTML = formatNumber(totalNumerator / 100000n);
             } else {
                  dom.dpsRes.innerHTML = "--";
                  dom.mpmRes.innerHTML = "--";
@@ -1451,7 +1478,7 @@
                 return;
             }
             
-            if (numerator === 0n) {
+            if (totalNumerator === 0n) {
                 dom.ttkRes.innerHTML = "Forever";
                 dom.mpmRes.innerHTML = "0";
                 dom.mphRes.innerHTML = "0";
@@ -1460,21 +1487,14 @@
                 return;
             }
 
-            const dphScaled = baseDmg * multiplierScaled; 
-            const mobHpScaledForHits = mobHp * 1000n; 
-            
-            let hits = 0n;
-            if (dphScaled > 0n) {
-                 hits = (mobHpScaledForHits + dphScaled - 1n) / dphScaled;
-            }
+            // 6. Time To Kill = MobHP / RealDPS
+            const mobHpScaled = mobHp * 100000n;
+            // Calculate seconds as floating point for accuracy
+            let timeSeconds = Number(mobHpScaled * 100n / totalNumerator) / 100;
 
-            let timeSeconds = 0;
-            if (hits > 0n) {
-                timeSeconds = Number(hits - 1n) / state.damageCps;
-            }
-            
             dom.ttkRes.innerHTML = (timeSeconds < 60) ? timeSeconds.toFixed(2) + "s" : formatTime(timeSeconds);
 
+            // 7. Kills & Drops Logic
             const respawnTime = 2.0;
             const spawnsPerMinute = 60 / respawnTime; 
             
