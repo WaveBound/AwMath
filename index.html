@@ -95,7 +95,6 @@
       
       /* --- UPDATED MEDIA QUERY --- */
       @media (max-width: 1650px) {
-          /* Generic reset */
           .side-column { 
               position: relative; 
               top: auto; 
@@ -105,8 +104,6 @@
               max-width: 600px; 
               align-items: stretch !important;
           }
-
-          /* CRITICAL FIX: Target specific classes to override desktop 'left', 'right', and 'margins' */
           .side-column.left-aligned, 
           .side-column.right-aligned {
               left: auto;
@@ -114,17 +111,16 @@
               margin-left: auto;
               margin-right: auto;
           }
-
           .side-panel.active { animation: fadeInBottom 0.4s ease forwards; }
           @keyframes fadeInBottom { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
       }
 
       /* Navigation Tabs */
       .tab-nav { display: flex; padding: 12px; gap: 8px; border-bottom: 1px solid var(--border-color); background-color: rgba(0,0,0,0.2); border-radius: var(--border-radius) var(--border-radius) 0 0; flex-shrink: 0; }
-.tab-button {
-  flex: 1; padding: 10px; background: transparent; border: 1px solid transparent; border-radius: 8px;
-  color: var(--text-muted); font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;
-}
+      .tab-button {
+        flex: 1; padding: 10px; background: transparent; border: 1px solid transparent; border-radius: 8px;
+        color: var(--text-muted); font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;
+      }
       .tab-button:hover { color: var(--text-main); background-color: rgba(255,255,255,0.03); }
       .tab-button.active {
         background-color: #000; background-image: var(--active-gradient); border: var(--active-border);
@@ -139,11 +135,11 @@
       /* Input Grids */
       .mastery-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 20px; }
       .input-group { margin-bottom: 18px; min-width: 0; }
-.input-group label {
-  display: flex; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em;
-  font-weight: 600; margin-bottom: 8px; /* Slightly reduced bottom margin too */
-  color: var(--text-muted); justify-content: space-between; align-items: center;
-}
+      .input-group label {
+        display: flex; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em;
+        font-weight: 600; margin-bottom: 8px;
+        color: var(--text-muted); justify-content: space-between; align-items: center;
+      }
       .input-row-multi { display: flex; gap: 20px; }
       .input-col { flex: 1; }
       .input-row { display: flex; gap: 12px; }
@@ -162,6 +158,41 @@
           text-transform: uppercase; letter-spacing: 0.1em; text-shadow: 0 0 10px var(--primary-dim);
       }
 
+      /* Map Controls Row */
+      .map-controls-row {
+          display: flex;
+          gap: 10px;
+          align-items: center;
+          justify-content: center;
+      }
+
+      /* Max All Button */
+      .max-btn {
+          height: 40px;
+          padding: 0 16px;
+          background: rgba(59, 130, 246, 0.1);
+          border: 1px solid var(--primary-border);
+          color: var(--primary-light);
+          border-radius: var(--border-radius-sm);
+          font-weight: 800;
+          font-size: 12px;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          white-space: nowrap;
+      }
+
+      .max-btn:hover {
+          background: rgba(59, 130, 246, 0.2); 
+          color: var(--primary-light);
+          border-color: var(--primary-light);
+      }
+
+      .max-btn:active {
+          transform: scale(0.96);
+      }
+
       /* Map Section Styles */
       .map-section { display: none; grid-template-columns: repeat(4, 1fr); gap: 18px; animation: fadeIn 0.3s ease; }
       .map-section.active { display: grid; }
@@ -176,7 +207,19 @@
         font-size: 14px; font-family: 'Inter', sans-serif; background-color: var(--bg-input); color: var(--text-main); transition: all 0.2s ease;
       }
       .numeric-input:focus { outline: none; border-color: var(--primary-light); background-color: #202023; }
-      input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+      
+      /* --- FIX: Remove Spin Buttons (Arrows) from Inputs --- */
+      /* Chrome, Safari, Edge, Opera */
+      input::-webkit-outer-spin-button,
+      input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+      /* Firefox */
+      input[type=number] {
+        -moz-appearance: textfield;
+        appearance: textfield;
+      }
       
       .mode-toggle { display: flex; background-color: rgba(0,0,0,0.2); padding: 5px; border-radius: 12px; border: 1px solid var(--border-color); }
       .mode-btn {
@@ -208,25 +251,43 @@
       .select-arrow { width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 5px solid var(--text-muted); transition: transform 0.2s ease; flex-shrink: 0; }
       .select-selected.select-arrow-active .select-arrow { transform: rotate(180deg); border-top-color: var(--primary-light); }
       
-      .select-items {
-        position: absolute; background-color: #161619; top: calc(100% + 8px); left: 0; right: 0; z-index: 9999; 
-        border: 1px solid var(--primary-light); border-radius: var(--border-radius-sm); max-height: 250px; overflow-y: auto;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.5); padding: 1px 0;
+      /* Standard Dropdown (hidden in normal view, used for source) */
+      .select-items { display: none; } 
+
+      /* --- NEW PORTAL DROPDOWN STYLES (Floats above everything) --- */
+      .portal-dropdown {
+          position: fixed; 
+          z-index: 99999; 
+          background-color: #161619; 
+          border: 1px solid var(--primary-light); 
+          border-radius: var(--border-radius-sm); 
+          max-height: 250px; 
+          overflow-y: auto;
+          box-shadow: 0 4px 20px rgba(0,0,0,0.5); 
+          padding: 1px 0;
+          display: flex;
+          flex-direction: column;
+          /* FIX: Allow scrolling inside dropdown without scrolling parent */
+          overscroll-behavior: contain;
       }
-      .select-items.select-up {
-  top: auto;
-  bottom: calc(100% + 8px); /* Position above the input */
-  flex-direction: column-reverse; /* Optional: keeps list order visual if needed, usually not required */
-}
-      .select-items::-webkit-scrollbar { width: 6px; }
-      .select-items::-webkit-scrollbar-track { background: transparent; }
-      .select-items::-webkit-scrollbar-thumb { background-color: #555; border-radius: 4px; }
-      
-      .select-items div { color: var(--text-main); padding: 12px 16px; cursor: pointer; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.03); user-select: none; }
-      .select-items div:last-child { border-bottom: none; }
-      .select-items div.disabled { color: var(--text-muted); background: rgba(255,255,255,0.05); cursor: not-allowed; opacity: 0.5; pointer-events: none; }
-      .select-hide { display: none; }
-      .select-items div:hover, .same-as-selected { background-color: var(--primary-dim); color: var(--primary-light); }
+      .portal-dropdown::-webkit-scrollbar { width: 6px; }
+      .portal-dropdown::-webkit-scrollbar-track { background: transparent; }
+      .portal-dropdown::-webkit-scrollbar-thumb { background-color: #555; border-radius: 4px; }
+
+      .portal-dropdown div {
+          color: var(--text-main); 
+          padding: 12px 16px; 
+          cursor: pointer; 
+          font-size: 13px; 
+          border-bottom: 1px solid rgba(255,255,255,0.03); 
+          user-select: none;
+      }
+      .portal-dropdown div:last-child { border-bottom: none; }
+      .portal-dropdown div.disabled { color: var(--text-muted); background: rgba(255,255,255,0.05); cursor: not-allowed; opacity: 0.5; pointer-events: none; }
+      .portal-dropdown div:hover, .portal-dropdown div.same-as-selected {
+          background-color: var(--primary-dim); 
+          color: var(--primary-light);
+      }
       
       /* Drops Theme Specifics */
       .drop-theme { --sub-primary: #facc15; --sub-border: #ca8a04; --sub-glow: rgba(250, 204, 21, 0.4); --sub-dim: rgba(250, 204, 21, 0.1); border-color: var(--sub-border); }
@@ -361,18 +422,28 @@
       /* Achievements Panel */
       #achievementsPanel .input-group { margin-bottom: 15px; }
       #achievementsPanel .select-selected { height: 35px; font-size: 13px; }
+
+      /* Achievements Scroll */
+      #achievementsContainer {
+          max-height: 365px; /* Shows approx 5-6 items */
+          overflow-y: auto;
+          padding-right: 5px;
+          margin-bottom: 10px;
+          padding-bottom: 50px; 
+          /* --- THIS FIXES THE PARENT SCROLLING ISSUE --- */
+          overscroll-behavior: contain;
+      }
+      #achievementsContainer::-webkit-scrollbar { width: 4px; }
+      #achievementsContainer::-webkit-scrollbar-track { background: transparent; }
+      #achievementsContainer::-webkit-scrollbar-thumb { background-color: var(--border-color); border-radius: 4px; }
+      #achievementsContainer::-webkit-scrollbar-thumb:hover { background-color: var(--primary-border); }
       
 @media (max-width: 768px) {
   .mastery-layout { grid-template-columns: 1fr; gap: 25px; }
   .tab-content { padding: 25px; }
   .input-row-multi { flex-direction: column; gap: 20px; }
-  
-  /* Keep generic potential grids at 2 columns if they fit, or switch them to 1fr as well if they are tight */
   .potential-grid, .map-section { grid-template-columns: repeat(2, 1fr); gap: 15px; }
-  
-  /* FIX: Change global-grid to 1fr so Yen/Raid stack vertically and don't get cut off */
   .potential-grid.global-grid { grid-template-columns: 1fr; } 
-
   .result-grid { grid-template-columns: 1fr; }
   .result-box.highlight { grid-column: auto; margin-top: 0; height: auto; padding: 20px; min-height: 115px; }
   .result-box.highlight .value { font-size: 24px; white-space: normal; }
@@ -581,9 +652,15 @@
                     <!-- 2. Centered Map Selector -->
                     <div class="map-selector-container">
                         <label>Map Selection</label>
-                        <div class="custom-select" style="width: 250px;" data-id="potMapSelect">
-                            <div class="select-selected"><span>Shinobi Village</span><div class="select-arrow"></div></div>
-                            <div class="select-items select-hide" id="potMapOptions"></div>
+                        <div class="map-controls-row">
+                            <!-- Existing Dropdown -->
+                            <div class="custom-select" style="width: 250px;" data-id="potMapSelect">
+                                <div class="select-selected"><span>Shinobi Village</span><div class="select-arrow"></div></div>
+                                <div class="select-items select-hide" id="potMapOptions"></div>
+                            </div>
+                            
+                            <!-- NEW BUTTON -->
+                            <button id="btnMaxAll" class="max-btn">⚡ Max All</button>
                         </div>
                     </div>
 
@@ -717,6 +794,24 @@
                         </div>
                     </div>
                     
+                    <!-- NEW: Shadow City -->
+                    <div id="map-ShadowCity" class="map-section">
+                        <div class="input-group" style="margin-bottom:0;">
+                            <label>Shadows Gacha</label>
+                            <div class="custom-select full-width" data-id="potShadowsSelect">
+                                <div class="select-selected"><span>None (+0%)</span><div class="select-arrow"></div></div>
+                                <div class="select-items select-hide" id="potShadowsOptions"></div>
+                            </div>
+                        </div>
+                        <div class="input-group" style="margin-bottom:0;">
+                            <label>Shadow Gate</label>
+                             <div class="custom-select full-width" data-id="potShadowGateSelect">
+                                <div class="select-selected"><span>None (+0%)</span><div class="select-arrow"></div></div>
+                                <div class="select-items select-hide" id="potShadowGateOptions"></div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Potential Result -->
                     <div class="result-section">
                         <div class="result-grid" style="grid-template-columns: 1fr;"> 
@@ -833,25 +928,25 @@
                     </div>
                     <div class="input-group">
                         <label>Accessory (%)</label>
-                        <input id="itemAccessoryInput" type="number" class="numeric-input" placeholder="0" value="0" style="text-align:center;">
+                        <input id="itemAccessoryInput" type="number" class="numeric-input" placeholder="0" style="text-align:center;">
                     </div>
                 </div>
 
                 <div class="compact-row">
                     <div class="input-group">
                         <label>Stats (%)</label>
-                        <input id="playerStatsInput" type="number" class="numeric-input" placeholder="0" value="0" style="text-align:center;">
+                        <input id="playerStatsInput" type="number" class="numeric-input" placeholder="0" style="text-align:center;">
                     </div>
                     <div class="input-group">
                         <label>Aura (%)</label>
-                        <input id="playerAuraInput" type="number" class="numeric-input" placeholder="0" value="0" style="text-align:center;">
+                        <input id="playerAuraInput" type="number" class="numeric-input" placeholder="0" style="text-align:center;">
                     </div>
                 </div>
 
                 <div class="compact-row">
                     <div class="input-group">
                         <label style="justify-content: center;">Avatar (%)</label>
-                        <input id="playerAvatarInput" type="number" class="numeric-input" placeholder="0" value="0" style="text-align:center;">
+                        <input id="playerAvatarInput" type="number" class="numeric-input" placeholder="0" style="text-align:center;">
                     </div>
                 </div>
             </div>
@@ -884,6 +979,11 @@
                 <h3 class="unit-ui-title">Achievements</h3>
                 <div id="achievementsContainer">
                     <!-- Dropdowns Generated by JS -->
+                </div>
+                <!-- TOTAL ACHIEVEMENT PERCENTAGE -->
+                <div class="result-box mini-highlight" style="margin-top: 15px;">
+                    <div id="achievementsTotalResult" class="value">0%</div>
+                    <div class="label">Total Achievement Bonus</div>
                 </div>
             </div>
         </div>
@@ -932,6 +1032,7 @@
             potBreathTrainer: document.getElementById('potBreathTrainerInput'), 
             potDemonArtLvl: document.getElementById('potDemonArtLevel'), 
             potLeveTrainer: document.getElementById('potLeveTrainerInput'),
+            // Removed potShadowGate from direct DOM reference since it is now a dropdown
             potRes: document.getElementById('potMpcResult'),
             
             // Potential - Units Panel
@@ -981,6 +1082,15 @@
         // ==========================================
 
         document.addEventListener('DOMContentLoaded', () => {
+            // FORCE CLEAR BROWSER CACHED VALUES FOR SPECIFIC INPUTS
+            const inputsToClear = [
+                dom.itemAccessory,
+                dom.playerStats,
+                dom.playerAura,
+                dom.playerAvatar
+            ];
+            inputsToClear.forEach(input => input.value = "");
+
             setTheme('rank');
 
             // Initialize Dropdowns
@@ -1003,13 +1113,14 @@
             initShinobiRaidDropdown();
             initDungeonDropdown();
             initPotentialMapDropdown();
+            initShadowsDropdown(); 
+            initShadowGateDropdown(); // ADDED THIS
             
             // Initialize Achievements Dropdowns
             initAchievementsDropdowns();
 
             // Setup Custom Select Logic
             document.querySelectorAll('.custom-select').forEach(setupCustomSelect);
-            document.addEventListener('click', closeAllSelects);
             
             // Setup Speed Buttons
             setupSpeedToggle('fastBtn', 'slowBtn', 'masteryCps', updateMastery);
@@ -1063,8 +1174,9 @@
                 dom.achievementsPanel.classList.remove('active');
             });
 
-            // Potential Input Logic
-            [dom.potCoin, dom.potCurr, dom.potEyeLvl, dom.potWise, dom.potPirate, dom.potBreathTrainer, dom.potDemonArtLvl, dom.potLeveTrainer, dom.itemWeapon, dom.itemAccessory, dom.playerStats, dom.playerAura, dom.playerAvatar].forEach(el => {
+            // Potential Input Logic (REMOVED dom.potShadowGate from list as it is now a dropdown)
+            [dom.potCoin, dom.potCurr, dom.potEyeLvl, dom.potWise, dom.potPirate, dom.potBreathTrainer, dom.potDemonArtLvl, dom.potLeveTrainer, 
+             dom.itemWeapon, dom.itemAccessory, dom.playerStats, dom.playerAura, dom.playerAvatar].forEach(el => {
                 el.addEventListener('input', updatePotential);
             });
 
@@ -1077,6 +1189,64 @@
                 if (state.unitCount < 16) addUnitInput();
                 dom.uContainer.scrollTop = 0;
                 updateAddButtonState();
+            });
+
+            // Global Click listener for closing portals
+            document.addEventListener('click', (e) => {
+                // If click is not on a select-selected or inside a portal dropdown
+                if (!e.target.closest('.select-selected') && !e.target.closest('.portal-dropdown')) {
+                    closeAllPortals();
+                }
+            });
+
+            // --- MAX ALL BUTTON LOGIC ---
+            document.getElementById('btnMaxAll').addEventListener('click', () => {
+                // 1. Identify the currently active map section
+                const mapSelect = document.querySelector('[data-id="potMapSelect"]');
+                const currentMapKey = mapSelect.getAttribute('data-value'); // e.g., "NamekPlanet"
+                const activeSection = document.getElementById(`map-${currentMapKey}`);
+
+                if (!activeSection) return;
+
+                // 2. Maximize all Dropdowns (Selects) in this section
+                const dropdowns = activeSection.querySelectorAll('.custom-select');
+                dropdowns.forEach(sel => {
+                    const optionsContainer = sel.querySelector('.select-items');
+                    if (optionsContainer && optionsContainer.children.length > 0) {
+                        // Get the last option (assuming data is ordered low to high)
+                        const lastOption = optionsContainer.lastElementChild;
+                        const val = lastOption.getAttribute('data-value');
+                        const text = lastOption.textContent;
+
+                        // Update the Select State
+                        sel.setAttribute('data-value', val);
+                        const span = sel.querySelector('.select-selected span');
+                        span.textContent = text;
+                        
+                        // Update visual selection class in the hidden list
+                        Array.from(optionsContainer.children).forEach(child => child.classList.remove('same-as-selected'));
+                        lastOption.classList.add('same-as-selected');
+
+                        // Resize text if needed
+                        fitTextToContainer(span);
+                    }
+                });
+
+                // 3. Maximize all Inputs (Trainers & Levels)
+                const inputs = activeSection.querySelectorAll('input.numeric-input, input.compact-input');
+                inputs.forEach(input => {
+                    // Check if it is a Level input (Eyes/Arts) or a Trainer
+                    // Level inputs usually have "Level" in ID or are class .compact-input
+                    if (input.id.toLowerCase().includes('level')) {
+                        input.value = 50; // Max for Magic Eyes / Demon Art
+                    } else {
+                        // It is a Trainer (or standard percentage input) -> Max 200
+                        input.value = 200; 
+                    }
+                });
+
+                // 4. Trigger Calculation Update
+                updatePotential();
             });
 
             updateAll();
@@ -1092,7 +1262,8 @@
             state.unitCount++;
             const div = document.createElement('div');
             div.className = 'input-group unit-input-group';
-            div.innerHTML = `<label>Unit ${state.unitCount} (%)</label><input type="number" class="numeric-input unit-input" placeholder="0" value="0">`;
+            // Removed value="0" from input string below
+            div.innerHTML = `<label>Unit ${state.unitCount} (%)</label><input type="number" class="numeric-input unit-input" placeholder="0">`;
             const input = div.querySelector('input');
             input.addEventListener('input', updatePotential);
             dom.uContainer.appendChild(div);
@@ -1120,6 +1291,14 @@
         }
 
         function updatePotential() {
+            // 1. Cap Trainer Inputs
+            const trainerInputs = [dom.potWise, dom.potPirate, dom.potBreathTrainer, dom.potLeveTrainer];
+            trainerInputs.forEach(input => {
+                if(input && parseInt(input.value) > 200) {
+                    input.value = 200;
+                }
+            });
+
             // Weapon Item (Base Value)
             const wVal = parseFloat(dom.itemWeapon.value);
             const safeWVal = (isNaN(wVal) || wVal === 0) ? 1 : wVal;
@@ -1160,17 +1339,32 @@
             const titanFactor = BigInt(document.querySelector('[data-id="potTitanSelect"]').getAttribute('data-value') || 100);
             const shinobiRaidFactor = BigInt(document.querySelector('[data-id="potShinobiRaidSelect"]').getAttribute('data-value') || 100);
             const dungeonFactor = BigInt(document.querySelector('[data-id="potDungeonSelect"]').getAttribute('data-value') || 100);
+            const shadowsFactor = BigInt(document.querySelector('[data-id="potShadowsSelect"]').getAttribute('data-value') || 100);
+            const shadowGateFactor = BigInt(document.querySelector('[data-id="potShadowGateSelect"]').getAttribute('data-value') || 100); // UPDATED: Reads from Dropdown
 
-            // Achievement Factors Calculation
-            let achieveTotalPercent = 0;
-            for(let i=1; i<=6; i++){
+            // --- ACHIEVEMENT FACTORS CALCULATION ---
+            
+            // 1. Secret Boss (Achievement 1) - Independent Multiplier
+            const secretBossEl = document.querySelector(`[data-id="achieveSelect1"]`);
+            const secretBossVal = BigInt(secretBossEl ? secretBossEl.getAttribute('data-value') || 100 : 100);
+
+            // 2. General Achievements (Achievements 2 to 9) - Additive
+            let otherAchievePercent = 0;
+            // We loop from 2 up to the total length of achievementsData (which is now 9)
+            // Note: Since achievementsData is array, indices are 0-8. DOM IDs are 1-9.
+            // achievementData[0] is Secret Boss (ID 1). 
+            // We need IDs 2 to 9.
+            for(let i=2; i<=achievementsData.length; i++){
                 const achSel = document.querySelector(`[data-id="achieveSelect${i}"]`);
                 if(achSel) {
                     const val = parseInt(achSel.getAttribute('data-value')) || 100;
-                    achieveTotalPercent += (val - 100);
+                    otherAchievePercent += (val - 100);
                 }
             }
-            const achievementFactor = BigInt(Math.round(100 + achieveTotalPercent));
+            const generalAchievementFactor = BigInt(Math.round(100 + otherAchievePercent));
+            
+            // Display Total Achievement % (Additive part only, as per user request style)
+            document.getElementById('achievementsTotalResult').textContent = otherAchievePercent.toLocaleString() + "%";
 
             // Special Logic (Eyes/Arts)
             const eyeSel = document.querySelector('[data-id="potMagicEyeSelect"]');
@@ -1218,7 +1412,10 @@
             const unitFactor = BigInt(Math.round(100 + totalUnitPercent));
 
             // Divisor logic
-            let result = (base * rankFactor * coinFactor * currFactor * wiseFactor * bijuuFactor * eyeFactor * titlesFactor * raceFactor * sayajinFactor * unitFactor * hakiFactor * fruitFactor * pirateFactor * breathingFactor * breathTrainerFactor * daFactor * orgFactor * titanFactor * leveTrainerFactor * shinobiRaidFactor * dungeonFactor * itemAccessoryFactor * playerStatsFactor * achievementFactor * auraFactor * avatarFactor) / 10000000000000000000000000000000000000000000000000000n;
+            // Added 2 new factors: shadowGateFactor and shadowsFactor.
+            // Old divisor (55 digits, 54 zeros) -> New Divisor (59 digits, 58 zeros)
+            
+            let result = (base * rankFactor * coinFactor * currFactor * wiseFactor * bijuuFactor * eyeFactor * titlesFactor * raceFactor * sayajinFactor * unitFactor * hakiFactor * fruitFactor * pirateFactor * breathingFactor * breathTrainerFactor * daFactor * orgFactor * titanFactor * leveTrainerFactor * shinobiRaidFactor * dungeonFactor * itemAccessoryFactor * playerStatsFactor * secretBossVal * generalAchievementFactor * auraFactor * avatarFactor * shadowGateFactor * shadowsFactor) / 10000000000000000000000000000000000000000000000000000000000n;
 
             // Apply 2x Multiplier
             result = result * BigInt(state.potentialMult);
@@ -1451,29 +1648,37 @@
             }
         }
 
-// Init Achievement Dropdowns
-        function initAchievementsDropdowns() {
-            for(let i = 1; i <= 6; i++) {
-                const div = document.createElement('div');
-                div.className = 'input-group';
-                div.innerHTML = `
-                    <label>Achievement ${i}</label>
-                    <div class="custom-select full-width" data-id="achieveSelect${i}">
-                        <div class="select-selected"><span>None (+0%)</span><div class="select-arrow"></div></div>
-                        <div class="select-items select-hide" id="achieveOptions${i}"></div>
-                    </div>
-                `;
-                dom.achieveContainer.appendChild(div);
+         // Init Achievement Dropdowns
+function initAchievementsDropdowns() {
+    // Loop through the new achievementsData from Data.js
+    achievementsData.forEach((achievement, index) => {
+        const i = index + 1; // Convert 0-index to 1-index for IDs
 
-                const el = document.getElementById(`achieveOptions${i}`);
-                const parent = document.querySelector(`[data-id="achieveSelect${i}"]`);
-                achievementOptions.forEach((opt, idx) => {
-                     el.innerHTML += `<div data-value="${opt.val}" class="${idx===0?'same-as-selected':''}">${opt.name}</div>`;
-                });
-                parent.setAttribute('data-value', '100');
-            }
-        }
+        const div = document.createElement('div');
+        div.className = 'input-group';
+        
+        // Use the title from Data.js
+        div.innerHTML = `
+            <label>${achievement.title}</label>
+            <div class="custom-select full-width" data-id="achieveSelect${i}">
+                <div class="select-selected"><span>None (+0%)</span><div class="select-arrow"></div></div>
+                <div class="select-items select-hide" id="achieveOptions${i}"></div>
+            </div>
+        `;
+        dom.achieveContainer.appendChild(div);
 
+        const el = document.getElementById(`achieveOptions${i}`);
+        const parent = document.querySelector(`[data-id="achieveSelect${i}"]`);
+
+        // Populate dropdown using the specific options for THIS achievement
+        achievement.options.forEach((opt, idx) => {
+             el.innerHTML += `<div data-value="${opt.val}" class="${idx===0?'same-as-selected':''}">${opt.name}</div>`;
+        });
+        
+        // Set default value (100 = 1.0x multiplier)
+        parent.setAttribute('data-value', '100');
+    });
+}
         function initBijuuDropdown() {
             const el = document.getElementById('potBijuuOptions');
             const parent = document.querySelector('[data-id="potBijuuSelect"]');
@@ -1590,6 +1795,24 @@
             });
             parent.setAttribute('data-value', '100');
         }
+        
+        function initShadowsDropdown() {
+            const el = document.getElementById('potShadowsOptions');
+            const parent = document.querySelector('[data-id="potShadowsSelect"]');
+            shadowsData.forEach((t, i) => {
+                el.innerHTML += `<div data-value="${t.val}" class="${i===0?'same-as-selected':''}">${t.name}</div>`;
+            });
+            parent.setAttribute('data-value', '100');
+        }
+
+        function initShadowGateDropdown() {
+            const el = document.getElementById('potShadowGateOptions');
+            const parent = document.querySelector('[data-id="potShadowGateSelect"]');
+            shadowGateData.forEach((t, i) => {
+                el.innerHTML += `<div data-value="${t.val}" class="${i===0?'same-as-selected':''}">${t.name}</div>`;
+            });
+            parent.setAttribute('data-value', '100');
+        }
 
         function initMapDropdown() {
             const mapSelect = document.getElementById('mapOptions');
@@ -1672,67 +1895,121 @@
             inp.addEventListener('keydown', e => { if(e.key==='Enter') { e.preventDefault(); h(); inp.blur(); }});
         }
 
-function setupCustomSelect(sel) {
+        /* --- UPDATED DROPDOWN LOGIC USING PORTALS --- */
+        let activePortal = null;
+
+        function closeAllPortals() {
+            if (activePortal) {
+                activePortal.remove();
+                activePortal = null;
+            }
+            document.querySelectorAll('.select-selected').forEach(el => el.classList.remove('select-arrow-active'));
+        }
+
+        function setupCustomSelect(sel) {
             const selected = sel.querySelector('.select-selected');
-            const items = sel.querySelector('.select-items');
+            const items = sel.querySelector('.select-items'); // Original hidden items
             
             selected.addEventListener('click', e => { 
                 e.stopPropagation(); 
-                closeAllSelects(selected); 
-                items.classList.toggle('select-hide'); 
-                selected.classList.toggle('select-arrow-active'); 
+                
+                // If this one is already active, close it
+                if (selected.classList.contains('select-arrow-active')) {
+                    closeAllPortals();
+                    return;
+                }
 
-                // --- SMART POSITIONING LOGIC ---
-                if (!items.classList.contains('select-hide')) {
-                    // 1. Reset position to default (down) to measure correctly
-                    items.classList.remove('select-up');
+                closeAllPortals(); // Close others first
+                selected.classList.add('select-arrow-active'); 
 
-                    // 2. Measure position
-                    const rect = items.getBoundingClientRect();
-                    const viewportHeight = window.innerHeight;
+                // --- CREATE PORTAL ---
+                const rect = selected.getBoundingClientRect();
+                const portal = document.createElement('div');
+                portal.className = 'portal-dropdown';
+                
+                // Position it
+                portal.style.width = rect.width + 'px';
+                portal.style.left = rect.left + 'px';
+                
+                // Decide direction (up or down)
+                const viewportHeight = window.innerHeight;
+                const spaceBelow = viewportHeight - rect.bottom;
+                const spaceAbove = rect.top;
+                
+                // Default down, unless space is tight
+                if (spaceBelow < 200 && spaceAbove > spaceBelow) {
+                    // Open UP
+                    portal.style.bottom = (viewportHeight - rect.top) + 'px';
+                    portal.style.maxHeight = Math.min(250, spaceAbove - 10) + 'px';
+                    // Reverse column order so scrolling starts at bottom visually if needed
+                    portal.style.flexDirection = 'column-reverse'; 
+                } else {
+                    // Open DOWN
+                    portal.style.top = (rect.bottom + 5) + 'px';
+                    portal.style.maxHeight = Math.min(250, spaceBelow - 10) + 'px';
+                }
 
-                    // 3. If bottom of dropdown goes past viewport bottom...
-                    if (rect.bottom > viewportHeight) {
-                        // ...and there is enough space above
-                        if (rect.top > rect.height) {
-                            items.classList.add('select-up');
+                // Copy items content
+                portal.innerHTML = items.innerHTML;
+                document.body.appendChild(portal);
+                activePortal = portal;
+
+                // Add click listeners to portal items
+                portal.querySelectorAll('div').forEach(div => {
+                    div.addEventListener('click', (evt) => {
+                        evt.stopPropagation();
+                        // Update UI
+                        const val = div.getAttribute('data-value');
+                        const txt = div.textContent;
+                        
+                        sel.setAttribute('data-value', val);
+                        if(div.hasAttribute('data-hp')) sel.setAttribute('data-hp', div.getAttribute('data-hp'));
+                        
+                        const span = selected.querySelector('span');
+                        span.textContent = txt;
+                        fitTextToContainer(span);
+
+                        // Trigger Logic updates
+                        const id = sel.getAttribute('data-id');
+                        if (id === 'mapSelect') updateMobDropdown(val);
+                        if (id === 'currentRankSelect' || id === 'targetRankSelect') handleRankLogic(id, parseInt(val));
+                        if (id === 'potRankSelect') span.textContent = `Rank ${val}`;
+                        if (id === 'potMapSelect') {
+                            const mapKey = val; 
+                            document.querySelectorAll('.map-section').forEach(sec => sec.classList.remove('active'));
+                            const targetSec = document.getElementById(`map-${mapKey}`);
+                            if(targetSec) targetSec.classList.add('active');
                         }
-                    }
-                }
-            });
-            
-            items.addEventListener('click', e => {
-                if (e.target === items || e.target.classList.contains('select-items')) return;
-                if(e.target.tagName !== 'DIV') return;
-                
-                const opt = e.target;
-                sel.setAttribute('data-value', opt.getAttribute('data-value'));
-                if(opt.hasAttribute('data-hp')) sel.setAttribute('data-hp', opt.getAttribute('data-hp'));
-                
-                const span = selected.querySelector('span');
-                span.textContent = opt.textContent;
-                fitTextToContainer(span);
 
-                items.querySelectorAll('div').forEach(d => d.classList.remove('same-as-selected'));
-                opt.classList.add('same-as-selected');
-                items.classList.add('select-hide');
-                selected.classList.remove('select-arrow-active');
-                items.classList.remove('select-up'); // Reset position on selection
+                        // Update original hidden list classes (for consistency)
+                        items.querySelectorAll('div').forEach(d => d.classList.remove('same-as-selected'));
+                        // Find matching item in original list by text content
+                        const origItem = Array.from(items.children).find(c => c.textContent === txt);
+                        if(origItem) origItem.classList.add('same-as-selected');
+
+                        closeAllPortals();
+                        updateAll();
+                    });
+                });
+            });
+        }
+
+        // Close portals when resizing
+        window.addEventListener('resize', closeAllPortals);
         
-                const id = sel.getAttribute('data-id');
-                if (id === 'mapSelect') updateMobDropdown(opt.getAttribute('data-value'));
-                if (id === 'currentRankSelect' || id === 'targetRankSelect') handleRankLogic(id, parseInt(opt.getAttribute('data-value')));
-                if (id === 'potRankSelect') span.textContent = `Rank ${opt.getAttribute('data-value')}`;
-                
-                if (id === 'potMapSelect') {
-                    const mapKey = opt.getAttribute('data-value'); 
-                    document.querySelectorAll('.map-section').forEach(sec => sec.classList.remove('active'));
-                    const targetSec = document.getElementById(`map-${mapKey}`);
-                    if(targetSec) targetSec.classList.add('active');
-                }
+        // --- FIXED SCROLL LISTENER ---
+        // Only close if scrolling happens OUTSIDE the active portal
+        window.addEventListener('scroll', (e) => {
+            if (activePortal && (e.target === activePortal || activePortal.contains(e.target))) {
+                return; // Ignore scroll events inside the dropdown itself
+            }
+            closeAllPortals();
+        }, true);
 
-                updateAll();
-            });
+        // Keep this for non-portal logic if needed
+        function closeAllSelects(ex) {
+            // Deprecated by portal system but kept for safety
+            document.querySelectorAll('.select-items').forEach(el => el.classList.add('select-hide'));
         }
 
         function fitTextToContainer(span) {
@@ -1778,23 +2055,12 @@ function setupCustomSelect(sel) {
         function setSelect(el, idx) {
             el.setAttribute('data-value', idx);
             el.querySelector('span').textContent = `Rank ${idx}`;
+            // Update hidden items
             el.querySelectorAll('.select-items div').forEach(d => d.classList.toggle('same-as-selected', d.getAttribute('data-value') == idx));
         }
 
         function updateDisabledTargetRanks(cur) {
             document.querySelectorAll('#targetRankOptions div').forEach(d => d.classList.toggle('disabled', parseInt(d.getAttribute('data-value')) <= cur));
-        }
-
-        function closeAllSelects(ex) {
-            document.querySelectorAll('.custom-select').forEach(s => {
-                const sl = s.querySelector('.select-selected');
-                const items = s.querySelector('.select-items');
-                if (sl !== ex) { 
-                    items.classList.add('select-hide'); 
-                    sl.classList.remove('select-arrow-active'); 
-                    items.classList.remove('select-up'); // Clean up direction
-                }
-            });
         }
     </script>
 </body>
