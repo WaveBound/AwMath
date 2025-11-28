@@ -11,533 +11,698 @@
     <style>
       :root {
         /* --- Base Colors (Dark Theme) --- */
-        --bg-app: #09090b;
+        --bg-app: #09090b; 
         --bg-card: #121215; 
-        --bg-input: #18181b;
+        --bg-input: #18181b; 
         --border-color: #27272a;
-        
+
         /* --- Default Theme Variables --- */
-        --primary: #ffffff;         
-        --primary-light: #bf00ff;
-        --primary-border: #8700bd; 
-        --primary-dim: rgba(135, 0, 189, 0.15); 
-        --primary-glow: rgba(163, 0, 222, 0.5); 
-        
-        /* Text */
-        --text-main: #ffffff;
+        --primary: #3b82f6; 
+        --primary-light: #60a5fa; 
+        --primary-border: #3b82f6;
+        --primary-dim: rgba(59, 130, 246, 0.15); 
+        --primary-glow: rgba(59, 130, 246, 0.5);
+
+        /* Text & UI */
+        --text-main: #ffffff; 
         --text-muted: #a1a1aa;
-        
-        /* UI Metrics */
-        --border-radius: 16px;
+        --border-radius: 16px; 
         --border-radius-sm: 10px;
-        
-        /* --- Gradients & Shadows --- */
         --active-gradient: radial-gradient(circle at center, var(--primary-dim) 0%, transparent 75%);
         --active-gradient-tight: radial-gradient(circle at center, var(--primary-dim) 0%, transparent 60%); 
         --active-border: 1px solid var(--primary-border);
-        --active-shadow: 0 0 30px -5px var(--primary-dim);
       }
 
       * { box-sizing: border-box; margin: 0; padding: 0; }
 
       body {
-        background-color: var(--bg-app);
-        color: var(--text-main);
+        background-color: var(--bg-app); 
+        color: var(--text-main); 
         font-family: 'Inter', sans-serif;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-        padding: 20px;
-        position: relative;
-        overflow-x: hidden;
+        display: flex; flex-direction: column; justify-content: center; align-items: center;
+        min-height: 100vh; padding: 40px 20px; position: relative; overflow-x: hidden; overflow-y: auto; 
+        -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; cursor: default;
       }
+
+      input { -webkit-user-select: text; -moz-user-select: text; -ms-user-select: text; user-select: text; cursor: text; }
 
       .bg-glow {
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 100vw;
-        height: 100vh;
-        background: radial-gradient(circle at center, var(--primary-glow) 0%, transparent 65%);
-        opacity: 0.25; 
-        filter: blur(120px); 
-        z-index: -1;
-        pointer-events: none;
-        transition: background 0.5s ease;
+        position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+        width: 100vw; height: 100vh; background: radial-gradient(circle at center, var(--primary-glow) 0%, transparent 65%);
+        opacity: 0.25; filter: blur(120px); z-index: -1; pointer-events: none; transition: background 0.5s ease;
       }
 
-      /* --- Layout Wrapper --- */
-      /* This wrapper stays exactly in the center of the screen */
-      .content-wrapper {
-          position: relative;
-          width: 100%;
-          max-width: 950px; /* Matches Main UI width */
-          margin: 0 auto;
-          /* No flex here, we use absolute positioning for the side panel */
-      }
-
-      .main-container {
-        width: 100%;
-        background-color: var(--bg-card);
-        border: 1px solid var(--border-color);
-        border-radius: var(--border-radius);
-        box-shadow: 0 0 0 1px #27272a, 0 40px 80px -20px rgba(0, 0, 0, 0.7);
-        overflow: hidden;
-        position: relative;
-        backdrop-filter: blur(10px);
-        z-index: 2; /* Keep above side panel visually if overlapped */
-      }
-
-      /* --- Side Panel (Drops UI) --- */
-      .side-panel {
-          /* Absolute Position: Floats to the right of the wrapper */
-          position: absolute;
-          left: 100%; 
-          top: 50%;
-          transform: translateY(-50%); /* Centers it Up/Down */
-          
-          width: 300px;
-          height: fit-content; /* Only as tall as needed */
-          margin-left: 20px; /* Gap between Main and Side */
-          
-          background-color: var(--bg-card);
-          border: 1px solid var(--border-color);
-          border-radius: var(--border-radius);
-          padding: 25px;
-          
-          display: none; /* Hidden by default */
-          opacity: 0;
-          
-          box-shadow: 0 0 0 1px #27272a, 0 20px 60px -10px rgba(0, 0, 0, 0.5);
-          backdrop-filter: blur(10px);
-          z-index: 1;
-          transition: opacity 0.3s ease, transform 0.3s ease;
-      }
-
-      .side-panel.active { 
-          display: block; 
-          animation: fadeSlideIn 0.4s ease forwards;
-      }
-
-      @keyframes fadeSlideIn {
-          from { opacity: 0; transform: translate(-10px, -50%); }
-          to { opacity: 1; transform: translate(0, -50%); }
-      }
+      .content-wrapper { position: relative; width: 100%; max-width: 855px; margin: 0 auto; }
       
-      /* --- Responsive Behavior --- */
-      /* When screen is too narrow to fit side-by-side (950 + 300 + margins), stack them */
-      @media (max-width: 1350px) {
-          .side-panel {
-              position: relative;
-              left: auto;
-              top: auto;
-              transform: none !important; /* Reset vertical centering */
-              margin: 20px auto 0; /* Center below main */
-              width: 100%;
-              max-width: 600px;
-          }
-          .side-panel.active {
-              animation: fadeInBottom 0.4s ease forwards;
-          }
-          @keyframes fadeInBottom {
-              from { opacity: 0; transform: translateY(-10px); }
-              to { opacity: 1; transform: translateY(0); }
-          }
+      .main-container {
+        width: 100%; background-color: var(--bg-card); border: 1px solid var(--border-color);
+        border-radius: var(--border-radius); position: relative;
+        backdrop-filter: blur(10px); z-index: 2;
+        overflow: visible; 
+        display: flex; flex-direction: column;
+        transition: height 0.3s ease;
       }
 
-      /* Navigation */
-      .tab-nav {
-        display: flex;
-        padding: 12px;
-        gap: 8px;
-        border-bottom: 1px solid var(--border-color);
-        background-color: rgba(0,0,0,0.2);
+      /* --- Side Panel Architecture --- */
+      .side-column {
+          position: absolute; top: 50%; transform: translateY(-50%);
+          display: flex; flex-direction: column; gap: 20px;
+          width: 270px; 
+          z-index: 1; pointer-events: none;
       }
 
-      .tab-button {
-        flex: 1;
-        padding: 12px;
-        background-color: transparent;
-        border: 1px solid transparent;
-        border-radius: 8px;
-        color: var(--text-muted);
-        font-size: 14px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
+      .side-column.left-aligned { right: 100%; margin-right: 20px; align-items: flex-end; }
+      .side-column.right-aligned { left: 100%; margin-left: 20px; align-items: flex-start; }
+
+      .side-panel {
+          width: 100%; height: auto; 
+          background-color: var(--bg-card); border: 1px solid var(--border-color); 
+          border-radius: var(--border-radius); padding: 22px; 
+          display: none; flex-direction: column; opacity: 0; backdrop-filter: blur(10px);
+          transition: opacity 0.3s ease, transform 0.3s ease;
+          pointer-events: auto; 
       }
 
+      .side-panel.active { display: flex; opacity: 1; }
+      
+      /* Animation Directions */
+      .side-column.right-aligned .side-panel.active { animation: fadeSlideInRight 0.4s ease forwards; }
+      @keyframes fadeSlideInRight { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+
+      .side-column.left-aligned .side-panel.active { animation: fadeSlideInLeft 0.4s ease forwards; }
+      @keyframes fadeSlideInLeft { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: translateX(0); } }
+      
+      @media (max-width: 1650px) {
+          .side-column { 
+              position: relative; left: auto; right: auto; top: auto; transform: none !important;
+              margin: 20px auto 0; width: 100%; max-width: 600px; 
+              align-items: stretch !important;
+          }
+          .side-panel.active { animation: fadeInBottom 0.4s ease forwards; }
+          @keyframes fadeInBottom { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+      }
+
+      /* Navigation Tabs */
+      .tab-nav { display: flex; padding: 12px; gap: 8px; border-bottom: 1px solid var(--border-color); background-color: rgba(0,0,0,0.2); border-radius: var(--border-radius) var(--border-radius) 0 0; flex-shrink: 0; }
+.tab-button {
+  flex: 1; padding: 10px; background: transparent; border: 1px solid transparent; border-radius: 8px;
+  color: var(--text-muted); font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;
+}
       .tab-button:hover { color: var(--text-main); background-color: rgba(255,255,255,0.03); }
-
       .tab-button.active {
-        background-color: #000;
-        background-image: var(--active-gradient);
-        border: var(--active-border);
-        box-shadow: var(--active-shadow);
-        color: var(--text-main);
-        text-shadow: 0 0 15px var(--primary-glow);
+        background-color: #000; background-image: var(--active-gradient); border: var(--active-border);
+        color: var(--text-main); text-shadow: 0 0 15px var(--primary-glow);
       }
 
-      /* Content */
-      .tab-content {
-        display: none;
-        padding: 40px;
-        animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-      }
+      .tab-content { display: none; padding: 30px; animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
       .tab-content.active { display: block; }
       @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+      .tab-content h2 { text-align: center; margin-bottom: 30px; font-weight: 700; }
       
-      .tab-content h2 {
-          text-align: center;
-          margin-bottom: 30px;
-          color: var(--text-main);
-          font-weight: 700;
-      }
-
-      /* Inputs Layout */
-      .mastery-layout {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 40px;
-        margin-bottom: 30px;
-      }
-      @media (max-width: 768px) {
-        .mastery-layout { grid-template-columns: 1fr; gap: 25px; }
-        .tab-content { padding: 25px; }
-      }
-
-      .input-group { margin-bottom: 25px; }
-      .input-group label {
-        display: block;
-        font-size: 13px;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        font-weight: 600;
-        margin-bottom: 10px;
-        color: var(--text-muted);
-        display: flex;
-        justify-content: space-between;
-      }
-      
+      /* Input Grids */
+      .mastery-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 20px; }
+      .input-group { margin-bottom: 18px; min-width: 0; }
+.input-group label {
+  display: flex; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em;
+  font-weight: 600; margin-bottom: 8px; /* Slightly reduced bottom margin too */
+  color: var(--text-muted); justify-content: space-between; align-items: center;
+}
       .input-row-multi { display: flex; gap: 20px; }
       .input-col { flex: 1; }
       .input-row { display: flex; gap: 12px; }
-      .input-row-full { width: 100%; }
+      
+      /* Potential View Styles */
+      .potential-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+      .potential-grid.global-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; align-items: start; }
 
-      /* Inputs */
+      /* Map Selector Section */
+      .map-selector-container {
+          display: flex; flex-direction: column; align-items: center; justify-content: center;
+          margin: 30px 0 20px 0; padding-top: 30px; border-top: 1px solid var(--border-color);
+      }
+      .map-selector-container label {
+          color: var(--primary-light); font-weight: 700; font-size: 14px; margin-bottom: 10px;
+          text-transform: uppercase; letter-spacing: 0.1em; text-shadow: 0 0 10px var(--primary-dim);
+      }
+
+      /* Map Section Styles */
+      .map-section { display: none; grid-template-columns: repeat(4, 1fr); gap: 18px; animation: fadeIn 0.3s ease; }
+      .map-section.active { display: grid; }
+      
+      .rank-select-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; }
+      .rank-arrow { color: var(--primary-light); opacity: 0.8; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+
+      /* Form Components */
       .numeric-input {
-        width: 100%;
-        padding: 14px 16px;
-        border-radius: var(--border-radius-sm);
-        border: 1px solid var(--primary-border); 
-        font-size: 16px;
-        font-family: 'Inter', sans-serif;
-        background-color: var(--bg-input);
-        color: var(--text-main);
-        transition: all 0.2s ease;
+        width: 100%; height: 40px; padding: 12px 16px; 
+        border-radius: var(--border-radius-sm); border: 1px solid var(--primary-border);
+        font-size: 14px; font-family: 'Inter', sans-serif; background-color: var(--bg-input); color: var(--text-main); transition: all 0.2s ease;
       }
-      .numeric-input:focus {
-        outline: none;
-        box-shadow: none; 
-        border-color: var(--primary-light); 
-        background-color: #202023;
-      }
+      .numeric-input:focus { outline: none; border-color: var(--primary-light); background-color: #202023; }
       input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-
-      /* Toggle Buttons */
-      .mode-toggle {
-        display: flex;
-        background-color: rgba(0,0,0,0.2); 
-        padding: 5px;
-        border-radius: 12px;
-        border: 1px solid var(--border-color);
-      }
+      
+      .mode-toggle { display: flex; background-color: rgba(0,0,0,0.2); padding: 5px; border-radius: 12px; border: 1px solid var(--border-color); }
       .mode-btn {
-        flex: 1;
-        padding: 12px;
-        cursor: pointer;
-        background-color: transparent;
-        color: var(--text-muted);
-        border: 1px solid transparent;
-        border-radius: 8px;
-        font-size: 14px;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        text-align: center;
+        flex: 1; padding: 12px; cursor: pointer; background: transparent; color: var(--text-muted);
+        border: 1px solid transparent; border-radius: 8px; font-size: 14px; font-weight: 600; transition: all 0.3s ease; text-align: center;
       }
       .mode-btn:hover { color: var(--text-main); }
       .mode-btn.active {
-        background-color: #000;
-        background-image: var(--active-gradient-tight);
-        border: var(--active-border);
-        box-shadow: var(--active-shadow);
-        color: #fff;
-        text-shadow: 0 0 10px var(--primary-glow);
+        background-color: #000; background-image: var(--active-gradient-tight); border: var(--active-border);
+        color: #fff; text-shadow: 0 0 10px var(--primary-glow);
       }
       .mode-btn .small { display: block; font-size: 11px; opacity: 0.7; margin-top: 3px; font-weight: 400; }
-
-      /* Custom Select */
-      .custom-select {
-        position: relative;
-        width: 125px;
-        flex-shrink: 0;
-        font-family: 'Inter', sans-serif;
-      }
+      
+      .custom-select { position: relative; width: 125px; flex-shrink: 0; font-family: 'Inter', sans-serif; }
       .custom-select.full-width { width: 100%; }
+      .custom-select.compact { width: auto; flex: 1; min-width: 0; }
       
       .time-input-group { display: flex; gap: 8px; }
-      .time-input-group input { flex-grow: 1; padding: 14px 10px; text-align: center; font-weight: 500; }
+      .time-input-group input { flex-grow: 1; text-align: center; font-weight: 500; padding: 12px 10px; }
       .time-label { font-size: 11px; color: var(--text-muted); text-align: center; margin-top: 5px; }
-
+      
       .select-selected {
-        background-color: var(--bg-input);
-        color: var(--text-main);
-        padding: 14px 16px;
-        border: 1px solid var(--primary-border);
-        border-radius: var(--border-radius-sm);
-        cursor: pointer;
-        font-size: 16px;
-        font-weight: 500;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        transition: all 0.2s ease;
+        background-color: var(--bg-input); color: var(--text-main); height: 40px; padding: 0 16px; 
+        border: 1px solid var(--primary-border); border-radius: var(--border-radius-sm); 
+        cursor: pointer; font-size: 14px; font-weight: 500; display: flex; align-items: center; justify-content: space-between; transition: all 0.2s ease; overflow: hidden; 
       }
-      .select-selected:hover { border-color: var(--primary-light); }
-      .select-selected.select-arrow-active { border-color: var(--primary-light); background-color: #202023; }
-      .select-arrow {
-        width: 0; height: 0;
-        border-left: 5px solid transparent; border-right: 5px solid transparent;
-        border-top: 5px solid var(--text-muted); transition: transform 0.2s ease;
-      }
+      .select-selected span { white-space: nowrap; overflow: hidden; text-overflow: clip; display: block; margin-right: 10px; line-height: 1.2; width: 100%; }
+      .select-selected:hover, .select-selected.select-arrow-active { border-color: var(--primary-light); background-color: #202023; }
+      .select-arrow { width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 5px solid var(--text-muted); transition: transform 0.2s ease; flex-shrink: 0; }
       .select-selected.select-arrow-active .select-arrow { transform: rotate(180deg); border-top-color: var(--primary-light); }
-
+      
       .select-items {
-        position: absolute; background-color: #161619;
-        top: calc(100% + 8px); left: 0; right: 0; z-index: 99;
-        border: 1px solid var(--primary-light); border-radius: var(--border-radius-sm);
-        max-height: 250px; overflow-y: auto;
-        box-shadow: 0 0 40px -5px rgba(0,0,0,0.8);
-        padding: 1px 0; 
+        position: absolute; background-color: #161619; top: calc(100% + 8px); left: 0; right: 0; z-index: 9999; 
+        border: 1px solid var(--primary-light); border-radius: var(--border-radius-sm); max-height: 250px; overflow-y: auto;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.5); padding: 1px 0;
       }
       .select-items::-webkit-scrollbar { width: 6px; }
       .select-items::-webkit-scrollbar-track { background: transparent; }
       .select-items::-webkit-scrollbar-thumb { background-color: #555; border-radius: 4px; }
-      .select-items div { color: var(--text-main); padding: 12px 16px; cursor: pointer; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.03); }
+      
+      .select-items div { color: var(--text-main); padding: 12px 16px; cursor: pointer; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.03); user-select: none; }
       .select-items div:last-child { border-bottom: none; }
+      .select-items div.disabled { color: var(--text-muted); background: rgba(255,255,255,0.05); cursor: not-allowed; opacity: 0.5; pointer-events: none; }
       .select-hide { display: none; }
       .select-items div:hover, .same-as-selected { background-color: var(--primary-dim); color: var(--primary-light); }
-
-      /* --- Drops Panel Theme (Yellow) --- */
-      .drop-theme {
-        --sub-primary: #facc15;       /* Yellow */
-        --sub-border: #ca8a04;        /* Dark Yellow/Gold */
-        --sub-glow: rgba(250, 204, 21, 0.4);
-        --sub-dim: rgba(250, 204, 21, 0.1);
-        border-color: var(--sub-border);
-      }
       
+      /* Drops Theme Specifics */
+      .drop-theme { --sub-primary: #facc15; --sub-border: #ca8a04; --sub-glow: rgba(250, 204, 21, 0.4); --sub-dim: rgba(250, 204, 21, 0.1); border-color: var(--sub-border); }
       .sub-ui-title {
-          font-size: 11px;
-          text-transform: uppercase;
-          letter-spacing: 0.15em;
-          color: var(--sub-primary);
-          margin-bottom: 20px;
-          font-weight: 800;
-          text-align: center;
-          text-shadow: 0 0 10px var(--sub-glow);
-          border-bottom: 1px solid var(--sub-dim);
-          padding-bottom: 12px;
+          font-size: 11px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--sub-primary);
+          margin-bottom: 20px; font-weight: 800; text-align: center; text-shadow: 0 0 10px var(--sub-glow); border-bottom: 1px solid var(--sub-dim); padding-bottom: 12px;
       }
-
-      /* Yellow Input Overrides */
-      .drop-theme .numeric-input {
-          border-color: var(--sub-border); 
-          color: #fff;
-          font-size: 14px;
-          padding: 10px;
-      }
-      .drop-theme .numeric-input:focus {
-          border-color: var(--sub-primary);
-          box-shadow: 0 0 10px -2px var(--sub-dim);
-      }
+      .drop-theme .numeric-input { border-color: var(--sub-border); color: #fff; font-size: 14px; padding: 10px; }
+      .drop-theme .numeric-input:focus { border-color: var(--sub-primary); box-shadow: 0 0 10px -2px var(--sub-dim); }
       .drop-theme label { color: #eab308; font-size: 11px; margin-bottom: 6px; } 
-
       .drop-theme .result-box.mini-highlight {
           background: radial-gradient(circle at center, rgba(250, 204, 21, 0.15) 0%, transparent 80%);
-          border: 1px solid var(--sub-border);
-          box-shadow: 0 0 15px -5px var(--sub-glow);
-          margin-top: 15px;
-          padding: 20px 15px;
-          text-align: center;
-          border-radius: 12px;
+          border: 1px solid var(--sub-border); margin-top: 15px; padding: 20px 15px; text-align: center; border-radius: 12px;
       }
-      .drop-theme .result-box .value {
-          color: var(--sub-primary);
-          font-size: 26px;
-          font-weight: 800;
-          margin-bottom: 5px;
-          text-shadow: 0 0 15px var(--sub-glow);
-      }
-      .drop-theme .result-box .label {
-          font-size: 10px;
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-          font-weight: 600;
-          color: rgba(255, 255, 255, 0.6);
-      }
+      .drop-theme .result-box .value { color: var(--sub-primary); font-size: 26px; font-weight: 800; margin-bottom: 5px; text-shadow: 0 0 15px var(--sub-glow); }
+      .drop-theme .result-box .label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; color: rgba(255, 255, 255, 0.6); }
 
-      /* Results */
-      .result-section { margin-top: 10px; padding-top: 30px; border-top: 1px solid var(--border-color); }
-      
-      .result-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 15px;
-        margin-bottom: 15px;
-      }
-      
+      /* Results Section */
+      .result-section { margin-top: 10px; padding-top: 30px; border-top: 1px solid var(--border-color); flex-shrink: 0; }
+      .result-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 13px; margin-bottom: 12px; }
       .result-box {
-        background: rgba(255,255,255,0.02);
-        padding: 20px;
-        border-radius: 12px;
-        border: 1px solid rgba(255,255,255,0.05);
-        text-align: center;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        transition: border-color 0.3s ease;
+        background: rgba(255,255,255,0.02); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);
+        text-align: center; display: flex; flex-direction: column; justify-content: center; transition: border-color 0.3s ease;
       }
       .result-box.highlight {
-        grid-column: 1 / -1; 
-        margin-top: 10px;
-        background-color: #000;
-        background-image: var(--active-gradient);
-        border: var(--active-border);
-        box-shadow: var(--active-shadow);
+        grid-column: 1 / -1; margin-top: 10px; background-color: #000; background-image: var(--active-gradient); border: var(--active-border);
+        height: 104px; padding: 0 20px;
       }
-      .result-box.mini-highlight {
-        background-color: #000;
-        background-image: var(--active-gradient);
-        border: var(--active-border);
-        box-shadow: var(--active-shadow);
-      }
-      
-      .result-box .value {
-        font-size: 24px;
-        font-weight: 700;
-        color: var(--primary-light);
-        margin-bottom: 6px;
-        text-shadow: 0 0 15px var(--primary-glow);
-        transition: color 0.3s ease;
-      }
-      .result-box.highlight .value { 
-          font-size: 36px; 
-          color: #fff; 
-          text-shadow: 0 0 5px var(--primary-light);
-          word-break: break-all;
-      }
-      .result-box .label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
+      .result-box.mini-highlight { background-color: #000; background-image: var(--active-gradient); border: var(--active-border); }
+      .result-box .value { font-size: 21px; font-weight: 700; color: var(--primary-light); margin-bottom: 6px; text-shadow: 0 0 15px var(--primary-glow); transition: color 0.3s ease; }
+      .result-box.highlight .value { font-size: 32px; color: #fff; text-shadow: 0 0 5px var(--primary-light); word-break: break-all; margin-bottom: 4px; }
+      .result-box .label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
       .result-box.highlight .label { color: rgba(255,255,255,0.7); }
 
-      .footer { text-align: center; margin-top: 30px; color: var(--text-muted); font-size: 13px; opacity: 0.6; width: 100%; }
-      .placeholder-text { color: var(--text-muted); text-align: center; padding: 50px; border: 2px dashed var(--border-color); border-radius: var(--border-radius); background: rgba(0,0,0,0.2); }
+      /* Rank Progress Bar */
+      .rank-progress-container { margin-top: 8px; width: 100%; display: flex; align-items: center; gap: 10px; }
+      .rank-progress-track { flex: 1; height: 4px; background: rgba(255,255,255,0.1); border-radius: 6px; overflow: hidden; }
+      .rank-progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--primary), var(--primary-light)); box-shadow: 0 0 15px var(--primary-glow); border-radius: 6px; transition: width 0.3s ease; }
+      .rank-progress-text { font-size: 11px; font-weight: 700; color: var(--primary-light); min-width: 35px; text-align: right; line-height: 1; }
 
+      /* Footer & Secrets */
+      .footer { text-align: center; margin-top: 30px; color: var(--text-muted); font-size: 13px; opacity: 0.6; width: 100%; }
+      .footer-tag { font-size: 15px; font-weight: 800; color: var(--primary-light); text-shadow: 0 0 15px var(--primary-glow); }
+      .placeholder-text { color: var(--text-muted); text-align: center; padding: 50px; border: 2px dashed var(--border-color); border-radius: var(--border-radius); background: rgba(0,0,0,0.2); }
+      
+      .secret-zone { position: fixed; bottom: 0; right: 0; width: 60px; height: 60px; z-index: 9999; }
+      .secret-popup {
+          position: absolute; bottom: 20px; right: 20px; background: var(--bg-card); border: 1px solid var(--primary-border);
+          padding: 15px 25px; border-radius: 12px; box-shadow: 0 0 20px var(--primary-glow); backdrop-filter: blur(10px);
+          transform: translateY(120%) scale(0.9); opacity: 0; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); pointer-events: none;
+          display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 140px; text-align: center;
+      }
+      .secret-zone:hover .secret-popup { transform: translateY(0) scale(1); opacity: 1; pointer-events: auto; }
+      .secret-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--text-muted); margin-bottom: 5px; font-weight: 600; }
+      .secret-name {
+          font-size: 15px; font-weight: 800; background: linear-gradient(90deg, #fff, var(--primary-light));
+          background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 0 15px var(--primary-glow);
+      }
+
+      /* --- LINKS & MINI INPUTS --- */
+      .mini-link-btn {
+        background: none; border: none; padding: 0;
+        color: var(--primary-light); font-size: 11px; font-weight: 700;
+        cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em;
+        transition: text-shadow 0.3s, opacity 0.3s;
+        opacity: 0.9;
+      }
+      .mini-link-btn:hover {
+        opacity: 1; text-shadow: 0 0 8px var(--primary-glow); text-decoration: underline;
+      }
+      
+      .back-btn {
+          background: transparent; border: none; color: var(--text-muted);
+          font-weight: 700; cursor: pointer; font-size: 14px; margin-bottom: 20px;
+          display: flex; align-items: center; gap: 6px; transition: color 0.3s ease;
+      }
+      .back-btn:hover { color: var(--primary-light); }
+      
+      .level-input-wrapper { display: flex; align-items: center; gap: 5px; }
+      .level-label { font-size: 9px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+      .compact-input {
+          width: 40px; padding: 2px 0; text-align: center; font-size: 11px; font-family: 'Inter', sans-serif; font-weight: 700;
+          background: rgba(255,255,255,0.05); border: 1px solid var(--border-color);
+          border-radius: 4px; color: var(--primary-light); transition: all 0.2s;
+      }
+      .compact-input:focus { border-color: var(--primary-light); background: rgba(0,0,0,0.3); outline: none; }
+      
+      .magic-eye-label-fix { margin-bottom: 6px !important; }
+      .magic-eye-label-fix > span:first-child { position: relative; top: -2px; }
+      
+      #mastery-potential-view { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+
+     /* --- UNIT SIDE PANEL STYLES --- */
+      .units-grid { 
+         display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; 
+         flex: 0 1 auto; 
+         max-height: 230px; 
+         min-height: 0; overflow-y: auto; padding-right: 5px; align-content: start;
+      }
+      
+      .units-grid::-webkit-scrollbar { width: 4px; }
+      .units-grid::-webkit-scrollbar-track { background: transparent; }
+      .units-grid::-webkit-scrollbar-thumb { background-color: var(--border-color); border-radius: 4px; }
+      .units-grid::-webkit-scrollbar-thumb:hover { background-color: var(--primary-border); }
+
+      .add-unit-btn {
+          width: 100%; padding: 10px; background: rgba(255,255,255,0.03); 
+          border: 1px dashed var(--border-color); border-radius: var(--border-radius-sm);
+          color: var(--text-muted); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;
+          cursor: pointer; transition: all 0.3s ease;
+          display: flex; align-items: center; justify-content: center; gap: 5px;
+      }
+      .add-unit-btn:hover { color: var(--primary-light); border-color: var(--primary-light); background: rgba(255,255,255,0.05); }
+      
+      .unit-ui-title {
+          font-size: 11px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--primary-light);
+          margin-bottom: 20px; font-weight: 800; text-align: center; text-shadow: 0 0 10px var(--primary-glow); 
+          border-bottom: 1px solid var(--primary-dim); padding-bottom: 12px;
+      }
+      .unit-input-group { margin-bottom: 0 !important; }
+      .unit-input-group label { color: var(--text-muted); font-size: 10px; margin-bottom: 4px; }
+      
+      .side-panel .numeric-input, .side-panel .select-selected { height: 35px !important; padding: 0 10px; font-size: 13px; }
+      .side-panel input { padding: 0 10px; }
+      
+      #unitsPanel .unit-ui-title { margin-bottom: 10px; padding-bottom: 8px; margin-top: 10px; }
+      #unitsPanel .result-box.mini-highlight { margin-top: 10px; }
+      
+      .compact-row { display: flex; gap: 10px; margin-bottom: 10px; }
+      .compact-row .input-group { flex: 1; margin-bottom: 0; }
+
+      /* Achievements Panel */
+      #achievementsPanel .input-group { margin-bottom: 15px; }
+      #achievementsPanel .select-selected { height: 35px; font-size: 13px; }
+      
+      @media (max-width: 768px) {
+        .mastery-layout { grid-template-columns: 1fr; gap: 25px; }
+        .tab-content { padding: 25px; }
+        .input-row-multi { flex-direction: column; gap: 20px; }
+        .potential-grid, .map-section { grid-template-columns: repeat(2, 1fr); gap: 15px; }
+        .potential-grid.global-grid { grid-template-columns: repeat(2, 1fr); } 
+        .result-grid { grid-template-columns: 1fr; }
+        .result-box.highlight { grid-column: auto; margin-top: 0; height: auto; padding: 20px; min-height: 115px; }
+        .result-box.highlight .value { font-size: 24px; white-space: normal; }
+        .input-group label { font-size: 11px; }
+      }
     </style>
 </head>
 <body>
     <div class="bg-glow"></div>
-
     <div class="content-wrapper">
-        <!-- Main Calculator UI -->
         <div class="main-container">
             <nav class="tab-nav">
-                <button class="tab-button" data-tab="rank">Rank</button>
-                <button class="tab-button active" data-tab="mastery">Mastery</button>
+                <button class="tab-button active" data-tab="rank">Rank</button>
+                <button class="tab-button" data-tab="mastery">Mastery</button>
                 <button class="tab-button" data-tab="damage">Damage</button>
                 <button class="tab-button" data-tab="gacha">Gacha</button>
             </nav>
 
-            <div id="rank-content" class="tab-content">
-                <h2>Rank Calculator</h2>
-                <div class="placeholder-text">This feature is currently in development.</div>
-            </div>
-
-            <div id="mastery-content" class="tab-content active">
-              <div class="mastery-layout">
-                <div>
-                    <div class="input-group">
-                        <label for="dmgInput">Mastery per Click</label>
-                        <div class="input-row">
-                            <input id="dmgInput" placeholder="0" type="text" class="numeric-input" />
-                            <div class="custom-select" data-original-id="suffixSelect">
-                                <div class="select-selected"><span>None</span><div class="select-arrow"></div></div>
-                                <div class="select-items select-hide">
-                                    <div data-value="none">None</div><div data-value="K">K</div><div data-value="M">M</div><div data-value="B">B</div><div data-value="T">T</div><div data-value="Qa">Qa</div><div data-value="Qi">Qi</div><div data-value="Sx">Sx</div><div data-value="Sp">Sp</div><div data-value="Oc">Oc</div><div data-value="No">No</div><div data-value="Dc">Dc</div><div data-value="Ud">Ud</div><div data-value="Dd">Dd</div><div data-value="Td">Td</div><div data-value="Qad">Qad</div><div data-value="Qid">Qid</div><div data-value="Sxd">Sxd</div><div data-value="Spd">Spd</div><div data-value="Ocd">Ocd</div><div data-value="Nod">Nod</div><div data-value="Vg">Vg</div><div data-value="Uvg">Uvg</div><div data-value="Dvg">Dvg</div><div data-value="Tvg">Tvg</div>
+            <!-- RANK CALCULATOR -->
+            <div id="rank-content" class="tab-content active">
+                <div class="mastery-layout">
+                    <div>
+                        <div class="input-group">
+                            <label for="rankMpcInput">Mastery per Click</label>
+                            <div class="input-row">
+                                <input id="rankMpcInput" placeholder="0" type="text" class="numeric-input" />
+                                <div class="custom-select" data-id="rankMpcSuffix">
+                                    <div class="select-selected"><span>None</span><div class="select-arrow"></div></div>
+                                    <div class="select-items select-hide"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Click Speed Mode</label>
+                            <div class="mode-toggle">
+                                <button id="rankFastBtn" class="mode-btn active">Fast <span class="small">5.8/s</span></button>
+                                <button id="rankSlowBtn" class="mode-btn">Slow <span class="small">4.5/s</span></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                         <div class="input-group">
+                            <label>Rank Selection</label>
+                            <div class="rank-select-row">
+                                <div class="custom-select compact" data-id="currentRankSelect">
+                                    <div class="select-selected"><span>Rank 0</span><div class="select-arrow"></div></div>
+                                    <div class="select-items select-hide" id="currentRankOptions"></div>
+                                </div>
+                                <div class="rank-arrow">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                                </div>
+                                <div class="custom-select compact" data-id="targetRankSelect">
+                                    <div class="select-selected"><span>Rank 1</span><div class="select-arrow"></div></div>
+                                    <div class="select-items select-hide" id="targetRankOptions"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label for="rankCurrentMasteryInput">Current Mastery</label>
+                            <div class="input-row">
+                                <input id="rankCurrentMasteryInput" placeholder="0" type="text" class="numeric-input" />
+                                <div class="custom-select" data-id="rankCurrentMasterySuffix">
+                                    <div class="select-selected"><span>None</span><div class="select-arrow"></div></div>
+                                    <div class="select-items select-hide"></div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="input-group">
-                        <label>Click Speed Mode</label>
-                        <div class="mode-toggle">
-                            <button id="fastBtn" class="mode-btn active">Fast <span class="small">5.8/s</span></button>
-                            <button id="slowBtn" class="mode-btn">Slow <span class="small">4.5/s</span></button>
+                </div>
+                <div class="result-section">
+                    <div class="result-grid">
+                        <div class="result-box"><div id="rankMpsResult" class="value">--</div><div class="label">Mastery Per Second</div></div>
+                        <div class="result-box"><div id="rankCostResult" class="value">--</div><div class="label">Rank Up Cost</div></div>
+                        <div class="result-box"><div id="rankCostRemainingResult" class="value">--</div><div class="label">Cost Remaining</div></div>
+                        <div class="result-box highlight">
+                            <div id="rankTimeResult" class="value">--</div><div class="label">Time to Rank Up</div>
+                            <div class="rank-progress-container">
+                                <div class="rank-progress-track"><div id="rankProgressBar" class="rank-progress-fill"></div></div>
+                                <div id="rankPercentLabel" class="rank-progress-text">0%</div>
+                            </div>
                         </div>
                     </div>
                 </div>
-                
-                <div>
-                    <div class="input-group">
-                        <label for="currentMasteryInput">Current Mastery (Optional)</label>
-                        <div class="input-row">
-                            <input id="currentMasteryInput" placeholder="0" type="text" class="numeric-input" />
-                            <div class="custom-select" data-original-id="currentMasterySuffixSelect">
-                                <div class="select-selected"><span>None</span><div class="select-arrow"></div></div>
-                                <div class="select-items select-hide">
-                                    <div data-value="none">None</div><div data-value="K">K</div><div data-value="M">M</div><div data-value="B">B</div><div data-value="T">T</div><div data-value="Qa">Qa</div><div data-value="Qi">Qi</div><div data-value="Sx">Sx</div><div data-value="Sp">Sp</div><div data-value="Oc">Oc</div><div data-value="No">No</div><div data-value="Dc">Dc</div><div data-value="Ud">Ud</div><div data-value="Dd">Dd</div><div data-value="Td">Td</div><div data-value="Qad">Qad</div><div data-value="Qid">Qid</div><div data-value="Sxd">Sxd</div><div data-value="Spd">Spd</div><div data-value="Ocd">Ocd</div><div data-value="Nod">Nod</div><div data-value="Vg">Vg</div><div data-value="Uvg">Uvg</div><div data-value="Dvg">Dvg</div><div data-value="Tvg">Tvg</div>
+            </div>
+
+            <!-- MASTERY CALCULATOR -->
+            <div id="mastery-content" class="tab-content">
+                <!-- Main View Wrapper -->
+                <div id="mastery-main-view">
+                    <div class="mastery-layout">
+                        <div>
+                            <div class="input-group">
+                                <label for="dmgInput">Mastery per Click</label>
+                                <div class="input-row">
+                                    <input id="dmgInput" placeholder="0" type="text" class="numeric-input" />
+                                    <div class="custom-select" data-id="suffixSelect">
+                                        <div class="select-selected"><span>None</span><div class="select-arrow"></div></div>
+                                        <div class="select-items select-hide"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <label>Click Speed Mode</label>
+                                <div class="mode-toggle">
+                                    <button id="fastBtn" class="mode-btn active">Fast <span class="small">5.8/s</span></button>
+                                    <button id="slowBtn" class="mode-btn">Slow <span class="small">4.5/s</span></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="input-group">
+                                <label for="currentMasteryInput">
+                                    <span>Current Mastery</span>
+                                    <span id="btnOpenPotential" class="mini-link-btn">Check Potential &rarr;</span>
+                                </label>
+                                <div class="input-row">
+                                    <input id="currentMasteryInput" placeholder="0" type="text" class="numeric-input" />
+                                    <div class="custom-select" data-id="currentMasterySuffixSelect">
+                                        <div class="select-selected"><span>None</span><div class="select-arrow"></div></div>
+                                        <div class="select-items select-hide"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <label>Time Duration (D:H:M)</label>
+                                <div class="time-input-group">
+                                    <div><input id="dayInput" type="number" value="0" min="0" class="numeric-input" /><div class="time-label">Days</div></div>
+                                    <div><input id="hourInput" type="number" value="0" min="0" class="numeric-input" /><div class="time-label">Hours</div></div>
+                                    <div><input id="minuteInput" type="number" value="0" min="0" class="numeric-input" /><div class="time-label">Minutes</div></div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    
-                    <div class="input-group">
-                        <label>Time Duration (D:H:M)</label>
-                        <div class="time-input-group">
-                            <div><input id="dayInput" type="number" value="0" min="0" placeholder="0" class="numeric-input" /><div class="time-label">Days</div></div>
-                            <div><input id="hourInput" type="number" value="0" min="0" placeholder="0" class="numeric-input" /><div class="time-label">Hours</div></div>
-                            <div><input id="minuteInput" type="number" value="0" min="0" placeholder="0" class="numeric-input" /><div class="time-label">Minutes</div></div>
+                    <div class="result-section">
+                        <div class="result-grid">
+                            <div class="result-box"><div id="resultBox" class="value">--</div><div class="label">Mastery Per Second</div></div>
+                            <div class="result-box"><div id="perHourResult" class="value">--</div><div class="label">Mastery Per Hour</div></div>
+                            <div class="result-box"><div id="perDayResult" class="value">--</div><div class="label">Mastery Per Day</div></div>
+                            <div class="result-box highlight"><div id="totalMasteryResult" class="value">--</div><div class="label">Total Mastery After Duration</div></div>
                         </div>
                     </div>
                 </div>
-              </div>
 
-              <div class="result-section">
-                <div class="result-grid">
-                    <div class="result-box">
-                        <div id="resultBox" class="value">--</div>
-                        <div class="label">Mastery Per Second</div>
+                <!-- Sub View Wrapper -->
+                <div id="mastery-potential-view" style="display: none;">
+                    <div style="margin-bottom: 20px; margin-top: -20px;">
+                        <button id="btnBackPotential" class="back-btn" style="margin-bottom:0;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                            Back to Calculator
+                        </button>
                     </div>
-                    <div class="result-box">
-                        <div id="perHourResult" class="value">--</div>
-                        <div class="label">Mastery Per Hour</div>
+
+                    <!-- 1. Global Stats Grid (Top, always visible) -->
+                    <div class="potential-grid global-grid">
+                        <!-- Column 1: Rank + Toggle -->
+                        <div>
+                            <div class="input-group" style="margin-bottom:0;">
+                                <label>Rank</label>
+                                <div class="custom-select full-width" data-id="potRankSelect">
+                                    <div class="select-selected"><span>Rank 0</span><div class="select-arrow"></div></div>
+                                    <div class="select-items select-hide" id="potRankOptions"></div>
+                                </div>
+                                 <!-- Moved 2X TOGGLE HERE -->
+                                <div class="mode-toggle" style="margin-top: 8px;">
+                                    <button id="pot2xBtn" class="mode-btn">2x Mastery</button>
+                                    <button id="potNo2xBtn" class="mode-btn active">1x Mastery</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Column 2: Yen Upgrade + Shinobi Raid -->
+                        <div style="display: flex; flex-direction: column; gap: 15px;">
+                            <!-- Yen -->
+                            <div class="input-group" style="margin-bottom:0;">
+                                <label>Yen Upgrade (%)</label>
+                                <input id="potDungeonCoinInput" placeholder="0" value="0" type="number" class="numeric-input" />
+                            </div>
+                            <!-- Shinobi Raid (Global) -->
+                            <div class="input-group" style="margin-bottom:0;">
+                                <label>Shinobi Raid</label>
+                                <div class="custom-select full-width" data-id="potShinobiRaidSelect">
+                                    <div class="select-selected"><span>None (+0%)</span><div class="select-arrow"></div></div>
+                                    <div class="select-items select-hide" id="potShinobiRaidOptions"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Column 3: Token Upgrade + Dungeon Gacha -->
+                        <div style="display: flex; flex-direction: column; gap: 15px;">
+                            <!-- Token -->
+                            <div class="input-group" style="margin-bottom:0;">
+                                <label>Token Upgrade (%)</label>
+                                <input id="potDungeonCurrencyInput" placeholder="0" value="0" type="number" class="numeric-input" />
+                            </div>
+                            <!-- Dungeon Gacha (Global) -->
+                            <div class="input-group" style="margin-bottom:0;">
+                                <label>Dungeon Gacha</label>
+                                <div class="custom-select full-width" data-id="potDungeonSelect">
+                                    <div class="select-selected"><span>None (+0%)</span><div class="select-arrow"></div></div>
+                                    <div class="select-items select-hide" id="potDungeonOptions"></div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="result-box">
-                        <div id="perDayResult" class="value">--</div>
-                        <div class="label">Mastery Per Day</div>
+
+                    <!-- 2. Centered Map Selector -->
+                    <div class="map-selector-container">
+                        <label>Map Selection</label>
+                        <div class="custom-select" style="width: 250px;" data-id="potMapSelect">
+                            <div class="select-selected"><span>Shinobi Village</span><div class="select-arrow"></div></div>
+                            <div class="select-items select-hide" id="potMapOptions"></div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Dynamic Map Sections (Appears underneath selector) -->
+                    
+                    <!-- Shinobi Village -->
+                    <div id="map-ShinobiVillage" class="map-section active">
+                        <div class="input-group" style="margin-bottom:0;">
+                            <label>Bijuu Gacha</label>
+                            <div class="custom-select full-width" data-id="potBijuuSelect">
+                                <div class="select-selected"><span>None (+0%)</span><div class="select-arrow"></div></div>
+                                <div class="select-items select-hide" id="potBijuuOptions"></div>
+                            </div>
+                        </div>
+                        <div class="input-group" style="margin-bottom:0;">
+                            <label class="magic-eye-label-fix">
+                                <span>Magic Eyes</span>
+                                <div class="level-input-wrapper">
+                                    <span class="level-label">Lvl</span>
+                                    <input id="potMagicEyeLevel" class="compact-input" type="number" value="0" min="0" max="50" placeholder="0" />
+                                </div>
+                            </label>
+                            <div class="custom-select full-width" data-id="potMagicEyeSelect">
+                                <div class="select-selected"><span>None (+0%)</span><div class="select-arrow"></div></div>
+                                <div class="select-items select-hide" id="potMagicEyeOptions"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Namek Planet -->
+                    <div id="map-NamekPlanet" class="map-section">
+                        <div class="input-group" style="margin-bottom:0;">
+                            <label>Race Gacha</label>
+                            <div class="custom-select full-width" data-id="potRaceSelect">
+                                <div class="select-selected"><span>None (+0%)</span><div class="select-arrow"></div></div>
+                                <div class="select-items select-hide" id="potRaceOptions"></div>
+                            </div>
+                        </div>
+                        <div class="input-group" style="margin-bottom:0;">
+                            <label>Sayajin Gacha</label>
+                            <div class="custom-select full-width" data-id="potSayajinSelect">
+                                <div class="select-selected"><span>None (+0%)</span><div class="select-arrow"></div></div>
+                                <div class="select-items select-hide" id="potSayajinOptions"></div>
+                            </div>
+                        </div>
+                        <!-- Moved Titles Here -->
+                        <div class="input-group" style="margin-bottom:0;">
+                            <label>Titles</label>
+                            <div class="custom-select full-width" data-id="potTitlesSelect">
+                                <div class="select-selected"><span>None (+0%)</span><div class="select-arrow"></div></div>
+                                <div class="select-items select-hide" id="potTitlesOptions"></div>
+                            </div>
+                        </div>
+                        <!-- Moved Wise Trainer Here -->
+                        <div class="input-group" style="margin-bottom:0;">
+                            <label>Wise Trainer (%)</label>
+                            <input id="potWiseTrainerInput" placeholder="0" value="0" type="number" class="numeric-input" />
+                        </div>
+                    </div>
+
+                    <!-- Desert Land -->
+                    <div id="map-DesertLand" class="map-section">
+                        <div class="input-group" style="margin-bottom:0;">
+                            <label>Haki Gacha</label>
+                            <div class="custom-select full-width" data-id="potHakiSelect">
+                                <div class="select-selected"><span>None (+0%)</span><div class="select-arrow"></div></div>
+                                <div class="select-items select-hide" id="potHakiOptions"></div>
+                            </div>
+                        </div>
+                        <div class="input-group" style="margin-bottom:0;">
+                            <label>Fruits Gacha</label>
+                            <div class="custom-select full-width" data-id="potFruitsSelect">
+                                <div class="select-selected"><span>None (+0%)</span><div class="select-arrow"></div></div>
+                                <div class="select-items select-hide" id="potFruitsOptions"></div>
+                            </div>
+                        </div>
+                         <div class="input-group" style="margin-bottom:0;">
+                            <label>Pirate Trainer (%)</label>
+                            <input id="potPirateTrainerInput" placeholder="0" value="0" type="number" class="numeric-input" />
+                        </div>
+                    </div>
+
+                    <!-- Demon Land -->
+                    <div id="map-DemonLand" class="map-section">
+                        <div class="input-group" style="margin-bottom:0;">
+                            <label>Breathing Gacha</label>
+                            <div class="custom-select full-width" data-id="potBreathingSelect">
+                                <div class="select-selected"><span>None (+0%)</span><div class="select-arrow"></div></div>
+                                <div class="select-items select-hide" id="potBreathingOptions"></div>
+                            </div>
+                        </div>
+                        <div class="input-group" style="margin-bottom:0;">
+                            <label>Breath Trainer (%)</label>
+                            <input id="potBreathTrainerInput" placeholder="0" value="0" type="number" class="numeric-input" />
+                        </div>
+                        <div class="input-group" style="margin-bottom:0;">
+                            <label class="magic-eye-label-fix">
+                                <span>Demon Art</span>
+                                <div class="level-input-wrapper">
+                                    <span class="level-label">Lvl</span>
+                                    <input id="potDemonArtLevel" class="compact-input" type="number" value="0" min="0" max="50" placeholder="0" />
+                                </div>
+                            </label>
+                            <div class="custom-select full-width" data-id="potDemonArtSelect">
+                                <div class="select-selected"><span>None (+0%)</span><div class="select-arrow"></div></div>
+                                <div class="select-items select-hide" id="potDemonArtOptions"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Paradis -->
+                    <div id="map-Paradis" class="map-section">
+                         <div class="input-group" style="margin-bottom:0;">
+                            <label>Titan Gacha</label>
+                            <div class="custom-select full-width" data-id="potTitanSelect">
+                                <div class="select-selected"><span>None (+0%)</span><div class="select-arrow"></div></div>
+                                <div class="select-items select-hide" id="potTitanOptions"></div>
+                            </div>
+                        </div>
+                        <div class="input-group" style="margin-bottom:0;">
+                            <label>Leve Trainer (%)</label>
+                            <input id="potLeveTrainerInput" placeholder="0" value="0" type="number" class="numeric-input" />
+                        </div>
+                        <!-- Moved Organization Here -->
+                         <div class="input-group" style="margin-bottom:0;">
+                            <label>Organization</label>
+                            <div class="custom-select full-width" data-id="potOrgSelect">
+                                <div class="select-selected"><span>None (+0%)</span><div class="select-arrow"></div></div>
+                                <div class="select-items select-hide" id="potOrgOptions"></div>
+                            </div>
+                        </div>
                     </div>
                     
-                    <div class="result-box highlight">
-                        <div id="totalMasteryResult" class="value">--</div>
-                        <div class="label">Total Mastery After Duration</div>
+                    <!-- Potential Result -->
+                    <div class="result-section">
+                        <div class="result-grid" style="grid-template-columns: 1fr;"> 
+                            <div class="result-box highlight">
+                                <div id="potMpcResult" class="value">--</div>
+                                <div class="label">Potential Mastery Per Click</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-              </div>
             </div>
 
+            <!-- DAMAGE CALCULATOR -->
             <div id="damage-content" class="tab-content">
                  <div class="mastery-layout">
                     <div>
@@ -547,26 +712,20 @@
                                     <label for="damageDmgInput">Damage per Click</label>
                                     <div class="input-row">
                                         <input id="damageDmgInput" placeholder="0" type="text" class="numeric-input" />
-                                        <div class="custom-select" data-original-id="damageSuffixSelect">
+                                        <div class="custom-select" data-id="damageSuffixSelect">
                                             <div class="select-selected"><span>None</span><div class="select-arrow"></div></div>
-                                            <div class="select-items select-hide">
-                                                <div data-value="none">None</div><div data-value="K">K</div><div data-value="M">M</div><div data-value="B">B</div><div data-value="T">T</div><div data-value="Qa">Qa</div><div data-value="Qi">Qi</div><div data-value="Sx">Sx</div><div data-value="Sp">Sp</div><div data-value="Oc">Oc</div><div data-value="No">No</div><div data-value="Dc">Dc</div><div data-value="Ud">Ud</div><div data-value="Dd">Dd</div><div data-value="Td">Td</div><div data-value="Qad">Qad</div><div data-value="Qid">Qid</div><div data-value="Sxd">Sxd</div><div data-value="Spd">Spd</div><div data-value="Ocd">Ocd</div><div data-value="Nod">Nod</div><div data-value="Vg">Vg</div><div data-value="Uvg">Uvg</div><div data-value="Dvg">Dvg</div><div data-value="Tvg">Tvg</div>
-                                            </div>
+                                            <div class="select-items select-hide"></div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            
                             <div class="input-col" style="flex: 1;">
                                 <div class="input-group">
                                     <label for="critInput">Crit %</label>
-                                    <div class="input-row">
-                                        <input id="critInput" placeholder="0" type="number" min="0" max="100" class="numeric-input" style="text-align: center;" />
-                                    </div>
+                                    <div class="input-row"><input id="critInput" placeholder="0" type="number" min="0" max="100" class="numeric-input" style="text-align: center;" /></div>
                                 </div>
                             </div>
                         </div>
-
                         <div class="input-group">
                             <label>Click Speed Mode</label>
                             <div class="mode-toggle">
@@ -575,651 +734,1018 @@
                             </div>
                         </div>
                     </div>
-                    
                     <div>
                         <div class="input-row-multi">
                              <div class="input-col">
                                 <div class="input-group">
                                     <label>Map Selection</label>
-                                    <div class="custom-select full-width" data-original-id="mapSelect">
+                                    <div class="custom-select full-width" data-id="mapSelect">
                                         <div class="select-selected"><span>Select Map</span><div class="select-arrow"></div></div>
                                         <div class="select-items select-hide" id="mapOptions"></div>
                                     </div>
                                 </div>
                             </div>
-                            
                             <div class="input-col">
                                  <div class="input-group">
                                     <label>Mob Selection</label>
-                                    <div class="custom-select full-width" data-original-id="mobSelect">
+                                    <div class="custom-select full-width" data-id="mobSelect">
                                         <div class="select-selected"><span>Select Mob</span><div class="select-arrow"></div></div>
-                                        <div class="select-items select-hide" id="mobOptions">
-                                            <div data-value="none">Select Map First</div>
-                                        </div>
+                                        <div class="select-items select-hide" id="mobOptions"><div data-value="none">Select Map First</div></div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-
                         <div class="input-row-multi">
                             <div class="input-col" style="flex: 2;">
                                 <div class="input-group" style="margin-bottom: 0;">
                                     <label>Selected Mob HP</label>
                                     <div class="result-box mini-highlight" style="padding: 10px;">
-                                        <div id="mobHpResultBox" class="value" style="font-size: 20px;">--</div>
-                                        <div class="label">Mob HP</div>
+                                        <div id="mobHpResultBox" class="value" style="font-size: 20px;">--</div><div class="label">Mob HP</div>
                                     </div>
                                 </div>
                             </div>
                             <div class="input-col" style="flex: 1;">
                                  <div class="input-group" style="margin-bottom: 0;">
                                     <label>Mob Count</label>
-                                    <div class="custom-select full-width" data-original-id="mobCountSelect">
+                                    <div class="custom-select full-width" data-id="mobCountSelect">
                                         <div class="select-selected"><span>1</span><div class="select-arrow"></div></div>
-                                        <div class="select-items select-hide" id="mobCountOptions">
-                                            </div>
+                                        <div class="select-items select-hide" id="mobCountOptions"></div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-
                 <div class="result-section">
                     <div class="result-grid">
-                        <div class="result-box">
-                            <div id="dmgPerSecResult" class="value">--</div>
-                            <div class="label">Damage Per Second</div>
-                        </div>
-                        <div class="result-box">
-                            <div id="mobsPerMinuteResult" class="value">--</div>
-                            <div class="label">Mobs Killed Per Minute</div>
-                        </div>
-                        <div class="result-box">
-                            <div id="mobsPerHourResult" class="value">--</div>
-                            <div class="label">Mobs Killed Per Hour</div>
-                        </div>
-                        
-                        <div class="result-box highlight">
-                            <div id="timeToKillResult" class="value">Select Mob</div>
-                            <div class="label">Time to Kill One Mob</div>
-                        </div>
+                        <div class="result-box"><div id="dmgPerSecResult" class="value">--</div><div class="label">Damage Per Second</div></div>
+                        <div class="result-box"><div id="mobsPerMinuteResult" class="value">--</div><div class="label">Mobs Killed Per Minute</div></div>
+                        <div class="result-box"><div id="mobsPerHourResult" class="value">--</div><div class="label">Mobs Killed Per Hour</div></div>
+                        <div class="result-box highlight"><div id="timeToKillResult" class="value">Select Mob</div><div class="label">Time to Kill One Mob</div></div>
                     </div>
                 </div>
             </div>
 
+            <!-- GACHA CALCULATOR -->
             <div id="gacha-content" class="tab-content">
                 <h2>Gacha Calculator</h2>
                 <div class="placeholder-text">This feature is currently in development.</div>
             </div>
         </div>
 
-        <!-- Right Side Panel for Drops -->
-        <div id="sidePanel" class="side-panel drop-theme">
-            <h3 class="sub-ui-title">Drops Calculator</h3>
-            
-            <div class="input-group">
-                <label>Drop Multiplier (%)</label>
-                <input id="dropMultiInput" type="number" placeholder="100" value="100" min="0" class="numeric-input" style="text-align:center;" />
+        <!-- LEFT COLUMN WRAPPER -->
+        <div class="side-column left-aligned">
+            <!-- SIDE PANEL: PLAYER STATS -->
+            <div id="statsPanel" class="side-panel">
+                <h3 class="unit-ui-title">Player Stats</h3>
+                
+                <div class="compact-row">
+                    <div class="input-group">
+                        <label>Weapon</label>
+                        <input id="itemWeaponInput" type="number" class="numeric-input" placeholder="1" value="1" style="text-align:center;">
+                    </div>
+                    <div class="input-group">
+                        <label>Accessory (%)</label>
+                        <input id="itemAccessoryInput" type="number" class="numeric-input" placeholder="0" value="0" style="text-align:center;">
+                    </div>
+                </div>
+
+                <div class="compact-row">
+                    <div class="input-group">
+                        <label>Stats (%)</label>
+                        <input id="playerStatsInput" type="number" class="numeric-input" placeholder="0" value="0" style="text-align:center;">
+                    </div>
+                    <div class="input-group">
+                        <label>Aura (%)</label>
+                        <input id="playerAuraInput" type="number" class="numeric-input" placeholder="0" value="0" style="text-align:center;">
+                    </div>
+                </div>
+
+                <div class="compact-row">
+                    <div class="input-group">
+                        <label style="justify-content: center;">Avatar (%)</label>
+                        <input id="playerAvatarInput" type="number" class="numeric-input" placeholder="0" value="0" style="text-align:center;">
+                    </div>
+                </div>
             </div>
 
-            <div class="input-group">
-                <label>Drop Chance (%)</label>
-                <input id="dropChanceInput" type="number" placeholder="10" value="10" min="0" max="100" class="numeric-input" style="text-align:center;" />
-            </div>
-
-            <div class="input-group">
-                <label>Drop Amount</label>
-                <input id="dropAmountInput" type="number" placeholder="5" value="5" min="0" class="numeric-input" style="text-align:center;" />
-            </div>
-
-            <div class="result-box mini-highlight">
-                <div id="dropsPerMinuteResult" class="value">--</div>
-                <div class="label">Drops Per Minute</div>
+            <!-- SIDE PANEL: UNITS (Now Left - Below Stats) -->
+            <div id="unitsPanel" class="side-panel">
+                <h3 class="unit-ui-title">Units</h3>
+                <div id="unitInputsContainer" class="units-grid">
+                    <!-- Inputs generated via JS -->
+                </div>
+                <button id="addUnitBtn" class="add-unit-btn">+ Add Unit</button>
+                <div class="result-box mini-highlight"><div id="unitsTotalResult" class="value">0%</div><div class="label">Total Unit Bonus</div></div>
             </div>
         </div>
 
-    </div> <!-- End Content Wrapper -->
+        <!-- RIGHT COLUMN WRAPPER -->
+        <div class="side-column right-aligned">
+            <!-- SIDE PANEL: DROPS -->
+            <div id="sidePanel" class="side-panel drop-theme">
+                <h3 class="sub-ui-title">Drops Calculator</h3>
+                <div class="input-group"><label>Drop Multiplier (%)</label><input id="dropMultiInput" type="number" placeholder="100" value="100" min="0" class="numeric-input" style="text-align:center;" /></div>
+                <div class="input-group"><label>Drop Chance (%)</label><input id="dropChanceInput" type="number" placeholder="10" value="10" min="0" max="100" class="numeric-input" style="text-align:center;" /></div>
+                <div class="input-group"><label>Drop Amount</label><input id="dropAmountInput" type="number" placeholder="5" value="5" min="0" class="numeric-input" style="text-align:center;" /></div>
+                <div class="result-box mini-highlight"><div id="dropsPerMinuteResult" class="value">--</div><div class="label">Drops Per Minute</div></div>
+                <div class="result-box mini-highlight" style="margin-top: 10px;"><div id="dropsPerHourResult" class="value">--</div><div class="label">Drops Per Hour</div></div>
+            </div>
 
-    <div class="footer">
-        Designed & Built by <span style="color:var(--primary-light); font-weight:600;">@xking.</span>
+            <!-- SIDE PANEL: ACHIEVEMENTS (New Right) -->
+            <div id="achievementsPanel" class="side-panel">
+                <h3 class="unit-ui-title">Achievements</h3>
+                <div id="achievementsContainer">
+                    <!-- Dropdowns Generated by JS -->
+                </div>
+            </div>
+        </div>
+
     </div>
 
+    <div class="footer">Designed & Built by <span class="footer-tag">@xking.</span></div>
+    <div class="secret-zone"><div class="secret-popup"><div class="secret-label">Secret Dev</div><div class="secret-name">@xauroraflare</div></div></div>
+
+    <!-- Data Script -->
+    <script src="Data.js"></script>
+
     <script>
-        const themes = {
-            rank: { 
-                primary: '#3b82f6',
-                light: '#60a5fa',
-                border: '#3b82f6',
-                dim: 'rgba(59, 130, 246, 0.15)',
-                glow: 'rgba(59, 130, 246, 0.5)'
-            },
+        // ==========================================
+        // 2. DOM ELEMENTS & STATE
+        // ==========================================
         
-            mastery: { 
-                primary: '#ffffff',
-                light: '#bf00ff',
-                border: '#8700bd',
-                dim: 'rgba(135, 0, 189, 0.3)',
-                glow: 'rgba(163, 0, 222, 0.5)'
-            },
-        
-            damage: {
-                primary: '#ff003c',
-                light: '#ff003c',
-                border: '#c20030',
-                dim: 'rgba(194, 0, 48, 0.25)',
-                glow: 'rgba(194, 0, 48, 0.4)'
-            },
-        
-            gacha: { 
-                primary: '#4ade80',
-                light: '#86efac',
-                border: '#4ade80',
-                dim: 'rgba(74, 222, 128, 0.15)',
-                glow: 'rgba(74, 222, 128, 0.5)'
-            }
+        const dom = {
+            // Rank Tab
+            rankMpc: document.getElementById('rankMpcInput'),
+            rankCur: document.getElementById('rankCurrentMasteryInput'),
+            rankMps: document.getElementById('rankMpsResult'),
+            rankCost: document.getElementById('rankCostResult'),
+            rankRem: document.getElementById('rankCostRemainingResult'),
+            rankTime: document.getElementById('rankTimeResult'),
+            rankBar: document.getElementById('rankProgressBar'),
+            rankPcnt: document.getElementById('rankPercentLabel'),
+            
+            // Mastery Tab
+            dmg: document.getElementById('dmgInput'),
+            masCur: document.getElementById('currentMasteryInput'),
+            masRes: document.getElementById('resultBox'),
+            masHr: document.getElementById('perHourResult'),
+            masDay: document.getElementById('perDayResult'),
+            masTot: document.getElementById('totalMasteryResult'),
+            dInput: document.getElementById('dayInput'),
+            hInput: document.getElementById('hourInput'),
+            mInput: document.getElementById('minuteInput'),
+            
+            // Potential Tab
+            potCoin: document.getElementById('potDungeonCoinInput'),
+            potCurr: document.getElementById('potDungeonCurrencyInput'),
+            potEyeLvl: document.getElementById('potMagicEyeLevel'),
+            potWise: document.getElementById('potWiseTrainerInput'),
+            potPirate: document.getElementById('potPirateTrainerInput'), 
+            potBreathTrainer: document.getElementById('potBreathTrainerInput'), 
+            potDemonArtLvl: document.getElementById('potDemonArtLevel'), 
+            potLeveTrainer: document.getElementById('potLeveTrainerInput'),
+            potRes: document.getElementById('potMpcResult'),
+            
+            // Potential - Units Panel
+            uContainer: document.getElementById('unitInputsContainer'),
+            uAddBtn: document.getElementById('addUnitBtn'),
+            uRes: document.getElementById('unitsTotalResult'),
+            unitsPanel: document.getElementById('unitsPanel'),
+
+            // Potential - Stats Panel
+            statsPanel: document.getElementById('statsPanel'),
+            itemWeapon: document.getElementById('itemWeaponInput'),
+            itemAccessory: document.getElementById('itemAccessoryInput'),
+            playerStats: document.getElementById('playerStatsInput'),
+            playerAura: document.getElementById('playerAuraInput'),
+            playerAvatar: document.getElementById('playerAvatarInput'),
+            
+            // Achievements
+            achievementsPanel: document.getElementById('achievementsPanel'),
+            achieveContainer: document.getElementById('achievementsContainer'),
+
+            // Damage Tab
+            dmgDmg: document.getElementById('damageDmgInput'),
+            crit: document.getElementById('critInput'),
+            mobHp: document.getElementById('mobHpResultBox'),
+            dpsRes: document.getElementById('dmgPerSecResult'),
+            mpmRes: document.getElementById('mobsPerMinuteResult'),
+            mphRes: document.getElementById('mobsPerHourResult'),
+            ttkRes: document.getElementById('timeToKillResult'),
+            
+            // Drops
+            dropAmt: document.getElementById('dropAmountInput'),
+            dropMul: document.getElementById('dropMultiInput'),
+            dropChn: document.getElementById('dropChanceInput'),
+            dropMin: document.getElementById('dropsPerMinuteResult'),
+            dropHr: document.getElementById('dropsPerHourResult'),
+            panel: document.getElementById('sidePanel') // Drops Panel
         };
 
-
-        const gameData = {
-            "Green Valley": [ { name: "Slime", hp: "100" }, { name: "Goblin", hp: "2500" }, { name: "Wolf", hp: "10000" } ],
-            "Dark Forest": [ { name: "Spider", hp: "500000" }, { name: "Orc", hp: "2000000" }, { name: "Troll", hp: "10000000" } ],
-            "Volcano Core": [ { name: "Fire Spirit", hp: "50000000" }, { name: "Magma Golem", hp: "250000000" }, { name: "Dragon", hp: "1000000000" } ],
-            "Frozen Peaks": [ { name: "Ice Bat", hp: "5000000000" }, { name: "Snow Yeti", hp: "25000000000" }, { name: "Frost Wyrm", hp: "100000000000" } ],
-            "Void Dimension": [ { name: "Shadow Fiend", hp: "500000000000" }, { name: "Void Walker", hp: "2500000000000" }, { name: "Eldritch Horror", hp: "10000000000000" } ]
-        };
-
-        const suffixes = { "none": 0, "K": 1, "M": 2, "B": 3, "T": 4, "Qa": 5, "Qi": 6, "Sx": 7, "Sp": 8, "Oc": 9, "No": 10, "Dc": 11, "Ud": 12, "Dd": 13, "Td": 14, "Qad": 15, "Qid": 16, "Sxd": 17, "Spd": 18, "Ocd": 19, "Nod": 20, "Vg": 21, "Uvg": 22, "Dvg": 23, "Tvg": 24 };
-        const suffixList = Object.keys(suffixes).slice(1);
+        const state = { rankCps: 5.8, masteryCps: 5.8, damageCps: 5.8, unitCount: 0, isPotentialOpen: false, potentialMult: 1 };
         
-        function decomposeNumber(numBigInt) {
-            if (numBigInt === 0n) return { val: "", suffix: "none" };
-            let str = numBigInt.toString();
-            let len = str.length;
-            if (len <= 3) return { val: str, suffix: "none" };
+        const suffixMap = suffixList.reduce((acc, v) => ({...acc, [v]: v[0].toUpperCase() + v.slice(1)}), {});
+        const suffixes = { "none": 0 }; 
+        suffixList.forEach((k, i) => suffixes[suffixMap[k]] = i + 1);
+
+        // ==========================================
+        // 3. INITIALIZATION
+        // ==========================================
+
+        document.addEventListener('DOMContentLoaded', () => {
+            setTheme('rank');
+
+            // Initialize Dropdowns
+            initSuffixDropdowns();
+            initRankDropdowns();
+            initMapDropdown();
+            initMobCountDropdown();
+            initPotentialRankDropdown(); 
+            initBijuuDropdown(); 
+            initMagicEyeDropdown(); 
+            initTitlesDropdown();  
+            initRaceDropdown();    
+            initSayajinDropdown(); 
+            initHakiDropdown();    
+            initFruitsDropdown(); 
+            initBreathingDropdown(); 
+            initDemonArtDropdown(); 
+            initOrganizationDropdown(); 
+            initTitanDropdown(); 
+            initShinobiRaidDropdown();
+            initDungeonDropdown();
+            initPotentialMapDropdown();
             
-            let exponent = Math.floor((len - 1) / 3);
-            let suffixIndex = exponent - 1;
+            // Initialize Achievements Dropdowns
+            initAchievementsDropdowns();
+
+            // Setup Custom Select Logic
+            document.querySelectorAll('.custom-select').forEach(setupCustomSelect);
+            document.addEventListener('click', closeAllSelects);
             
-            if (suffixIndex >= suffixList.length) {
-                return { val: str, suffix: "none" }; 
-            }
-            let suffixKey = suffixList[suffixIndex];
-            let divisor = 10n ** BigInt(exponent * 3);
-            let scaled = (numBigInt * 100n) / divisor;
-            let valFloat = Number(scaled) / 100;
-            return { val: valFloat.toString(), suffix: suffixKey };
-        }
+            // Setup Speed Buttons
+            setupSpeedToggle('fastBtn', 'slowBtn', 'masteryCps', updateMastery);
+            setupSpeedToggle('dmgFastBtn', 'dmgSlowBtn', 'damageCps', updateDamage);
+            setupSpeedToggle('rankFastBtn', 'rankSlowBtn', 'rankCps', updateRank);
+            
+            // Setup Multiplier Toggle Button
+            setupMultiplierToggle('pot2xBtn', 'potNo2xBtn', 'potentialMult', updatePotential);
 
-        const tabs = document.querySelectorAll('.tab-button');
-        const tabContents = document.querySelectorAll('.tab-content');
-        const root = document.documentElement;
-        const sidePanel = document.getElementById('sidePanel');
+            // Bind Input Events
+            const inputs = [dom.dmg, dom.masCur, dom.dInput, dom.hInput, dom.mInput, dom.dmgDmg, dom.crit, dom.dropAmt, dom.dropMul, dom.dropChn, dom.rankMpc, dom.rankCur];
+            inputs.forEach(el => el.addEventListener('input', updateAll));
 
-        function setTheme(themeName) {
-            const theme = themes[themeName];
-            if (!theme) return;
-            root.style.setProperty('--primary', theme.primary);
-            root.style.setProperty('--primary-light', theme.light);
-            root.style.setProperty('--primary-border', theme.border);
-            root.style.setProperty('--primary-dim', theme.dim);
-            root.style.setProperty('--primary-glow', theme.glow);
-        }
+            // Setup Smart Inputs
+            setupSuffixInput(dom.dmg, 'suffixSelect', updateMastery);
+            setupSuffixInput(dom.masCur, 'currentMasterySuffixSelect', updateMastery);
+            setupSuffixInput(dom.dmgDmg, 'damageSuffixSelect', updateDamage);
+            setupSuffixInput(dom.rankMpc, 'rankMpcSuffix', updateRank);
+            setupSuffixInput(dom.rankCur, 'rankCurrentMasterySuffix', updateRank);
 
-        tabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                tabs.forEach(item => item.classList.remove('active'));
-                tabContents.forEach(content => content.classList.remove('active'));
-                tab.classList.add('active');
-                const targetTab = tab.dataset.tab;
-                document.getElementById(targetTab + '-content').classList.add('active');
-                setTheme(targetTab);
+            // Potential View Toggle logic
+            const btnOpenPot = document.getElementById('btnOpenPotential');
+            const btnBackPot = document.getElementById('btnBackPotential');
+            const masterMain = document.getElementById('mastery-main-view');
+            const masterSub = document.getElementById('mastery-potential-view');
+
+            btnOpenPot.addEventListener('click', (e) => {
+                e.preventDefault(); 
+                state.isPotentialOpen = true; 
+                masterMain.style.display = 'none';
+                masterSub.style.display = 'block'; 
                 
-                // Toggle Side Panel Visibility
-                if (targetTab === 'damage') {
-                    sidePanel.classList.add('active');
+                // Show Potential Panels (Stats, Units, Achievements)
+                dom.unitsPanel.classList.add('active'); 
+                dom.statsPanel.classList.add('active');
+                dom.achievementsPanel.classList.add('active');
+                
+                // Hide Drops Panel (if visible)
+                dom.panel.classList.remove('active');
+
+                document.querySelectorAll('.custom-select').forEach(el => fitTextToContainer(el.querySelector('.select-selected span')));
+            });
+            btnBackPot.addEventListener('click', () => {
+                state.isPotentialOpen = false;
+                masterSub.style.display = 'none';
+                masterMain.style.display = 'block';
+                
+                // Hide Potential Panels
+                dom.unitsPanel.classList.remove('active'); 
+                dom.statsPanel.classList.remove('active'); 
+                dom.achievementsPanel.classList.remove('active');
+            });
+
+            // Potential Input Logic
+            [dom.potCoin, dom.potCurr, dom.potEyeLvl, dom.potWise, dom.potPirate, dom.potBreathTrainer, dom.potDemonArtLvl, dom.potLeveTrainer, dom.itemWeapon, dom.itemAccessory, dom.playerStats, dom.playerAura, dom.playerAvatar].forEach(el => {
+                el.addEventListener('input', updatePotential);
+            });
+
+            // Unit Panel Logic
+            for(let i=0; i<8; i++) addUnitInput();
+            
+            dom.uAddBtn.addEventListener('click', () => {
+                if (state.unitCount >= 16) return;
+                addUnitInput();
+                if (state.unitCount < 16) addUnitInput();
+                dom.uContainer.scrollTop = 0;
+                updateAddButtonState();
+            });
+
+            updateAll();
+            document.querySelectorAll('.custom-select').forEach(el => fitTextToContainer(el.querySelector('.select-selected span')));
+        });
+
+        // ==========================================
+        // 4. CALCULATION LOGIC
+        // ==========================================
+
+        function addUnitInput() {
+            if (state.unitCount >= 16) return;
+            state.unitCount++;
+            const div = document.createElement('div');
+            div.className = 'input-group unit-input-group';
+            div.innerHTML = `<label>Unit ${state.unitCount} (%)</label><input type="number" class="numeric-input unit-input" placeholder="0" value="0">`;
+            const input = div.querySelector('input');
+            input.addEventListener('input', updatePotential);
+            dom.uContainer.appendChild(div);
+        }
+
+        function updateAddButtonState() {
+             if (state.unitCount >= 16) {
+                dom.uAddBtn.textContent = "Max Limit Reached (16)";
+                dom.uAddBtn.style.opacity = "0.5";
+                dom.uAddBtn.style.cursor = "not-allowed";
+            }
+        }
+
+        function updateMastery() {
+            const base = parseInput(dom.dmg, 'suffixSelect');
+            const cur = parseInput(dom.masCur, 'currentMasterySuffixSelect');
+            let dps = (base > 0n) ? base * BigInt(Math.round(state.masteryCps * 100)) / 100n : 0n;
+            
+            dom.masRes.innerHTML = dps ? formatNumber(dps) : "--";
+            dom.masHr.innerHTML = dps ? formatNumber(dps * 3600n) : "--";
+            dom.masDay.innerHTML = dps ? formatNumber(dps * 86400n) : "--";
+            
+            const sec = BigInt((parseInt(dom.dInput.value)||0)*86400 + (parseInt(dom.hInput.value)||0)*3600 + (parseInt(dom.mInput.value)||0)*60);
+            dom.masTot.innerHTML = (base > 0n || cur > 0n) ? formatNumber(cur + (dps * sec)) : "--";
+        }
+
+        function updatePotential() {
+            // Weapon Item (Base Value)
+            const wVal = parseFloat(dom.itemWeapon.value);
+            const safeWVal = (isNaN(wVal) || wVal === 0) ? 1 : wVal;
+            const base = BigInt(Math.round(safeWVal * 100)); 
+
+            const rankSel = document.querySelector('[data-id="potRankSelect"]');
+            const rank = BigInt(rankSel.getAttribute('data-value') || 0);
+            
+            // --- RANK MODIFICATION ---
+            // Rank 0 = +0%, Rank 1 = +100%, Rank 2 = +200%, Rank 3 = +400%...
+            let rankBonus = 0n;
+            if (rank > 0n) {
+                rankBonus = 100n * (2n ** (rank - 1n));
+            }
+            const rankFactor = 100n + rankBonus;
+
+            // Factors (Value + 100)
+            const coinFactor = BigInt((parseInt(dom.potCoin.value) || 0) + 100);
+            const currFactor = BigInt((parseInt(dom.potCurr.value) || 0) + 100);
+            const wiseFactor = BigInt((parseInt(dom.potWise.value) || 0) + 100);
+            const pirateFactor = BigInt((parseInt(dom.potPirate.value) || 0) + 100);
+            const breathTrainerFactor = BigInt((parseInt(dom.potBreathTrainer.value) || 0) + 100);
+            const leveTrainerFactor = BigInt((parseInt(dom.potLeveTrainer.value) || 0) + 100);
+            const itemAccessoryFactor = BigInt((parseInt(dom.itemAccessory.value) || 0) + 100);
+            const playerStatsFactor = BigInt((parseInt(dom.playerStats.value) || 0) + 100);
+            const auraFactor = BigInt((parseInt(dom.playerAura.value) || 0) + 100);
+            const avatarFactor = BigInt((parseInt(dom.playerAvatar.value) || 0) + 100);
+            
+            // Dropdown Factors
+            const bijuuFactor = BigInt(document.querySelector('[data-id="potBijuuSelect"]').getAttribute('data-value') || 100);
+            const titlesFactor = BigInt(document.querySelector('[data-id="potTitlesSelect"]').getAttribute('data-value') || 100);
+            const raceFactor = BigInt(document.querySelector('[data-id="potRaceSelect"]').getAttribute('data-value') || 100);
+            const sayajinFactor = BigInt(document.querySelector('[data-id="potSayajinSelect"]').getAttribute('data-value') || 100);
+            const hakiFactor = BigInt(document.querySelector('[data-id="potHakiSelect"]').getAttribute('data-value') || 100);
+            const fruitFactor = BigInt(document.querySelector('[data-id="potFruitsSelect"]').getAttribute('data-value') || 100);
+            const breathingFactor = BigInt(document.querySelector('[data-id="potBreathingSelect"]').getAttribute('data-value') || 100);
+            const orgFactor = BigInt(document.querySelector('[data-id="potOrgSelect"]').getAttribute('data-value') || 100);
+            const titanFactor = BigInt(document.querySelector('[data-id="potTitanSelect"]').getAttribute('data-value') || 100);
+            const shinobiRaidFactor = BigInt(document.querySelector('[data-id="potShinobiRaidSelect"]').getAttribute('data-value') || 100);
+            const dungeonFactor = BigInt(document.querySelector('[data-id="potDungeonSelect"]').getAttribute('data-value') || 100);
+
+            // Achievement Factors Calculation
+            let achieveTotalPercent = 0;
+            for(let i=1; i<=6; i++){
+                const achSel = document.querySelector(`[data-id="achieveSelect${i}"]`);
+                if(achSel) {
+                    const val = parseInt(achSel.getAttribute('data-value')) || 100;
+                    achieveTotalPercent += (val - 100);
+                }
+            }
+            const achievementFactor = BigInt(Math.round(100 + achieveTotalPercent));
+
+            // Special Logic (Eyes/Arts)
+            const eyeSel = document.querySelector('[data-id="potMagicEyeSelect"]');
+            const eyeBase = parseFloat(eyeSel.getAttribute('data-value')) || 0;
+            let eyeLvl = parseInt(dom.potEyeLvl.value);
+            if (eyeLvl > 50) { eyeLvl = 50; dom.potEyeLvl.value = 50; }
+            if (isNaN(eyeLvl) || eyeLvl < 0) eyeLvl = 0;
+            const eyePercentBonus = eyeBase + (eyeBase * 0.1 * eyeLvl);
+            const eyeFactor = BigInt(Math.round(100 + eyePercentBonus));
+            // Update Label
+            const eyeObj = magicEyeData.find(e => e.base === eyeBase);
+            if (eyeObj) {
+                const cleanName = eyeObj.name.split(' (')[0];
+                const newLabel = `${cleanName} (+${Math.round(eyePercentBonus)}%)`;
+                const span = eyeSel.querySelector('.select-selected span');
+                span.textContent = newLabel;
+                fitTextToContainer(span); 
+            }
+
+            const daSel = document.querySelector('[data-id="potDemonArtSelect"]');
+            const daBase = parseFloat(daSel.getAttribute('data-value')) || 0;
+            let daLvl = parseInt(dom.potDemonArtLvl.value);
+            if (daLvl > 50) { daLvl = 50; dom.potDemonArtLvl.value = 50; }
+            if (isNaN(daLvl) || daLvl < 0) daLvl = 0;
+            const daPercentBonus = daBase + (daBase * 0.1 * daLvl);
+            const daFactor = BigInt(Math.round(100 + daPercentBonus));
+            // Update Label
+            const daObj = demonArtData.find(e => e.base === daBase);
+            if (daObj) {
+                const cleanName = daObj.name.split(' (')[0];
+                const newLabel = `${cleanName} (+${Math.round(daPercentBonus)}%)`;
+                const span = daSel.querySelector('.select-selected span');
+                span.textContent = newLabel;
+                fitTextToContainer(span); 
+            }
+
+            // Units
+            let totalUnitPercent = 0;
+            const unitInputs = document.querySelectorAll('.unit-input');
+            unitInputs.forEach(input => {
+                const val = parseFloat(input.value) || 0;
+                totalUnitPercent += val;
+            });
+            dom.uRes.innerHTML = totalUnitPercent.toLocaleString() + "%";
+            const unitFactor = BigInt(Math.round(100 + totalUnitPercent));
+
+            // Divisor logic
+            let result = (base * rankFactor * coinFactor * currFactor * wiseFactor * bijuuFactor * eyeFactor * titlesFactor * raceFactor * sayajinFactor * unitFactor * hakiFactor * fruitFactor * pirateFactor * breathingFactor * breathTrainerFactor * daFactor * orgFactor * titanFactor * leveTrainerFactor * shinobiRaidFactor * dungeonFactor * itemAccessoryFactor * playerStatsFactor * achievementFactor * auraFactor * avatarFactor) / 10000000000000000000000000000000000000000000000000000n;
+
+            // Apply 2x Multiplier
+            result = result * BigInt(state.potentialMult);
+
+            dom.potRes.innerHTML = (result > 0n) ? formatNumber(result) : "0";
+        }
+
+        function updateDamage() {
+            // Logic from Provided Old File
+            const baseDmg = parseInput(dom.dmgDmg, 'damageSuffixSelect');
+            const critPercent = parseFloat(dom.crit.value) || 0;
+            
+            const mobSel = document.querySelector('[data-id="mobSelect"]');
+            const hpString = mobSel.getAttribute('data-hp');
+            const mobHp = parseSuffixedString(hpString);
+            
+            dom.mobHp.textContent = hpString || "--";
+
+            const mobCountVal = parseInt(document.querySelector('[data-id="mobCountSelect"]').getAttribute('data-value')) || 1;
+
+            const multiplierScaled = BigInt(Math.round(1000 + (critPercent * 5))); 
+            const cpsScaled = BigInt(Math.round(state.damageCps * 100)); 
+            
+            const numerator = baseDmg * cpsScaled * multiplierScaled;
+            
+            if (baseDmg > 0n) {
+                 dom.dpsRes.innerHTML = formatNumber(numerator / 100000n);
+            } else {
+                 dom.dpsRes.innerHTML = "--";
+                 dom.mpmRes.innerHTML = "--";
+                 dom.mphRes.innerHTML = "--";
+                 dom.ttkRes.innerHTML = "0s";
+                 dom.dropMin.innerHTML = "--";
+                 dom.dropHr.innerHTML = "--";
+                 return;
+            }
+
+            if (mobHp <= 0n) {
+                dom.ttkRes.innerHTML = "Select Mob";
+                dom.mpmRes.innerHTML = "--";
+                dom.mphRes.innerHTML = "--";
+                dom.dropMin.innerHTML = "--";
+                dom.dropHr.innerHTML = "--";
+                return;
+            }
+            
+            if (numerator === 0n) {
+                dom.ttkRes.innerHTML = "Forever";
+                dom.mpmRes.innerHTML = "0";
+                dom.mphRes.innerHTML = "0";
+                dom.dropMin.innerHTML = "0";
+                dom.dropHr.innerHTML = "0";
+                return;
+            }
+
+            const dphScaled = baseDmg * multiplierScaled; 
+            const mobHpScaledForHits = mobHp * 1000n; 
+            
+            let hits = 0n;
+            if (dphScaled > 0n) {
+                 hits = (mobHpScaledForHits + dphScaled - 1n) / dphScaled;
+            }
+
+            let timeSeconds = 0;
+            if (hits > 0n) {
+                timeSeconds = Number(hits - 1n) / state.damageCps;
+            }
+            
+            dom.ttkRes.innerHTML = (timeSeconds < 60) ? timeSeconds.toFixed(2) + "s" : formatTime(timeSeconds);
+
+            const respawnTime = 2.0;
+            const spawnsPerMinute = 60 / respawnTime; 
+            
+            let killsPerMin = 0;
+            
+            if (mobCountVal === 1) {
+                const totalCycleTime = timeSeconds + respawnTime;
+                if (totalCycleTime > 0) {
+                    killsPerMin = 60 / totalCycleTime;
+                }
+            } else {
+                let mobLimit = 0;
+                if (timeSeconds > 0) {
+                    mobLimit = respawnTime / timeSeconds;
                 } else {
-                    sidePanel.classList.remove('active');
+                    mobLimit = 999999;
+                }
+                const effectiveKillsPerWave = Math.min(mobCountVal, mobLimit);
+                killsPerMin = effectiveKillsPerWave * spawnsPerMinute;
+            }
+
+            const killsPerHour = killsPerMin * 60;
+            
+            dom.mpmRes.innerHTML = killsPerMin.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+            dom.mphRes.innerHTML = killsPerHour.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+
+            const dAmount = parseFloat(dom.dropAmt.value) || 0;
+            const dMulti = (parseFloat(dom.dropMul.value) || 100) / 100;
+            const dChance = parseFloat(dom.dropChn.value) || 0;
+
+            const effectiveAmount = dAmount * dMulti;
+            const chanceFactor = dChance / 100;
+            
+            const totalDropsPerMin = killsPerMin * chanceFactor * effectiveAmount;
+            const totalDropsPerHour = killsPerHour * chanceFactor * effectiveAmount;
+            
+            dom.dropMin.innerHTML = totalDropsPerMin.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+            dom.dropHr.innerHTML = totalDropsPerHour.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+        }
+
+        function updateRank() {
+            const mpc = parseInput(dom.rankMpc, 'rankMpcSuffix');
+            const cur = parseInput(dom.rankCur, 'rankCurrentMasterySuffix');
+            const start = parseInt(document.querySelector('[data-id="currentRankSelect"]').getAttribute('data-value')) || 0;
+            const end = parseInt(document.querySelector('[data-id="targetRankSelect"]').getAttribute('data-value')) || 1;
+            
+            let mps = (mpc > 0n) ? mpc * BigInt(Math.round(state.rankCps * 100)) / 100n : 0n;
+            
+            dom.rankMps.innerHTML = mps ? formatNumber(mps) : "--";
+
+            if (start >= end) {
+                dom.rankCost.innerHTML = "--"; 
+                dom.rankRem.innerHTML = "--"; 
+                dom.rankTime.innerHTML = "Target Rank must be higher";
+                dom.rankBar.style.width = "0%"; 
+                dom.rankPcnt.innerHTML = "0%"; 
+                return;
+            }
+
+            let cost = 0n;
+            for(let i=start+1; i<=end; i++) if(i < rankCostsData.length) cost += parseSuffixedString(rankCostsData[i]);
+            
+            dom.rankCost.innerHTML = formatNumber(cost);
+            const rem = (cost > cur) ? cost - cur : 0n;
+            dom.rankRem.innerHTML = formatNumber(rem);
+            
+            const pct = (cost > 0n) ? Math.min(100, Number((cur * 10000n) / cost) / 100) : 0;
+            dom.rankBar.style.width = pct + "%"; 
+            dom.rankPcnt.innerHTML = pct.toFixed(1) + "%";
+
+            if (rem === 0n) dom.rankTime.innerHTML = "0.00s";
+            else if (mps > 0n) {
+                const s = Number(rem) / Number(mps);
+                dom.rankTime.innerHTML = (s < 60) ? s.toFixed(2)+"s" : formatTime(s);
+            } else dom.rankTime.innerHTML = "Infinite";
+        }
+
+        function updateAll() { updateMastery(); updateDamage(); updateRank(); updatePotential(); }
+
+        function setTheme(name) {
+            const t = themes[name]; if(!t) return;
+            const r = document.documentElement.style;
+            r.setProperty('--primary', t.primary); 
+            r.setProperty('--primary-light', t.light);
+            r.setProperty('--primary-border', t.border); 
+            r.setProperty('--primary-dim', t.dim); 
+            r.setProperty('--primary-glow', t.glow);
+        }
+
+        document.querySelectorAll('.tab-button').forEach(b => {
+            b.addEventListener('click', () => {
+                document.querySelectorAll('.tab-button, .tab-content').forEach(el => el.classList.remove('active'));
+                b.classList.add('active');
+                const tab = b.dataset.tab;
+                document.getElementById(tab + '-content').classList.add('active');
+                setTheme(tab);
+                
+                // Panel Logic
+                dom.panel.classList.toggle('active', tab === 'damage'); // Show Drops on Damage
+                
+                // If exiting Mastery Potential view by clicking tabs
+                if (tab !== 'mastery') {
+                    // Hide Potential Panels
+                    dom.unitsPanel.classList.remove('active');
+                    dom.statsPanel.classList.remove('active');
+                    dom.achievementsPanel.classList.remove('active');
+                } else if (state.isPotentialOpen) {
+                    // If returning to Mastery and it was open
+                    dom.unitsPanel.classList.add('active');
+                    dom.statsPanel.classList.add('active');
+                    dom.achievementsPanel.classList.add('active');
+                    dom.panel.classList.remove('active');
                 }
             });
         });
 
-        document.addEventListener('DOMContentLoaded', function() {
-            setTheme('mastery');
+        function initSuffixDropdowns() {
+            const ids = ['suffixSelect', 'currentMasterySuffixSelect', 'damageSuffixSelect', 'rankMpcSuffix', 'rankCurrentMasterySuffix'];
+            ids.forEach(id => {
+                const s = document.querySelector(`[data-id="${id}"] .select-items`);
+                s.innerHTML = '<div data-value="none" class="same-as-selected">None</div>';
+                Object.values(suffixMap).forEach(v => s.innerHTML += `<div data-value="${v}">${v}</div>`);
+                s.parentElement.setAttribute('data-value', 'none');
+            });
+        }
+
+        function initRankDropdowns() {
+            const ids = ['currentRankSelect', 'targetRankSelect'];
+            ids.forEach(id => {
+                const s = document.querySelector(`[data-id="${id}"] .select-items`);
+                rankCostsData.forEach((_, i) => s.innerHTML += `<div data-value="${i}" class="${(id === 'currentRankSelect' && i === 0) || (id === 'targetRankSelect' && i === 1) ? 'same-as-selected' : ''}">Rank ${i}</div>`);
+                const defVal = id === 'currentRankSelect' ? '0' : '1';
+                s.parentElement.setAttribute('data-value', defVal);
+                s.previousElementSibling.querySelector('span').textContent = `Rank ${defVal}`;
+            });
+            updateDisabledTargetRanks(0);
+        }
+
+        function initPotentialRankDropdown() {
+            const el = document.getElementById('potRankOptions');
+            const parent = document.querySelector('[data-id="potRankSelect"]');
+            rankCostsData.forEach((_, i) => {
+                 el.innerHTML += `<div data-value="${i}" class="${i===0?'same-as-selected':''}">Rank ${i}</div>`;
+            });
+            parent.setAttribute('data-value', '0');
+        }
+
+        function initPotentialMapDropdown() {
+            const el = document.getElementById('potMapOptions');
+            const parent = document.querySelector('[data-id="potMapSelect"]');
             
-            // Map Options
-            const mapSelectItems = document.getElementById('mapOptions');
-            mapSelectItems.innerHTML = '';
-            for (const mapName in gameData) {
+            const maps = Object.keys(gameData);
+            maps.forEach((map, i) => {
+                el.innerHTML += `<div data-value="${map.replace(/\s+/g, '')}" class="${i===0?'same-as-selected':''}">${map}</div>`;
+            });
+            if(maps.length > 0) {
+                 const def = maps[0].replace(/\s+/g, '');
+                 parent.setAttribute('data-value', def);
+                 parent.querySelector('span').textContent = maps[0];
+            }
+        }
+
+// Init Achievement Dropdowns
+        function initAchievementsDropdowns() {
+            for(let i = 1; i <= 6; i++) {
                 const div = document.createElement('div');
-                div.setAttribute('data-value', mapName);
-                div.textContent = mapName;
-                mapSelectItems.appendChild(div);
-            }
+                div.className = 'input-group';
+                div.innerHTML = `
+                    <label>Achievement ${i}</label>
+                    <div class="custom-select full-width" data-id="achieveSelect${i}">
+                        <div class="select-selected"><span>None (+0%)</span><div class="select-arrow"></div></div>
+                        <div class="select-items select-hide" id="achieveOptions${i}"></div>
+                    </div>
+                `;
+                dom.achieveContainer.appendChild(div);
 
-            // Mob Count Options (1-10)
-            const mobCountItems = document.getElementById('mobCountOptions');
-            mobCountItems.innerHTML = '';
-            for (let i = 1; i <= 10; i++) {
-                const div = document.createElement('div');
-                div.setAttribute('data-value', i);
-                div.textContent = i;
-                if(i === 1) div.classList.add('same-as-selected');
-                mobCountItems.appendChild(div);
-            }
-
-            function createCustomSelects() {
-                const customSelects = document.querySelectorAll('.custom-select');
-                customSelects.forEach(select => {
-                    const selected = select.querySelector('.select-selected');
-                    const items = select.querySelector('.select-items');
-                    if(items.children.length === 0) return;
-                    const options = items.querySelectorAll('div');
-                    if (!select.dataset.value && options.length > 0) {
-                         const initialValue = options[0].getAttribute('data-value');
-                         select.setAttribute('data-value', initialValue);
-                    }
-                    selected.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        closeAllSelects(this);
-                        items.classList.toggle('select-hide');
-                        this.classList.toggle('select-arrow-active');
-                    });
-                    options.forEach(option => { bindOptionClick(select, selected, items, option); });
+                const el = document.getElementById(`achieveOptions${i}`);
+                const parent = document.querySelector(`[data-id="achieveSelect${i}"]`);
+                achievementOptions.forEach((opt, idx) => {
+                     el.innerHTML += `<div data-value="${opt.val}" class="${idx===0?'same-as-selected':''}">${opt.name}</div>`;
                 });
+                parent.setAttribute('data-value', '100');
             }
+        }
+
+        function initBijuuDropdown() {
+            const el = document.getElementById('potBijuuOptions');
+            const parent = document.querySelector('[data-id="potBijuuSelect"]');
+            bijuuData.forEach((b, i) => {
+                el.innerHTML += `<div data-value="${b.val}" class="${i===0?'same-as-selected':''}">${b.name}</div>`;
+            });
+            parent.setAttribute('data-value', '100'); 
+        }
+
+        function initMagicEyeDropdown() {
+            const el = document.getElementById('potMagicEyeOptions');
+            const parent = document.querySelector('[data-id="potMagicEyeSelect"]');
+            magicEyeData.forEach((e, i) => {
+                el.innerHTML += `<div data-value="${e.base}" class="${i===0?'same-as-selected':''}">${e.name}</div>`;
+            });
+            parent.setAttribute('data-value', '0'); 
+        }
+
+        function initTitlesDropdown() {
+            const el = document.getElementById('potTitlesOptions');
+            const parent = document.querySelector('[data-id="potTitlesSelect"]');
+            titlesData.forEach((t, i) => {
+                el.innerHTML += `<div data-value="${t.val}" class="${i===0?'same-as-selected':''}">${t.name}</div>`;
+            });
+            parent.setAttribute('data-value', '100');
+        }
+
+        function initRaceDropdown() {
+            const el = document.getElementById('potRaceOptions');
+            const parent = document.querySelector('[data-id="potRaceSelect"]');
+            raceData.forEach((r, i) => {
+                el.innerHTML += `<div data-value="${r.val}" class="${i===0?'same-as-selected':''}">${r.name}</div>`;
+            });
+            parent.setAttribute('data-value', '100');
+        }
+
+        function initSayajinDropdown() {
+            const el = document.getElementById('potSayajinOptions');
+            const parent = document.querySelector('[data-id="potSayajinSelect"]');
+            sayajinData.forEach((s, i) => {
+                el.innerHTML += `<div data-value="${s.val}" class="${i===0?'same-as-selected':''}">${s.name}</div>`;
+            });
+            parent.setAttribute('data-value', '100');
+        }
+
+        function initHakiDropdown() {
+            const el = document.getElementById('potHakiOptions');
+            const parent = document.querySelector('[data-id="potHakiSelect"]');
+            hakiData.forEach((h, i) => {
+                el.innerHTML += `<div data-value="${h.val}" class="${i===0?'same-as-selected':''}">${h.name}</div>`;
+            });
+            parent.setAttribute('data-value', '100');
+        }
+
+        function initFruitsDropdown() {
+            const el = document.getElementById('potFruitsOptions');
+            const parent = document.querySelector('[data-id="potFruitsSelect"]');
+            fruitsData.forEach((f, i) => {
+                el.innerHTML += `<div data-value="${f.val}" class="${i===0?'same-as-selected':''}">${f.name}</div>`;
+            });
+            parent.setAttribute('data-value', '100');
+        }
+
+        function initBreathingDropdown() {
+            const el = document.getElementById('potBreathingOptions');
+            const parent = document.querySelector('[data-id="potBreathingSelect"]');
+            breathingData.forEach((b, i) => {
+                el.innerHTML += `<div data-value="${b.val}" class="${i===0?'same-as-selected':''}">${b.name}</div>`;
+            });
+            parent.setAttribute('data-value', '100');
+        }
+
+        function initDemonArtDropdown() {
+            const el = document.getElementById('potDemonArtOptions');
+            const parent = document.querySelector('[data-id="potDemonArtSelect"]');
+            demonArtData.forEach((e, i) => {
+                el.innerHTML += `<div data-value="${e.base}" class="${i===0?'same-as-selected':''}">${e.name}</div>`;
+            });
+            parent.setAttribute('data-value', '0'); 
+        }
+
+        function initOrganizationDropdown() {
+            const el = document.getElementById('potOrgOptions');
+            const parent = document.querySelector('[data-id="potOrgSelect"]');
+            organizationData.forEach((o, i) => {
+                el.innerHTML += `<div data-value="${o.val}" class="${i===0?'same-as-selected':''}">${o.name}</div>`;
+            });
+            parent.setAttribute('data-value', '100');
+        }
+
+        function initTitanDropdown() {
+            const el = document.getElementById('potTitanOptions');
+            const parent = document.querySelector('[data-id="potTitanSelect"]');
+            titanData.forEach((t, i) => {
+                el.innerHTML += `<div data-value="${t.val}" class="${i===0?'same-as-selected':''}">${t.name}</div>`;
+            });
+            parent.setAttribute('data-value', '100');
+        }
+
+        function initShinobiRaidDropdown() {
+            const el = document.getElementById('potShinobiRaidOptions');
+            const parent = document.querySelector('[data-id="potShinobiRaidSelect"]');
+            shinobiRaidData.forEach((t, i) => {
+                el.innerHTML += `<div data-value="${t.val}" class="${i===0?'same-as-selected':''}">${t.name}</div>`;
+            });
+            parent.setAttribute('data-value', '100');
+        }
+
+        function initDungeonDropdown() {
+            const el = document.getElementById('potDungeonOptions');
+            const parent = document.querySelector('[data-id="potDungeonSelect"]');
+            dungeonData.forEach((t, i) => {
+                el.innerHTML += `<div data-value="${t.val}" class="${i===0?'same-as-selected':''}">${t.name}</div>`;
+            });
+            parent.setAttribute('data-value', '100');
+        }
+
+        function initMapDropdown() {
+            const mapSelect = document.getElementById('mapOptions');
+            Object.keys(gameData).forEach(k => mapSelect.innerHTML += `<div data-value="${k}">${k}</div>`);
+        }
+
+        function initMobCountDropdown() {
+            const mobCountSelect = document.getElementById('mobCountOptions');
+            for(let i=1; i<=10; i++) mobCountSelect.innerHTML += `<div data-value="${i}" class="${i===1?'same-as-selected':''}">${i}</div>`;
+        }
+
+        function parseSuffixedString(str) {
+            const m = (str || "").match(/^([\d\.]+)\s*([a-zA-Z]+)?$/);
+            if (!m) return 0n;
+            const exp = suffixes[suffixMap[(m[2] || "none").toLowerCase()] || "none"] || 0;
+            return BigInt(Math.round(parseFloat(m[1]) * 100)) * (10n ** BigInt(exp * 3));
+        }
+
+        function parseInput(inEl, selId) {
+            const raw = parseFloat(inEl.value);
+            if (isNaN(raw) || raw < 0) return 0n;
+            const suf = document.querySelector(`[data-id="${selId}"]`).getAttribute('data-value');
+            return BigInt(Math.round(raw * 100)) * (10n ** BigInt((suffixes[suf] || 0) * 3));
+        }
+
+        function formatNumber(n) {
+            if (n === 0n) return "0";
+            let val = Number(n) / 100, idx = 0;
+            while (val >= 1000 && idx < Object.keys(suffixMap).length) { val /= 1000; idx++; }
+            return idx === 0 ? val.toLocaleString(undefined, {maxFractionDigits: 2}) : val.toFixed(2) + Object.values(suffixMap)[idx-1];
+        }
+
+        function formatTime(s) {
+            if (s === Infinity) return "Forever"; if (s === 0) return "Instant";
+            const y = Math.floor(s/31536000), d = Math.floor((s%31536000)/86400), h = Math.floor((s%86400)/3600), m = Math.floor((s%3600)/60), sec = Math.floor(s%60);
+            if (y>=1000) return "1000+ y";
+            if (y+d+h+m === 0 && s < 1) return s.toFixed(2)+"s";
+            return `${y?y+'y ':''}${d?d+'d ':''}${h?h+'h ':''}${m?m+'m ':''}${(y+d===0)?sec+'s':''}`.trim();
+        }
+
+        function setupSpeedToggle(fastId, slowId, key, cb) {
+            const f = document.getElementById(fastId), s = document.getElementById(slowId);
+            f.onclick = () => { state[key] = 5.8; f.classList.add('active'); s.classList.remove('active'); cb(); };
+            s.onclick = () => { state[key] = 4.5; s.classList.add('active'); f.classList.remove('active'); cb(); };
+        }
+
+        function setupMultiplierToggle(onBtnId, offBtnId, stateKey, cb) {
+            const onBtn = document.getElementById(onBtnId);
+            const offBtn = document.getElementById(offBtnId);
             
-            function bindOptionClick(select, selected, items, option) {
-                option.addEventListener('click', function() {
-                    const value = this.getAttribute('data-value');
-                    const text = this.innerHTML;
-                    const hp = this.getAttribute('data-hp'); 
-
-                    select.setAttribute('data-value', value);
-                    if(hp) select.setAttribute('data-hp', hp);
-                    
-                    selected.querySelector('span').innerHTML = text;
-                    items.querySelectorAll('div').forEach(opt => opt.classList.remove('same-as-selected'));
-                    this.classList.add('same-as-selected');
-                    items.classList.add('select-hide');
-                    selected.classList.remove('select-arrow-active');
-                    
-                    if (select.dataset.originalId === 'mapSelect') updateMobDropdown(value);
-                    
-                    updateAll();
-                });
-            }
-
-            function updateMobDropdown(mapName) {
-                const mobSelect = document.querySelector('[data-original-id="mobSelect"]');
-                const mobSelectItems = document.getElementById('mobOptions');
-                const mobSelectedSpan = mobSelect.querySelector('.select-selected span');
-                
-                mobSelectItems.innerHTML = '';
-                const mobs = gameData[mapName] || [];
-                
-                if (mobs.length === 0) {
-                     const div = document.createElement('div');
-                     div.setAttribute('data-value', 'none');
-                     div.textContent = "No Mobs Available";
-                     mobSelectItems.appendChild(div);
-                     mobSelectedSpan.textContent = "No Mobs";
-                     mobSelect.setAttribute('data-value', 'none');
-                } else {
-                    mobs.forEach((mobObj, index) => {
-                        const div = document.createElement('div');
-                        div.setAttribute('data-value', mobObj.name);
-                        div.setAttribute('data-hp', mobObj.hp);
-                        div.textContent = mobObj.name;
-                        
-                        if (index === 0) {
-                            div.classList.add('same-as-selected');
-                            mobSelectedSpan.textContent = mobObj.name;
-                            mobSelect.setAttribute('data-value', mobObj.name);
-                            mobSelect.setAttribute('data-hp', mobObj.hp);
-                        }
-                        mobSelectItems.appendChild(div);
-                    });
-                }
-                const newOptions = mobSelectItems.querySelectorAll('div');
-                const selected = mobSelect.querySelector('.select-selected');
-                newOptions.forEach(option => { bindOptionClick(mobSelect, selected, mobSelectItems, option); });
-            }
-
-            function closeAllSelects(elmnt) {
-                const customSelects = document.querySelectorAll('.custom-select');
-                customSelects.forEach(select => {
-                    const selected = select.querySelector('.select-selected');
-                    const items = select.querySelector('.select-items');
-                    if (selected !== elmnt) {
-                        items.classList.add('select-hide');
-                        selected.classList.remove('select-arrow-active');
-                    }
-                });
-            }
-
-            createCustomSelects();
-            document.addEventListener('click', closeAllSelects);
-
-            const dmgInput = document.getElementById("dmgInput");
-            const suffixSelect = document.querySelector('[data-original-id="suffixSelect"]');
-            const resultBox = document.getElementById("resultBox");
-            const fastBtn = document.getElementById("fastBtn");
-            const slowBtn = document.getElementById("slowBtn");
-            const perHourResult = document.getElementById("perHourResult");
-            const perDayResult = document.getElementById("perDayResult");
-            const currentMasteryInput = document.getElementById("currentMasteryInput");
-            const currentMasterySuffixSelect = document.querySelector('[data-original-id="currentMasterySuffixSelect"]');
-            const dayInput = document.getElementById("dayInput");
-            const hourInput = document.getElementById("hourInput");
-            const minuteInput = document.getElementById("minuteInput");
-            const totalMasteryResult = document.getElementById("totalMasteryResult");
-
-            const damageDmgInput = document.getElementById("damageDmgInput");
-            const damageSuffixSelect = document.querySelector('[data-original-id="damageSuffixSelect"]');
-            const critInput = document.getElementById("critInput");
-            const dmgFastBtn = document.getElementById("dmgFastBtn");
-            const dmgSlowBtn = document.getElementById("dmgSlowBtn");
-            
-            const dmgPerSecResult = document.getElementById("dmgPerSecResult");
-            const mobHpResultBox = document.getElementById("mobHpResultBox"); 
-            const mobsPerMinuteResult = document.getElementById("mobsPerMinuteResult");
-            const mobsPerHourResult = document.getElementById("mobsPerHourResult");
-            const timeToKillResult = document.getElementById("timeToKillResult");
-            const mobCountSelect = document.querySelector('[data-original-id="mobCountSelect"]');
-
-            // NEW DROPS VARIABLES
-            const dropAmountInput = document.getElementById("dropAmountInput");
-            const dropMultiInput = document.getElementById("dropMultiInput");
-            const dropChanceInput = document.getElementById("dropChanceInput");
-            const dropsPerMinuteResult = document.getElementById("dropsPerMinuteResult");
-
-            let cps = 5.8;
-            let dmgCps = 5.8;
-            
-            fastBtn.onclick = () => { cps = 5.8; fastBtn.classList.add("active"); slowBtn.classList.remove("active"); updateMastery(); };
-            slowBtn.onclick = () => { cps = 4.5; slowBtn.classList.add("active"); fastBtn.classList.remove("active"); updateMastery(); };
-            dmgInput.oninput = updateMastery;
-            currentMasteryInput.oninput = updateMastery;
-            dayInput.oninput = updateMastery;
-            hourInput.oninput = updateMastery;
-            minuteInput.oninput = updateMastery;
-            
-            dmgFastBtn.onclick = () => { dmgCps = 5.8; dmgFastBtn.classList.add("active"); dmgSlowBtn.classList.remove("active"); updateDamage(); };
-            dmgSlowBtn.onclick = () => { dmgCps = 4.5; dmgSlowBtn.classList.add("active"); dmgFastBtn.classList.remove("active"); updateDamage(); };
-            damageDmgInput.oninput = updateDamage;
-            critInput.oninput = updateDamage;
-
-            // NEW DROPS LISTENERS
-            dropAmountInput.oninput = updateDamage;
-            dropMultiInput.oninput = updateDamage;
-            dropChanceInput.oninput = updateDamage;
-
-            function formatNumber(num) {
-                if (num === 0n) return "0";
-                const numStr = num.toString();
-                const Ls = numStr.length; 
-                // Scaled by 100.
-                const realLength = Ls - 2; 
-                
-                if (num < 100000n) {
-                    return (Number(num) / 100).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 });
-                }
-                const exponent = Math.floor((realLength - 1) / 3);
-                const suffixIndex = exponent - 1;
-                if (suffixIndex < 0) return (Number(num) / 100).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 });
-                if (suffixIndex >= suffixList.length) return (Number(num) / 100).toExponential(2);
-
-                const val = Number(num) / 100;
-                const divisor = Math.pow(10, exponent * 3);
-                const shortVal = val / divisor;
-                return shortVal.toFixed(2) + suffixList[suffixIndex];
-            }
-            
-            function formatTime(seconds) {
-                if (seconds === Infinity) return "Forever";
-                if (seconds === 0) return "Instant";
-                
-                const y = Math.floor(seconds / 31536000);
-                if (y >= 1000) return "1000+ y";
-                
-                const d = Math.floor((seconds % 31536000) / 86400);
-                const h = Math.floor((seconds % 86400) / 3600);
-                const m = Math.floor((seconds % 3600) / 60);
-                const s = Math.floor(seconds % 60);
-                
-                let timeStr = "";
-                if (y > 0) timeStr += `${y}y `;
-                if (d > 0) timeStr += `${d}d `;
-                if (h > 0) timeStr += `${h}h `;
-                if (m > 0) timeStr += `${m}m `;
-                
-                if (y === 0 && d === 0) {
-                    if (s === 0 && seconds < 1) {
-                         return seconds.toFixed(2) + "s";
-                    }
-                    timeStr += `${s}s`;
-                } else if (timeStr === "") {
-                    timeStr += `${s}s`;
-                }
-                
-                return timeStr.trim();
-            }
-            
-            function formatCompactNumber(num) {
-                return num.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 });
-            }
-
-            function parseInput(inputEl, suffixEl) {
-                const rawValue = parseFloat(inputEl.value);
-                if (isNaN(rawValue) || rawValue < 0) return 0n; 
-                const selectedSuffix = suffixEl.getAttribute('data-value');
-                if (selectedSuffix === "none") return BigInt(Math.round(rawValue * 100));
-                const exponent = suffixes[selectedSuffix];
-                if (exponent === undefined) return 0n;
-                const multiplier = 10n ** BigInt(exponent * 3);
-                return BigInt(Math.round(rawValue * 100)) * multiplier;
-            }
-
-            function updateMastery() {
-                const baseDmg = parseInput(dmgInput, suffixSelect);
-                const currentMastery = parseInput(currentMasteryInput, currentMasterySuffixSelect);
-                
-                if (baseDmg === 0n) { 
-                    resultBox.innerHTML = "--";
-                    perHourResult.innerHTML = "--";
-                    perDayResult.innerHTML = "--";
-                    if(currentMastery > 0n) totalMasteryResult.innerHTML = formatNumber(currentMastery);
-                    else totalMasteryResult.innerHTML = "--";
-                } else {
-                    const dps = baseDmg * BigInt(Math.round(cps * 100)) / 100n;
-                    resultBox.innerHTML = formatNumber(dps); 
-                    perHourResult.innerHTML = formatNumber(dps * 3600n);
-                    perDayResult.innerHTML = formatNumber(dps * 86400n);
-                }
-
-                const days = BigInt(Math.max(0, parseInt(dayInput.value) || 0));
-                const hours = BigInt(Math.max(0, parseInt(hourInput.value) || 0));
-                const minutes = BigInt(Math.max(0, parseInt(minuteInput.value) || 0));
-                const totalSeconds = (days * 86400n) + (hours * 3600n) + (minutes * 60n);
-
-                if (baseDmg > 0n) {
-                    const dps = baseDmg * BigInt(Math.round(cps * 100)) / 100n;
-                    const gained = dps * totalSeconds;
-                    const total = currentMastery + gained;
-                    totalMasteryResult.innerHTML = formatNumber(total);
-                } else if (currentMastery > 0n) {
-                    totalMasteryResult.innerHTML = formatNumber(currentMastery);
-                }
-            }
-
-            function updateDamage() {
-                const baseDmg = parseInput(damageDmgInput, damageSuffixSelect);
-                const critPercent = parseFloat(critInput.value) || 0;
-                
-                const mobSelect = document.querySelector('[data-original-id="mobSelect"]');
-                const hpString = mobSelect.getAttribute('data-hp');
-                const mobHp = BigInt(hpString || 0) * 100n; // Scaled 100
-                
-                const mobCountVal = parseInt(mobCountSelect.getAttribute('data-value')) || 1;
-
-                if (mobHp > 0n) {
-                    mobHpResultBox.innerHTML = formatNumber(mobHp);
-                } else {
-                    mobHpResultBox.innerHTML = "--";
-                }
-
-                const multiplierScaled = BigInt(Math.round(1000 + (critPercent * 5))); // Scaled 1000
-                const cpsScaled = BigInt(Math.round(dmgCps * 100)); // Scaled 100
-                
-                // --- DPS Calculation ---
-                // Numerator = Base * CPS * Mult
-                // Scale = 100 * 100 * 1000 = 10,000,000
-                // Target Scale = 100 (for 2 decimal display) -> Div by 100,000
-                const numerator = baseDmg * cpsScaled * multiplierScaled;
-                if (baseDmg > 0n) {
-                     dmgPerSecResult.innerHTML = formatNumber(numerator / 100000n);
-                } else {
-                     dmgPerSecResult.innerHTML = "--";
-                     mobsPerMinuteResult.innerHTML = "--";
-                     mobsPerHourResult.innerHTML = "--";
-                     timeToKillResult.innerHTML = "0s";
-                     dropsPerMinuteResult.innerHTML = "--";
-                     return;
-                }
-
-                if (mobHp <= 0n) {
-                    timeToKillResult.innerHTML = "Select A Mob";
-                    mobsPerMinuteResult.innerHTML = "--";
-                    mobsPerHourResult.innerHTML = "--";
-                    dropsPerMinuteResult.innerHTML = "--";
-                    return;
-                }
-                
-                if (numerator === 0n) {
-                    timeToKillResult.innerHTML = "Forever";
-                    mobsPerMinuteResult.innerHTML = "0";
-                    mobsPerHourResult.innerHTML = "0";
-                    dropsPerMinuteResult.innerHTML = "0";
-                    return;
-                }
-
-                // --- Discrete Hits Calculation ---
-                // Damage Per Hit (DPH) = BaseDmg * Multiplier
-                // Scale DPH = 100 * 1000 = 100,000
-                // MobHP Scale = 100. To Match DPH, MobHP * 1000 = 100,000.
-                
-                const dphScaled = baseDmg * multiplierScaled; // Scale 100,000
-                const mobHpScaledForHits = mobHp * 1000n;     // Scale 100,000
-                
-                let hits = 0n;
-                if (dphScaled > 0n) {
-                     // Ceiling Division: (Num + Denom - 1) / Denom
-                     hits = (mobHpScaledForHits + dphScaled - 1n) / dphScaled;
-                }
-
-                // --- Time to Kill ONE Mob (Visual) ---
-                // Logic: 1st hit is instant (0s). 2nd hit is at 1/CPS.
-                // Time = (Hits - 1) / CPS
-                let timeSeconds = 0;
-                if (hits > 0n) {
-                    timeSeconds = Number(hits - 1n) / dmgCps;
-                }
-                
-                timeToKillResult.innerHTML = (timeSeconds < 60) ? timeSeconds.toFixed(2) + "s" : formatTime(timeSeconds);
-
-                // --- Mobs Killed Per Time (Throughput) ---
-                const spawnInterval = 1.8; // seconds
-                
-                let actualKillsPerSecond = 0;
-                const timeToKillOneMob = Number(hits) / dmgCps;
-                
-                if (timeToKillOneMob <= 0) {
-                    actualKillsPerSecond = mobCountVal / spawnInterval;
-                } else {
-                    // Check for continuous killing: can we kill other mobs during one mob's respawn time?
-                    const timeToKillOtherMobs = (mobCountVal - 1) * timeToKillOneMob;
-                    
-                    if (timeToKillOtherMobs >= spawnInterval) {
-                        // Continuous killing is possible, limited only by kill speed.
-                        actualKillsPerSecond = 1 / timeToKillOneMob;
-                    } else {
-                        // Downtime exists. Cycle time is dominated by respawn.
-                        // The time for a full cycle is the time to kill the first mob + its respawn time.
-                        const cycleTime = timeToKillOneMob + spawnInterval;
-                        // In that cycle, you kill N mobs.
-                        actualKillsPerSecond = mobCountVal / cycleTime;
-                    }
-                }
-                
-                const killsPerMin = actualKillsPerSecond * 60;
-                const killsPerHour = actualKillsPerSecond * 3600;
-                
-                mobsPerMinuteResult.innerHTML = formatCompactNumber(killsPerMin);
-                mobsPerHourResult.innerHTML = formatCompactNumber(killsPerHour);
-
-                // --- DROPS MATH ---
-                // Logic: (Mobs/Min) * (Chance/100) * (Amount * Multi)
-                const dAmount = parseFloat(dropAmountInput.value) || 0;
-                const dMulti = (parseFloat(dropMultiInput.value) || 100) / 100;
-                const dChance = parseFloat(dropChanceInput.value) || 0;
-
-                const effectiveAmount = dAmount * dMulti;
-                const chanceFactor = dChance / 100;
-                
-                const totalDropsPerMin = killsPerMin * chanceFactor * effectiveAmount;
-                dropsPerMinuteResult.innerHTML = formatCompactNumber(totalDropsPerMin);
-            }
-            
-            function updateAll() { updateMastery(); updateDamage(); }
-
-            dayInput.value = '0'; hourInput.value = '0'; minuteInput.value = '0';
-            updateAll();
-
-            const suffixMap = {
-                'k': 'K', 'm': 'M', 'b': 'B', 't': 'T', 'qa': 'Qa', 'qi': 'Qi', 'sx': 'Sx', 'sp': 'Sp',
-                'oc': 'Oc', 'no': 'No', 'dc': 'Dc', 'ud': 'Ud', 'dd': 'Dd', 'td': 'Td', 'qad': 'Qad',
-                'qid': 'Qid', 'sxd': 'Sxd', 'spd': 'Spd', 'ocd': 'Ocd', 'nod': 'Nod', 'vg': 'Vg',
-                'uvg': 'Uvg', 'dvg': 'Dvg', 'tvg': 'Tvg'
+            onBtn.onclick = () => { 
+                state[stateKey] = 2; 
+                onBtn.classList.add('active'); 
+                offBtn.classList.remove('active'); 
+                cb(); 
             };
+            offBtn.onclick = () => { 
+                state[stateKey] = 1; 
+                offBtn.classList.add('active'); 
+                onBtn.classList.remove('active'); 
+                cb(); 
+            };
+        }
 
-            function handleSuffixInput(inputEl, selectEl, updateFunc) {
-                const rawValue = inputEl.value.trim();
-                if (rawValue === '') { updateFunc(); return; }
-                const match = rawValue.match(/^([\d\.]+)\s*([a-zA-Z]+)$/);
-                if (match) {
-                    const numberPart = match[1];
-                    const suffixPart = match[2].toLowerCase();
-                    inputEl.value = numberPart;
-                    if (suffixMap[suffixPart]) {
-                        const targetValue = suffixMap[suffixPart];
-                        const selectItems = selectEl.querySelector('.select-items');
-                        const selectedSpan = selectEl.querySelector('.select-selected span');
-                        const targetOption = selectItems.querySelector(`div[data-value="${targetValue}"]`);
-                        if (targetOption) {
-                            selectEl.setAttribute('data-value', targetValue);
-                            selectedSpan.textContent = targetOption.textContent;
-                            selectItems.querySelectorAll('div').forEach(opt => opt.classList.remove('same-as-selected'));
-                            targetOption.classList.add('same-as-selected');
-                        }
-                    }
+        function setupSuffixInput(inp, selId, cb) {
+            const h = () => {
+                const m = inp.value.trim().match(/^([\d\.]+)\s*([a-zA-Z]+)$/);
+                if (m && suffixMap[m[2].toLowerCase()]) {
+                    inp.value = m[1];
+                    const sel = document.querySelector(`[data-id="${selId}"]`);
+                    const val = suffixMap[m[2].toLowerCase()];
+                    sel.setAttribute('data-value', val);
+                    sel.querySelector('span').textContent = val;
+                    sel.querySelectorAll('.select-items div').forEach(d => d.classList.remove('same-as-selected'));
+                    sel.querySelector(`.select-items div[data-value="${val}"]`).classList.add('same-as-selected');
                 }
-                updateFunc();
-            }
+                cb();
+            };
+            inp.addEventListener('blur', h);
+            inp.addEventListener('keydown', e => { if(e.key==='Enter') { e.preventDefault(); h(); inp.blur(); }});
+        }
 
-            let isProcessingEnter = false;
-            const dmgInputBlurHandler = () => { if(!isProcessingEnter) handleSuffixInput(dmgInput, suffixSelect, updateMastery); };
-            const currentMasteryBlurHandler = () => { if(!isProcessingEnter) handleSuffixInput(currentMasteryInput, currentMasterySuffixSelect, updateMastery); };
-            dmgInput.addEventListener('blur', dmgInputBlurHandler);
-            currentMasteryInput.addEventListener('blur', currentMasteryBlurHandler);
-            dmgInput.addEventListener('keydown', (e) => { if(e.key === 'Enter') { e.preventDefault(); isProcessingEnter=true; handleSuffixInput(dmgInput, suffixSelect, updateMastery); e.target.blur(); setTimeout(()=>{isProcessingEnter=false},100); } });
-            currentMasteryInput.addEventListener('keydown', (e) => { if(e.key === 'Enter') { e.preventDefault(); isProcessingEnter=true; handleSuffixInput(currentMasteryInput, currentMasterySuffixSelect, updateMastery); e.target.blur(); setTimeout(()=>{isProcessingEnter=false},100); } });
-
-            const damageDmgInputBlurHandler = () => { if(!isProcessingEnter) handleSuffixInput(damageDmgInput, damageSuffixSelect, updateDamage); };
-            damageDmgInput.addEventListener('blur', damageDmgInputBlurHandler);
-            damageDmgInput.addEventListener('keydown', (e) => { if(e.key === 'Enter') { e.preventDefault(); isProcessingEnter=true; handleSuffixInput(damageDmgInput, damageSuffixSelect, updateDamage); e.target.blur(); setTimeout(()=>{isProcessingEnter=false},100); } });
+        function setupCustomSelect(sel) {
+            const selected = sel.querySelector('.select-selected');
+            const items = sel.querySelector('.select-items');
             
-        });
+            selected.addEventListener('click', e => { 
+                e.stopPropagation(); 
+                closeAllSelects(selected); 
+                items.classList.toggle('select-hide'); 
+                selected.classList.toggle('select-arrow-active'); 
+            });
+            
+            items.addEventListener('click', e => {
+                if (e.target === items || e.target.classList.contains('select-items')) return;
+                if(e.target.tagName !== 'DIV') return;
+                
+                const opt = e.target;
+                sel.setAttribute('data-value', opt.getAttribute('data-value'));
+                if(opt.hasAttribute('data-hp')) sel.setAttribute('data-hp', opt.getAttribute('data-hp'));
+                
+                const span = selected.querySelector('span');
+                span.textContent = opt.textContent;
+                fitTextToContainer(span);
+
+                items.querySelectorAll('div').forEach(d => d.classList.remove('same-as-selected'));
+                opt.classList.add('same-as-selected');
+                items.classList.add('select-hide');
+                selected.classList.remove('select-arrow-active');
+        
+                const id = sel.getAttribute('data-id');
+                if (id === 'mapSelect') updateMobDropdown(opt.getAttribute('data-value'));
+                if (id === 'currentRankSelect' || id === 'targetRankSelect') handleRankLogic(id, parseInt(opt.getAttribute('data-value')));
+                if (id === 'potRankSelect') span.textContent = `Rank ${opt.getAttribute('data-value')}`;
+                
+                // Map Visibility Toggle logic
+                if (id === 'potMapSelect') {
+                    const mapKey = opt.getAttribute('data-value'); // e.g. "ShinobiVillage"
+                    document.querySelectorAll('.map-section').forEach(sec => sec.classList.remove('active'));
+                    const targetSec = document.getElementById(`map-${mapKey}`);
+                    if(targetSec) targetSec.classList.add('active');
+                }
+
+                updateAll();
+            });
+        }
+
+        function fitTextToContainer(span) {
+            if(!span) return;
+            let size = 16;
+            span.style.fontSize = size + 'px';
+            const parent = span.parentElement;
+            if(!parent || parent.clientWidth === 0) return; 
+            const maxWidth = parent.clientWidth - 45; 
+            while (span.scrollWidth > maxWidth && size > 9) {
+                size--;
+                span.style.fontSize = size + 'px';
+            }
+        }
+
+        function updateMobDropdown(map) {
+            const sel = document.querySelector('[data-id="mobSelect"]');
+            const items = document.getElementById('mobOptions');
+            const mobs = gameData[map] || [];
+            items.innerHTML = mobs.length ? '' : '<div data-value="none">No Mobs</div>';
+            mobs.forEach((m, i) => items.innerHTML += `<div data-value="${m.name}" data-hp="${m.hp}" class="${i===0?'same-as-selected':''}">${m.name}</div>`);
+            
+            const first = mobs[0] || {name:'No Mobs', hp:''};
+            sel.setAttribute('data-value', first.name);
+            sel.setAttribute('data-hp', first.hp);
+            sel.querySelector('span').textContent = first.name;
+        }
+
+        function handleRankLogic(id, val) {
+            const curSel = document.querySelector('[data-id="currentRankSelect"]');
+            const tgtSel = document.querySelector('[data-id="targetRankSelect"]');
+            const cur = parseInt(curSel.getAttribute('data-value')) || 0;
+            const tgt = parseInt(tgtSel.getAttribute('data-value')) || 0;
+
+            if (id === 'currentRankSelect') {
+                updateDisabledTargetRanks(val);
+                if (tgt <= val) setSelect(tgtSel, Math.min(val + 1, rankCostsData.length - 1));
+            } else if (tgt <= cur) {
+                setSelect(tgtSel, Math.min(cur + 1, rankCostsData.length - 1));
+            }
+        }
+
+        function setSelect(el, idx) {
+            el.setAttribute('data-value', idx);
+            el.querySelector('span').textContent = `Rank ${idx}`;
+            el.querySelectorAll('.select-items div').forEach(d => d.classList.toggle('same-as-selected', d.getAttribute('data-value') == idx));
+        }
+
+        function updateDisabledTargetRanks(cur) {
+            document.querySelectorAll('#targetRankOptions div').forEach(d => d.classList.toggle('disabled', parseInt(d.getAttribute('data-value')) <= cur));
+        }
+
+        function closeAllSelects(ex) {
+            document.querySelectorAll('.custom-select').forEach(s => {
+                const sl = s.querySelector('.select-selected');
+                if (sl !== ex) { s.querySelector('.select-items').classList.add('select-hide'); sl.classList.remove('select-arrow-active'); }
+            });
+        }
     </script>
 </body>
 </html>
