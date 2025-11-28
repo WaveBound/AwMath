@@ -213,6 +213,11 @@
         border: 1px solid var(--primary-light); border-radius: var(--border-radius-sm); max-height: 250px; overflow-y: auto;
         box-shadow: 0 4px 20px rgba(0,0,0,0.5); padding: 1px 0;
       }
+      .select-items.select-up {
+  top: auto;
+  bottom: calc(100% + 8px); /* Position above the input */
+  flex-direction: column-reverse; /* Optional: keeps list order visual if needed, usually not required */
+}
       .select-items::-webkit-scrollbar { width: 6px; }
       .select-items::-webkit-scrollbar-track { background: transparent; }
       .select-items::-webkit-scrollbar-thumb { background-color: #555; border-radius: 4px; }
