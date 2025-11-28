@@ -203,7 +203,16 @@
         border: 1px solid var(--primary-border); border-radius: var(--border-radius-sm); 
         cursor: pointer; font-size: 14px; font-weight: 500; display: flex; align-items: center; justify-content: space-between; transition: all 0.2s ease; overflow: hidden; 
       }
-      .select-selected span { white-space: nowrap; overflow: hidden; text-overflow: clip; display: block; margin-right: 10px; line-height: 1.2; width: 100%; }
+.select-selected span { 
+    white-space: nowrap; 
+    overflow: hidden; 
+    text-overflow: ellipsis; /* Adds ... if it still doesn't fit */
+    display: block; 
+    margin-right: 10px; 
+    line-height: 1.2; 
+    flex: 1;       /* Takes up remaining space */
+    min-width: 0;  /* CRITICAL: Prevents flex item from forcing container width */
+}
       .select-selected:hover, .select-selected.select-arrow-active { border-color: var(--primary-light); background-color: #202023; }
       .select-arrow { width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 5px solid var(--text-muted); transition: transform 0.2s ease; flex-shrink: 0; }
       .select-selected.select-arrow-active .select-arrow { transform: rotate(180deg); border-top-color: var(--primary-light); }
@@ -1368,32 +1377,49 @@
             r.setProperty('--primary-glow', t.glow);
         }
 
-        document.querySelectorAll('.tab-button').forEach(b => {
-            b.addEventListener('click', () => {
-                document.querySelectorAll('.tab-button, .tab-content').forEach(el => el.classList.remove('active'));
-                b.classList.add('active');
-                const tab = b.dataset.tab;
-                document.getElementById(tab + '-content').classList.add('active');
-                setTheme(tab);
-                
-                // Panel Logic
-                dom.panel.classList.toggle('active', tab === 'damage'); // Show Drops on Damage
-                
-                // If exiting Mastery Potential view by clicking tabs
-                if (tab !== 'mastery') {
-                    // Hide Potential Panels
-                    dom.unitsPanel.classList.remove('active');
-                    dom.statsPanel.classList.remove('active');
-                    dom.achievementsPanel.classList.remove('active');
-                } else if (state.isPotentialOpen) {
-                    // If returning to Mastery and it was open
-                    dom.unitsPanel.classList.add('active');
-                    dom.statsPanel.classList.add('active');
-                    dom.achievementsPanel.classList.add('active');
-                    dom.panel.classList.remove('active');
-                }
+document.querySelectorAll('.tab-button').forEach(b => {
+    b.addEventListener('click', () => {
+        document.querySelectorAll('.tab-button, .tab-content').forEach(el => el.classList.remove('active'));
+        b.classList.add('active');
+        const tab = b.dataset.tab;
+        
+        // 1. Activate content
+        const activeContent = document.getElementById(tab + '-content');
+        activeContent.classList.add('active');
+        
+        setTheme(tab);
+        
+        // Panel Logic
+        dom.panel.classList.toggle('active', tab === 'damage'); 
+        
+        if (tab !== 'mastery') {
+            dom.unitsPanel.classList.remove('active');
+            dom.statsPanel.classList.remove('active');
+            dom.achievementsPanel.classList.remove('active');
+        } else if (state.isPotentialOpen) {
+            dom.unitsPanel.classList.add('active');
+            dom.statsPanel.classList.add('active');
+            dom.achievementsPanel.classList.add('active');
+            dom.panel.classList.remove('active');
+        }
+
+        // --- NEW CODE: Fix text size when tab becomes visible ---
+        // We wait 10ms to let the CSS transition/display change apply so clientWidth is not 0
+        setTimeout(() => {
+            activeContent.querySelectorAll('.custom-select').forEach(el => {
+                fitTextToContainer(el.querySelector('.select-selected span'));
             });
-        });
+            // Also resize side panels if they are active
+            if(dom.unitsPanel.classList.contains('active')) {
+                dom.unitsPanel.querySelectorAll('.custom-select').forEach(el => fitTextToContainer(el.querySelector('.select-selected span')));
+            }
+            if(dom.achievementsPanel.classList.contains('active')) {
+                dom.achievementsPanel.querySelectorAll('.custom-select').forEach(el => fitTextToContainer(el.querySelector('.select-selected span')));
+            }
+        }, 10);
+        // -------------------------------------------------------
+    });
+});
 
         function initSuffixDropdowns() {
             const ids = ['suffixSelect', 'currentMasterySuffixSelect', 'damageSuffixSelect', 'rankMpcSuffix', 'rankCurrentMasterySuffix'];
@@ -1662,98 +1688,73 @@
             inp.addEventListener('keydown', e => { if(e.key==='Enter') { e.preventDefault(); h(); inp.blur(); }});
         }
 
-function setupCustomSelect(sel) {
-    const selected = sel.querySelector('.select-selected');
-    const items = sel.querySelector('.select-items');
-    
-    // 1. Initial fit on load
-    fitTextToContainer(selected.querySelector('span'));
+        function setupCustomSelect(sel) {
+            const selected = sel.querySelector('.select-selected');
+            const items = sel.querySelector('.select-items');
+            
+            selected.addEventListener('click', e => { 
+                e.stopPropagation(); 
+                closeAllSelects(selected); 
+                items.classList.toggle('select-hide'); 
+                selected.classList.toggle('select-arrow-active'); 
+            });
+            
+            items.addEventListener('click', e => {
+                if (e.target === items || e.target.classList.contains('select-items')) return;
+                if(e.target.tagName !== 'DIV') return;
+                
+                const opt = e.target;
+                sel.setAttribute('data-value', opt.getAttribute('data-value'));
+                if(opt.hasAttribute('data-hp')) sel.setAttribute('data-hp', opt.getAttribute('data-hp'));
+                
+                const span = selected.querySelector('span');
+                span.textContent = opt.textContent;
+                fitTextToContainer(span);
 
-    selected.addEventListener('click', e => { 
-        e.stopPropagation(); 
+                items.querySelectorAll('div').forEach(d => d.classList.remove('same-as-selected'));
+                opt.classList.add('same-as-selected');
+                items.classList.add('select-hide');
+                selected.classList.remove('select-arrow-active');
         
-        const isClosing = !items.classList.contains('select-hide');
-        closeAllSelects(selected); // Close others first
-        
-        if (!isClosing) {
-            // --- LOGIC: Check screen space to decide Up or Down ---
-            const rect = selected.getBoundingClientRect();
-            const spaceBelow = window.innerHeight - rect.bottom;
-            const dropdownHeight = 250; // Max-height set in CSS
+                const id = sel.getAttribute('data-id');
+                if (id === 'mapSelect') updateMobDropdown(opt.getAttribute('data-value'));
+                if (id === 'currentRankSelect' || id === 'targetRankSelect') handleRankLogic(id, parseInt(opt.getAttribute('data-value')));
+                if (id === 'potRankSelect') span.textContent = `Rank ${opt.getAttribute('data-value')}`;
+                
+                // Map Visibility Toggle logic
+                if (id === 'potMapSelect') {
+                    const mapKey = opt.getAttribute('data-value'); // e.g. "ShinobiVillage"
+                    document.querySelectorAll('.map-section').forEach(sec => sec.classList.remove('active'));
+                    const targetSec = document.getElementById(`map-${mapKey}`);
+                    if(targetSec) targetSec.classList.add('active');
+                }
 
-            // If less than 250px space below, open UP
-            if (spaceBelow < dropdownHeight) {
-                items.classList.add('open-up');
-            } else {
-                items.classList.remove('open-up');
-            }
-
-            items.classList.remove('select-hide'); 
-            selected.classList.add('select-arrow-active'); 
+                updateAll();
+            });
         }
-    });
-    
-    items.addEventListener('click', e => {
-        if (e.target === items || e.target.classList.contains('select-items')) return;
-        if(e.target.tagName !== 'DIV') return;
-        
-        const opt = e.target;
-        sel.setAttribute('data-value', opt.getAttribute('data-value'));
-        if(opt.hasAttribute('data-hp')) sel.setAttribute('data-hp', opt.getAttribute('data-hp'));
-        
-        const span = selected.querySelector('span');
-        span.textContent = opt.textContent;
-        
-        // --- LOGIC: Resize text immediately after selection ---
-        fitTextToContainer(span);
-
-        items.querySelectorAll('div').forEach(d => d.classList.remove('same-as-selected'));
-        opt.classList.add('same-as-selected');
-        items.classList.add('select-hide');
-        selected.classList.remove('select-arrow-active');
-
-        const id = sel.getAttribute('data-id');
-        if (id === 'mapSelect') updateMobDropdown(opt.getAttribute('data-value'));
-        if (id === 'currentRankSelect' || id === 'targetRankSelect') handleRankLogic(id, parseInt(opt.getAttribute('data-value')));
-        if (id === 'potRankSelect') span.textContent = `Rank ${opt.getAttribute('data-value')}`;
-        
-        if (id === 'potMapSelect') {
-            const mapKey = opt.getAttribute('data-value');
-            document.querySelectorAll('.map-section').forEach(sec => sec.classList.remove('active'));
-            const targetSec = document.getElementById(`map-${mapKey}`);
-            if(targetSec) targetSec.classList.add('active');
-        }
-
-        updateAll();
-    });
-}
 
 function fitTextToContainer(span) {
-    if(!span) return;
+    if (!span) return;
     
-    // Reset to base size to measure correctly
-    span.style.fontSize = '14px'; 
+    // Reset to default size to calculate correctly
+    let size = 16; // Default font size
+    span.style.fontSize = size + 'px';
     
     const parent = span.parentElement;
-    if(!parent || parent.clientWidth === 0) return; 
-    
-    // Account for arrow width (approx 30px) + padding
-    const maxWidth = parent.clientWidth - 35; 
-    let size = 14;
+    // If parent is hidden or collapsed, stop to prevent errors
+    if (!parent || parent.clientWidth === 0) return; 
 
-    // Shrink until it fits
-    while (span.scrollWidth > maxWidth && size > 8) {
-        size -= 0.5; // Decrement by 0.5 for smoother fit
+    // Calculate available space (Parent width - padding - arrow width)
+    const arrowWidth = 20; 
+    const padding = 35; 
+    const maxWidth = parent.clientWidth - padding - arrowWidth;
+
+    // Loop to shrink text
+    while (span.scrollWidth > maxWidth && size > 9) {
+        size--;
         span.style.fontSize = size + 'px';
     }
 }
-
-// Add global resize listener to handle screen rotation/resizing
-window.addEventListener('resize', () => {
-    document.querySelectorAll('.select-selected span').forEach(span => {
-        fitTextToContainer(span);
-    });
-});
 
         function updateMobDropdown(map) {
             const sel = document.querySelector('[data-id="mobSelect"]');
