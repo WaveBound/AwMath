@@ -598,6 +598,12 @@
                                     <button id="pot2xBtn" class="mode-btn">2x Mastery</button>
                                     <button id="potNo2xBtn" class="mode-btn active">1x Mastery</button>
                                 </div>
+                                
+                                <!-- NEW POTION TOGGLE ADDED HERE -->
+                                <div class="mode-toggle" style="margin-top: 8px;">
+                                    <button id="potPotionBtn" class="mode-btn">1.5x Potion</button>
+                                    <button id="potNoPotionBtn" class="mode-btn active">No Potion</button>
+                                </div>
                             </div>
                         </div>
 
@@ -1074,7 +1080,7 @@
             panel: document.getElementById('sidePanel') // Drops Panel
         };
 
-        const state = { rankCps: 5.8, masteryCps: 5.8, damageCps: 5.8, unitCount: 0, isPotentialOpen: false, potentialMult: 1 };
+        const state = { rankCps: 5.8, masteryCps: 5.8, damageCps: 5.8, unitCount: 0, isPotentialOpen: false, potentialMult: 1, potentialPotionMult: 1 };
         
         const suffixMap = suffixList.reduce((acc, v) => ({...acc, [v]: v[0].toUpperCase() + v.slice(1)}), {});
         const suffixes = { "none": 0 }; 
@@ -1132,6 +1138,24 @@
             
             // Setup Multiplier Toggle Button
             setupMultiplierToggle('pot2xBtn', 'potNo2xBtn', 'potentialMult', updatePotential);
+
+            // --- NEW POTION TOGGLE SETUP ---
+            const potPotionBtn = document.getElementById('potPotionBtn');
+            const potNoPotionBtn = document.getElementById('potNoPotionBtn');
+            
+            potPotionBtn.addEventListener('click', () => {
+                state.potentialPotionMult = 1.5;
+                potPotionBtn.classList.add('active');
+                potNoPotionBtn.classList.remove('active');
+                updatePotential();
+            });
+
+            potNoPotionBtn.addEventListener('click', () => {
+                state.potentialPotionMult = 1;
+                potNoPotionBtn.classList.add('active');
+                potPotionBtn.classList.remove('active');
+                updatePotential();
+            });
 
             // Bind Input Events
             const inputs = [dom.dmg, dom.masCur, dom.dInput, dom.hInput, dom.mInput, dom.dmgDmg, dom.crit, dom.dmgHero, dom.dropAmt, dom.dropMul, dom.dropChn, dom.rankMpc, dom.rankCur];
@@ -1422,6 +1446,12 @@
 
             // Apply 2x Multiplier
             result = result * BigInt(state.potentialMult);
+
+            // --- NEW: Apply Potion Multiplier (1.5x) ---
+            if (state.potentialPotionMult === 1.5) {
+                // Multiply by 15 then divide by 10 to handle the decimal with BigInt
+                result = (result * 15n) / 10n;
+            }
 
             dom.potRes.innerHTML = (result > 0n) ? formatNumber(result) : "0";
         }
