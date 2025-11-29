@@ -688,6 +688,13 @@
                                 <div class="select-items select-hide" id="potShadowGateOptions"></div>
                             </div>
                         </div>
+                        <div class="input-group" style="margin-bottom:0;">
+                            <label>Solo Rank</label>
+                             <div class="custom-select full-width" data-id="potSoloRankSelect">
+                                <div class="select-selected"><span>None (+0%)</span><div class="select-arrow"></div></div>
+                                <div class="select-items select-hide" id="potSoloRankOptions"></div>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="result-section">
@@ -1006,7 +1013,7 @@
             initBijuuDropdown(); initMagicEyeDropdown(); initTitlesDropdown(); initRaceDropdown(); initSayajinDropdown(); 
             initHakiDropdown(); initFruitsDropdown(); initBreathingDropdown(); initDemonArtDropdown(); initOrganizationDropdown(); 
             initTitanDropdown(); initShinobiRaidDropdown(); initDungeonDropdown(); initPotentialMapDropdown(); initShadowsDropdown(); 
-            initShadowGateDropdown(); initAchievementsDropdowns(); initEggCostDropdown();
+            initShadowGateDropdown(); initSoloRankDropdown(); initAchievementsDropdowns(); initEggCostDropdown();
 
             document.querySelectorAll('.custom-select').forEach(setupCustomSelect);
             setupSpeedToggle('fastBtn', 'slowBtn', 'masteryCps', updateMastery);
@@ -1146,6 +1153,7 @@
             const dungeonFactor = BigInt(document.querySelector('[data-id="potDungeonSelect"]').getAttribute('data-value') || 100);
             const shadowsFactor = BigInt(document.querySelector('[data-id="potShadowsSelect"]').getAttribute('data-value') || 100);
             const shadowGateFactor = BigInt(document.querySelector('[data-id="potShadowGateSelect"]').getAttribute('data-value') || 100);
+            const soloRankFactor = BigInt(document.querySelector('[data-id="potSoloRankSelect"]').getAttribute('data-value') || 100);
 
             const secretBossEl = document.querySelector(`[data-id="achieveSelect1"]`);
             const secretBossVal = BigInt(secretBossEl ? secretBossEl.getAttribute('data-value') || 100 : 100);
@@ -1190,7 +1198,7 @@
             dom.uRes.innerHTML = totalUnitPercent.toLocaleString() + "%";
             const unitFactor = BigInt(Math.round(100 + totalUnitPercent));
             
-            let result = (base * rankFactor * coinFactor * currFactor * wiseFactor * bijuuFactor * eyeFactor * titlesFactor * raceFactor * sayajinFactor * unitFactor * hakiFactor * fruitFactor * pirateFactor * breathingFactor * breathTrainerFactor * daFactor * orgFactor * titanFactor * leveTrainerFactor * shinobiRaidFactor * dungeonFactor * itemAccessoryFactor * playerStatsFactor * secretBossVal * generalAchievementFactor * auraFactor * avatarFactor * shadowGateFactor * shadowsFactor) / 10000000000000000000000000000000000000000000000000000000000n;
+            let result = (base * rankFactor * coinFactor * currFactor * wiseFactor * bijuuFactor * eyeFactor * titlesFactor * raceFactor * sayajinFactor * unitFactor * hakiFactor * fruitFactor * pirateFactor * breathingFactor * breathTrainerFactor * daFactor * orgFactor * titanFactor * leveTrainerFactor * shinobiRaidFactor * dungeonFactor * itemAccessoryFactor * playerStatsFactor * secretBossVal * generalAchievementFactor * auraFactor * avatarFactor * shadowGateFactor * shadowsFactor * soloRankFactor) / 1000000000000000000000000000000000000000000000000000000000000n;
             result = result * BigInt(state.potentialMult);
             if (state.potentialPotionMult === 1.5) result = (result * 15n) / 10n;
             dom.potRes.innerHTML = (result > 0n) ? formatNumber(result) : "0";
@@ -1438,6 +1446,7 @@ function updateGacha() {
         function initDungeonDropdown() { const el = document.getElementById('potDungeonOptions'); dungeonData.forEach((t, i) => el.innerHTML += `<div data-value="${t.val}" class="${i===0?'same-as-selected':''}">${t.name}</div>`); document.querySelector('[data-id="potDungeonSelect"]').setAttribute('data-value', '100'); }
         function initShadowsDropdown() { const el = document.getElementById('potShadowsOptions'); shadowsData.forEach((t, i) => el.innerHTML += `<div data-value="${t.val}" class="${i===0?'same-as-selected':''}">${t.name}</div>`); document.querySelector('[data-id="potShadowsSelect"]').setAttribute('data-value', '100'); }
         function initShadowGateDropdown() { const el = document.getElementById('potShadowGateOptions'); shadowGateData.forEach((t, i) => el.innerHTML += `<div data-value="${t.val}" class="${i===0?'same-as-selected':''}">${t.name}</div>`); document.querySelector('[data-id="potShadowGateSelect"]').setAttribute('data-value', '100'); }
+        function initSoloRankDropdown() { const el = document.getElementById('potSoloRankOptions'); soloRanksData.forEach((t, i) => el.innerHTML += `<div data-value="${t.val}" class="${i===0?'same-as-selected':''}">${t.name}</div>`); document.querySelector('[data-id="potSoloRankSelect"]').setAttribute('data-value', '100'); }
 
         function initMapDropdown() {
             const mapSelect = document.getElementById('mapOptions');
@@ -1487,7 +1496,13 @@ function initEggCostDropdown() {
             if (n === 0n) return "0";
             let val = Number(n) / 100, idx = 0;
             while (val >= 1000 && idx < Object.keys(suffixMap).length) { val /= 1000; idx++; }
-            return idx === 0 ? val.toLocaleString(undefined, {maxFractionDigits: 2}) : val.toFixed(2) + Object.values(suffixMap)[idx-1];
+            
+            // To prevent rounding up (e.g. 439.6T becoming 440T), we floor the decimal representation 
+            // before formatting.
+            if (idx === 0) return val.toLocaleString(undefined, {maxFractionDigits: 2});
+            
+            val = Math.floor(val * 100) / 100;
+            return val.toFixed(2) + Object.values(suffixMap)[idx-1];
         }
 
         function formatTime(s) {
