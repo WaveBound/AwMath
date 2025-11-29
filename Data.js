@@ -7,11 +7,58 @@ const suffixList = [
 ];
 
 const rankCostsData = [
-     "0", "30k", "252k", "2.12M", "17.78M", "149.36M", "1.25B", "10.54B", "88.53B", "743.63B",
-     "6.25T", "52.47T", "440.75T", "3.7Qa", "31.1Qa", "261.23Qa", "2.19Qi", "18.43Qi", "154.83Qi",
-     "1.30Sx", "10.93Sx", "91.77Sx", "770.88Sx", "6.48Sp", "54.29Sp", "456.90Sp", "3.84Oc", "32.24Oc",
-     "270.81Oc", "2.27No", "19.11No", "160.51No", "1.35Dc", "11.33Dc", "95.13Dc", "799.13Dc", "6.71Ud",
-     "56.39Ud", "473.65Ud", "3.98Dd", "131.33Dd", "1.14Td", "9.94Td", "86.48Td", "???", "???"
+    "0",          // Rank 0
+    "30k",        // Rank 1
+    "252k",       // Rank 2
+    "2.12M",      // Rank 3
+    "17.78M",     // Rank 4
+    "149.36M",    // Rank 5
+    "1.25B",      // Rank 6
+    "10.54B",     // Rank 7
+    "88.53B",     // Rank 8
+    "743.63B",    // Rank 9
+    "6.25T",      // Rank 10
+    "52.47T",     // Rank 11
+    "440.75T",    // Rank 12
+    "3.7Qa",      // Rank 13
+    "31.1Qa",     // Rank 14
+    "261.23Qa",   // Rank 15
+    "2.19Qi",     // Rank 16
+    "18.43Qi",    // Rank 17
+    "154.83Qi",   // Rank 18
+    "1.30Sx",     // Rank 19
+    "10.93Sx",    // Rank 20
+    "91.77Sx",    // Rank 21
+    "770.88Sx",   // Rank 22
+    "6.48Sp",     // Rank 23
+    "54.29Sp",    // Rank 24
+    "456.90Sp",   // Rank 25
+    "3.84Oc",     // Rank 26
+    "32.24Oc",    // Rank 27
+    "270.81Oc",   // Rank 28
+    "2.27No",     // Rank 29
+    "19.11No",    // Rank 30
+    "160.51No",   // Rank 31
+    "1.35Dc",     // Rank 32
+    "11.33Dc",    // Rank 33
+    "95.13Dc",    // Rank 34
+    "799.13Dc",   // Rank 35
+    "6.71Ud",     // Rank 36
+    "56.39Ud",    // Rank 37
+    "473.65Ud",   // Rank 38
+    "3.98Dd",     // Rank 39
+    "131.33Dd",   // Rank 40
+    "2.84Td",     // Rank 41
+    "25.24Td",    // Rank 42
+    "224.65Td",   // Rank 43
+    "2Qad",       // Rank 44
+    "17.79Qad",   // Rank 45
+    "142.3Qad",   // Rank 46
+    "1.14Qid",    // Rank 47
+    "9.12Qid",    // Rank 48
+    "72.9Qid",    // Rank 49
+    "583.7Qid",   // Rank 50
+    "4.67Sxd"     // Rank 51
 ];
 
 const bijuuData = [
@@ -94,6 +141,17 @@ const shadowsData = [
     { name: "None (+0%)", val: 100 }, { name: "Tenk (+50%)", val: 150 }, { name: "Greed (+100%)", val: 200 },
     { name: "Eron (+200%)", val: 300 }, { name: "Keisal (+300%)", val: 400 }, { name: "Berrion (+400%)", val: 500 },
     { name: "Igris (+600%)", val: 700 }
+];
+
+const soloRanksData = [
+    { name: "None (+0%)", val: 100 }, 
+    { name: "Rank-E (+50%)", val: 150 },
+    { name: "Rank-C (+100%)", val: 200 },
+    { name: "Rank-B (+200%)", val: 300 },
+    { name: "Rank-A (+300%)", val: 400 },
+    { name: "Rank-AA (+400%)", val: 500 },
+    { name: "Rank-S (+600%)", val: 700 },
+    { name: "Rank-SS (+1000%)", val: 1100 }
 ];
 
 const shadowGateData = [
@@ -272,7 +330,7 @@ const gameData = {
     ],
     "Shadow City": [
         { name: "TangFak", hp: "8Td" }, { name: "Sunly", hp: "400Qad" }, { name: "Haler", hp: "20Qid" }, 
-        { name: "Thomas", hp: "2Sxd" }, { name: "Frieze", hp: "50Spd" }, { name: "???", hp: "???" }
+        { name: "Thomas", hp: "2Sxd" }, { name: "Frieze", hp: "50Spd" }, { name: "Belu", hp: "100Dc" }
     ]
 };
 
