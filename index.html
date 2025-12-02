@@ -660,6 +660,15 @@
                                 <div class="select-items select-hide" id="potTitanOptions"></div>
                             </div>
                         </div>
+                         <!-- NEW TITAN PET INPUT STARTS HERE -->
+                        <div class="input-group" style="margin-bottom:0;">
+                            <label>Titan Pet</label>
+                            <div class="custom-select full-width" data-id="potTitanPetSelect">
+                                <div class="select-selected"><span>None (+0%)</span><div class="select-arrow"></div></div>
+                                <div class="select-items select-hide" id="potTitanPetOptions"></div>
+                            </div>
+                        </div>
+                        <!-- NEW TITAN PET INPUT ENDS HERE -->
                         <div class="input-group" style="margin-bottom:0;">
                             <label>Leve Trainer (%)</label>
                             <input id="potLeveTrainerInput" placeholder="0" value="0" type="number" class="numeric-input" />
@@ -1012,7 +1021,7 @@
             initSuffixDropdowns(); initRankDropdowns(); initMapDropdown(); initMobCountDropdown(); initPotentialRankDropdown(); 
             initBijuuDropdown(); initMagicEyeDropdown(); initTitlesDropdown(); initRaceDropdown(); initSayajinDropdown(); 
             initHakiDropdown(); initFruitsDropdown(); initBreathingDropdown(); initDemonArtDropdown(); initOrganizationDropdown(); 
-            initTitanDropdown(); initShinobiRaidDropdown(); initDungeonDropdown(); initPotentialMapDropdown(); initShadowsDropdown(); 
+            initTitanDropdown(); initTitanPetDropdown(); initShinobiRaidDropdown(); initDungeonDropdown(); initPotentialMapDropdown(); initShadowsDropdown(); 
             initShadowGateDropdown(); initSoloRankDropdown(); initAchievementsDropdowns(); initEggCostDropdown();
 
             document.querySelectorAll('.custom-select').forEach(setupCustomSelect);
@@ -1149,6 +1158,7 @@
             const breathingFactor = BigInt(document.querySelector('[data-id="potBreathingSelect"]').getAttribute('data-value') || 100);
             const orgFactor = BigInt(document.querySelector('[data-id="potOrgSelect"]').getAttribute('data-value') || 100);
             const titanFactor = BigInt(document.querySelector('[data-id="potTitanSelect"]').getAttribute('data-value') || 100);
+            const titanPetFactor = BigInt(document.querySelector('[data-id="potTitanPetSelect"]').getAttribute('data-value') || 100);
             const shinobiRaidFactor = BigInt(document.querySelector('[data-id="potShinobiRaidSelect"]').getAttribute('data-value') || 100);
             const dungeonFactor = BigInt(document.querySelector('[data-id="potDungeonSelect"]').getAttribute('data-value') || 100);
             const shadowsFactor = BigInt(document.querySelector('[data-id="potShadowsSelect"]').getAttribute('data-value') || 100);
@@ -1198,7 +1208,7 @@
             dom.uRes.innerHTML = totalUnitPercent.toLocaleString() + "%";
             const unitFactor = BigInt(Math.round(100 + totalUnitPercent));
             
-            let result = (base * rankFactor * coinFactor * currFactor * wiseFactor * bijuuFactor * eyeFactor * titlesFactor * raceFactor * sayajinFactor * unitFactor * hakiFactor * fruitFactor * pirateFactor * breathingFactor * breathTrainerFactor * daFactor * orgFactor * titanFactor * leveTrainerFactor * shinobiRaidFactor * dungeonFactor * itemAccessoryFactor * playerStatsFactor * secretBossVal * generalAchievementFactor * auraFactor * avatarFactor * shadowGateFactor * shadowsFactor * soloRankFactor) / 1000000000000000000000000000000000000000000000000000000000000n;
+            let result = (base * rankFactor * coinFactor * currFactor * wiseFactor * bijuuFactor * eyeFactor * titlesFactor * raceFactor * sayajinFactor * unitFactor * hakiFactor * fruitFactor * pirateFactor * breathingFactor * breathTrainerFactor * daFactor * orgFactor * titanFactor * titanPetFactor * leveTrainerFactor * shinobiRaidFactor * dungeonFactor * itemAccessoryFactor * playerStatsFactor * secretBossVal * generalAchievementFactor * auraFactor * avatarFactor * shadowGateFactor * shadowsFactor * soloRankFactor) / 100000000000000000000000000000000000000000000000000000000000000n;
             result = result * BigInt(state.potentialMult);
             if (state.potentialPotionMult === 1.5) result = (result * 15n) / 10n;
             dom.potRes.innerHTML = (result > 0n) ? formatNumber(result) : "0";
@@ -1442,6 +1452,7 @@ function updateGacha() {
         function initDemonArtDropdown() { const el = document.getElementById('potDemonArtOptions'); demonArtData.forEach((e, i) => el.innerHTML += `<div data-value="${e.base}" class="${i===0?'same-as-selected':''}">${e.name}</div>`); document.querySelector('[data-id="potDemonArtSelect"]').setAttribute('data-value', '0'); }
         function initOrganizationDropdown() { const el = document.getElementById('potOrgOptions'); organizationData.forEach((o, i) => el.innerHTML += `<div data-value="${o.val}" class="${i===0?'same-as-selected':''}">${o.name}</div>`); document.querySelector('[data-id="potOrgSelect"]').setAttribute('data-value', '100'); }
         function initTitanDropdown() { const el = document.getElementById('potTitanOptions'); titanData.forEach((t, i) => el.innerHTML += `<div data-value="${t.val}" class="${i===0?'same-as-selected':''}">${t.name}</div>`); document.querySelector('[data-id="potTitanSelect"]').setAttribute('data-value', '100'); }
+        function initTitanPetDropdown() { const el = document.getElementById('potTitanPetOptions'); titanPetData.forEach((t, i) => el.innerHTML += `<div data-value="${t.val}" class="${i===0?'same-as-selected':''}">${t.name}</div>`); document.querySelector('[data-id="potTitanPetSelect"]').setAttribute('data-value', '100'); }
         function initShinobiRaidDropdown() { const el = document.getElementById('potShinobiRaidOptions'); shinobiRaidData.forEach((t, i) => el.innerHTML += `<div data-value="${t.val}" class="${i===0?'same-as-selected':''}">${t.name}</div>`); document.querySelector('[data-id="potShinobiRaidSelect"]').setAttribute('data-value', '100'); }
         function initDungeonDropdown() { const el = document.getElementById('potDungeonOptions'); dungeonData.forEach((t, i) => el.innerHTML += `<div data-value="${t.val}" class="${i===0?'same-as-selected':''}">${t.name}</div>`); document.querySelector('[data-id="potDungeonSelect"]').setAttribute('data-value', '100'); }
         function initShadowsDropdown() { const el = document.getElementById('potShadowsOptions'); shadowsData.forEach((t, i) => el.innerHTML += `<div data-value="${t.val}" class="${i===0?'same-as-selected':''}">${t.name}</div>`); document.querySelector('[data-id="potShadowsSelect"]').setAttribute('data-value', '100'); }

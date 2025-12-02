@@ -127,6 +127,17 @@ const titanData = [
     { name: "Colossus (+600%)", val: 700 }, { name: "Hunter (+1000%)", val: 1100 }
 ];
 
+const titanPetData = [
+    { name: "None (+0%)", val: 100 },
+    { name: "Messenger Pigeon (+50%)", val: 150 },
+    { name: "Patrol Crow (+100%)", val: 200 },
+    { name: "Small Horse (+200%)", val: 300 },
+    { name: "Marley Owl (+300%)", val: 400 },
+    { name: "Scout Dog (+400%)", val: 500 },
+    { name: "White Bird (+600%)", val: 700 },
+    { name: "Military Cat (+1000%)", val: 1100 }
+];
+
 const shinobiRaidData = [
     { name: "None (+0%)", val: 100 }, { name: "Base (+50%)", val: 150 }, { name: "Rage (+100%)", val: 200 },
     { name: "Beast (+200%)", val: 300 }, { name: "Light (+300%)", val: 400 }, { name: "Kitsune (+1000%)", val: 1100 }
