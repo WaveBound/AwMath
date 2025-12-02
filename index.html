@@ -1,0 +1,1667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Calculator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+      :root {
+        /* --- Base Colors (Dark Theme) --- */
+        --bg-app: #09090b; 
+        --bg-card: #121215; 
+        --bg-input: #18181b; 
+        --border-color: #27272a;
+
+        /* --- Default Theme Variables --- */
+        --primary: #3b82f6; 
+        --primary-light: #60a5fa; 
+        --primary-border: #3b82f6;
+        --primary-dim: rgba(59, 130, 246, 0.15); 
+        --primary-glow: rgba(59, 130, 246, 0.5);
+
+        /* Text & UI */
+        --text-main: #ffffff; 
+        --text-muted: #a1a1aa;
+        --border-radius: 16px; 
+        --border-radius-sm: 10px;
+        --active-gradient: radial-gradient(circle at center, var(--primary-dim) 0%, transparent 75%);
+        --active-gradient-tight: radial-gradient(circle at center, var(--primary-dim) 0%, transparent 60%); 
+        --active-border: 1px solid var(--primary-border);
+      }
+
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+
+      body {
+        background-color: var(--bg-app); 
+        color: var(--text-main); 
+        font-family: 'Inter', sans-serif;
+        display: flex; flex-direction: column; justify-content: center; align-items: center;
+        min-height: 100vh; padding: 40px 20px; position: relative; overflow-x: hidden; overflow-y: auto; 
+        -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; cursor: default;
+      }
+
+      input { -webkit-user-select: text; -moz-user-select: text; -ms-user-select: text; user-select: text; cursor: text; }
+
+      .bg-glow {
+        position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+        width: 100vw; height: 100vh; background: radial-gradient(circle at center, var(--primary-glow) 0%, transparent 65%);
+        opacity: 0.25; filter: blur(120px); z-index: -1; pointer-events: none; transition: background 0.5s ease;
+      }
+
+      .content-wrapper { position: relative; width: 100%; max-width: 855px; margin: 0 auto; }
+      
+      .main-container {
+        width: 100%; background-color: var(--bg-card); border: 1px solid var(--border-color);
+        border-radius: var(--border-radius); position: relative;
+        backdrop-filter: blur(10px); z-index: 2;
+        overflow: visible; 
+        display: flex; flex-direction: column;
+        transition: height 0.3s ease;
+      }
+
+      /* --- Side Panel Architecture --- */
+      .side-column {
+          position: absolute; top: 50%; transform: translateY(-50%);
+          display: flex; flex-direction: column; gap: 20px;
+          width: 270px; 
+          z-index: 1; pointer-events: none;
+      }
+
+      .side-column.left-aligned { right: 100%; margin-right: 20px; align-items: flex-end; }
+      .side-column.right-aligned { left: 100%; margin-left: 20px; align-items: flex-start; }
+
+      .side-panel {
+          width: 100%; height: auto; 
+          background-color: var(--bg-card); border: 1px solid var(--border-color); 
+          border-radius: var(--border-radius); padding: 22px; 
+          display: none; flex-direction: column; opacity: 0; backdrop-filter: blur(10px);
+          transition: opacity 0.3s ease, transform 0.3s ease;
+          pointer-events: auto; 
+      }
+
+      .side-panel.active { display: flex; opacity: 1; }
+      
+      .side-column.right-aligned .side-panel.active { animation: fadeSlideInRight 0.4s ease forwards; }
+      @keyframes fadeSlideInRight { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+
+      .side-column.left-aligned .side-panel.active { animation: fadeSlideInLeft 0.4s ease forwards; }
+      @keyframes fadeSlideInLeft { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: translateX(0); } }
+      
+      @media (max-width: 1650px) {
+          .side-column { 
+              position: relative; top: auto; transform: none !important;
+              margin: 20px auto 0; width: 100%; max-width: 600px; 
+              align-items: stretch !important;
+          }
+          .side-column.left-aligned, .side-column.right-aligned { left: auto; right: auto; margin-left: auto; margin-right: auto; }
+          .side-panel.active { animation: fadeInBottom 0.4s ease forwards; }
+          @keyframes fadeInBottom { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+      }
+
+      /* Navigation Tabs */
+      .tab-nav { display: flex; padding: 12px; gap: 8px; border-bottom: 1px solid var(--border-color); background-color: rgba(0,0,0,0.2); border-radius: var(--border-radius) var(--border-radius) 0 0; flex-shrink: 0; }
+      .tab-button {
+        flex: 1; padding: 10px; background: transparent; border: 1px solid transparent; border-radius: 8px;
+        color: var(--text-muted); font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;
+      }
+      .tab-button:hover { color: var(--text-main); background-color: rgba(255,255,255,0.03); }
+      .tab-button.active {
+        background-color: #000; background-image: var(--active-gradient); border: var(--active-border);
+        color: var(--text-main); text-shadow: 0 0 15px var(--primary-glow);
+      }
+
+      .tab-content { display: none; padding: 30px; animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+      .tab-content.active { display: block; }
+      @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+      .tab-content h2 { text-align: center; margin-bottom: 30px; font-weight: 700; }
+      
+      /* Input Grids */
+      .mastery-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 20px; }
+      .input-group { margin-bottom: 18px; min-width: 0; }
+      .input-group label {
+        display: flex; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em;
+        font-weight: 600; margin-bottom: 8px;
+        color: var(--text-muted); justify-content: space-between; align-items: center;
+      }
+      .input-row-multi { display: flex; gap: 20px; }
+      .input-col { flex: 1; }
+      .input-row { display: flex; gap: 12px; }
+      
+      .potential-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+      .potential-grid.global-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; align-items: start; }
+
+      .max-btn {
+          height: 40px; padding: 0 16px; background: rgba(59, 130, 246, 0.1);
+          border: 1px solid var(--primary-border); color: var(--primary-light);
+          border-radius: var(--border-radius-sm); font-weight: 800; font-size: 12px;
+          cursor: pointer; transition: all 0.2s ease; text-transform: uppercase;
+          letter-spacing: 0.05em; white-space: nowrap; flex-shrink: 0;
+      }
+      .max-btn:hover { background: rgba(59, 130, 246, 0.2); color: var(--primary-light); border-color: var(--primary-light); }
+      .max-btn:active { transform: scale(0.96); }
+
+      .map-section { display: none; grid-template-columns: repeat(4, 1fr); gap: 18px; animation: fadeIn 0.3s ease; }
+      .map-section.active { display: grid; }
+      
+      .rank-select-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; }
+      .rank-arrow { color: var(--primary-light); opacity: 0.8; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+
+      .numeric-input {
+        width: 100%; height: 40px; padding: 12px 16px; 
+        border-radius: var(--border-radius-sm); border: 1px solid var(--primary-border);
+        font-size: 14px; font-family: 'Inter', sans-serif; background-color: var(--bg-input); color: var(--text-main); transition: all 0.2s ease;
+      }
+      .numeric-input:focus { outline: none; border-color: var(--primary-light); background-color: #202023; }
+      
+      input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+      input[type=number] { -moz-appearance: textfield; appearance: textfield; }
+      
+      .mode-toggle { display: flex; background-color: rgba(0,0,0,0.2); padding: 5px; border-radius: 12px; border: 1px solid var(--border-color); }
+      .mode-btn {
+        flex: 1; padding: 12px; cursor: pointer; background: transparent; color: var(--text-muted);
+        border: 1px solid transparent; border-radius: 8px; font-size: 14px; font-weight: 600; transition: all 0.3s ease; text-align: center;
+      }
+      .mode-btn:hover { color: var(--text-main); }
+      .mode-btn.active {
+        background-color: #000; background-image: var(--active-gradient-tight); border: var(--active-border);
+        color: #fff; text-shadow: 0 0 10px var(--primary-glow);
+      }
+      .mode-btn .small { display: block; font-size: 11px; opacity: 0.7; margin-top: 3px; font-weight: 400; }
+      
+      .custom-select { position: relative; width: 125px; flex-shrink: 0; font-family: 'Inter', sans-serif; }
+      .custom-select.full-width { width: 100%; }
+      .custom-select.compact { width: auto; flex: 1; min-width: 0; }
+      
+      .time-input-group { display: flex; gap: 8px; }
+      .time-input-group input { flex-grow: 1; text-align: center; font-weight: 500; padding: 12px 10px; }
+      .time-label { font-size: 11px; color: var(--text-muted); text-align: center; margin-top: 5px; }
+      
+      .select-selected {
+        background-color: var(--bg-input); color: var(--text-main); height: 40px; padding: 0 16px; 
+        border: 1px solid var(--primary-border); border-radius: var(--border-radius-sm); 
+        cursor: pointer; font-size: 14px; font-weight: 500; display: flex; align-items: center; justify-content: space-between; transition: all 0.2s ease; overflow: hidden; 
+      }
+      .select-selected span { white-space: nowrap; overflow: hidden; text-overflow: clip; display: block; margin-right: 10px; line-height: 1.2; width: 100%; }
+      .select-selected:hover, .select-selected.select-arrow-active { border-color: var(--primary-light); background-color: #202023; }
+      .select-arrow { width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 5px solid var(--text-muted); transition: transform 0.2s ease; flex-shrink: 0; }
+      .select-selected.select-arrow-active .select-arrow { transform: rotate(180deg); border-top-color: var(--primary-light); }
+      
+      .select-items { display: none; } 
+
+      .portal-dropdown {
+          position: fixed; z-index: 99999; background-color: #161619; 
+          border: 1px solid var(--primary-light); border-radius: var(--border-radius-sm); 
+          max-height: 250px; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.5); 
+          padding: 1px 0; display: flex; flex-direction: column; overscroll-behavior: contain;
+      }
+      .portal-dropdown::-webkit-scrollbar { width: 6px; }
+      .portal-dropdown::-webkit-scrollbar-track { background: transparent; }
+      .portal-dropdown::-webkit-scrollbar-thumb { background-color: #555; border-radius: 4px; }
+      .portal-dropdown div {
+          color: var(--text-main); padding: 12px 16px; cursor: pointer; font-size: 13px; 
+          border-bottom: 1px solid rgba(255,255,255,0.03); user-select: none;
+      }
+      .portal-dropdown div:last-child { border-bottom: none; }
+      .portal-dropdown div.disabled { color: var(--text-muted); background: rgba(255,255,255,0.05); cursor: not-allowed; opacity: 0.5; pointer-events: none; }
+      .portal-dropdown div:hover, .portal-dropdown div.same-as-selected { background-color: var(--primary-dim); color: var(--primary-light); }
+      
+      .drop-theme { --sub-primary: #facc15; --sub-border: #ca8a04; --sub-glow: rgba(250, 204, 21, 0.4); --sub-dim: rgba(250, 204, 21, 0.1); border-color: var(--sub-border); }
+      .sub-ui-title {
+          font-size: 11px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--sub-primary);
+          margin-bottom: 20px; font-weight: 800; text-align: center; text-shadow: 0 0 10px var(--sub-glow); border-bottom: 1px solid var(--sub-dim); padding-bottom: 12px;
+      }
+      .drop-theme .numeric-input { border-color: var(--sub-border); color: #fff; font-size: 14px; padding: 10px; }
+      .drop-theme .numeric-input:focus { border-color: var(--sub-primary); box-shadow: 0 0 10px -2px var(--sub-dim); }
+      .drop-theme label { color: #eab308; font-size: 11px; margin-bottom: 6px; } 
+      .drop-theme .result-box.mini-highlight {
+          background: radial-gradient(circle at center, rgba(250, 204, 21, 0.15) 0%, transparent 80%);
+          border: 1px solid var(--sub-border); margin-top: 15px; padding: 20px 15px; text-align: center; border-radius: 12px;
+      }
+      .drop-theme .result-box .value { color: var(--sub-primary); font-size: 26px; font-weight: 800; margin-bottom: 5px; text-shadow: 0 0 15px var(--sub-glow); }
+      .drop-theme .result-box .label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; color: rgba(255, 255, 255, 0.6); }
+
+      .result-section { margin-top: 10px; padding-top: 30px; border-top: 1px solid var(--border-color); flex-shrink: 0; }
+      .result-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 13px; margin-bottom: 12px; }
+      .result-box {
+        background: rgba(255,255,255,0.02); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);
+        text-align: center; display: flex; flex-direction: column; justify-content: center; transition: border-color 0.3s ease;
+      }
+      .result-box.highlight {
+        grid-column: 1 / -1; margin-top: 10px; background-color: #000; background-image: var(--active-gradient); border: var(--active-border);
+        height: 104px; padding: 0 20px;
+      }
+      .result-box.mini-highlight { background-color: #000; background-image: var(--active-gradient); border: var(--active-border); }
+      .result-box .value { font-size: 21px; font-weight: 700; color: var(--primary-light); margin-bottom: 6px; text-shadow: 0 0 15px var(--primary-glow); transition: color 0.3s ease; }
+      .result-box.highlight .value { font-size: 32px; color: #fff; text-shadow: 0 0 5px var(--primary-light); word-break: break-all; margin-bottom: 4px; }
+      .result-box .label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
+      .result-box.highlight .label { color: rgba(255,255,255,0.7); }
+
+      .rank-progress-container { margin-top: 8px; width: 100%; display: flex; align-items: center; gap: 10px; }
+      .rank-progress-track { flex: 1; height: 4px; background: rgba(255,255,255,0.1); border-radius: 6px; overflow: hidden; }
+      .rank-progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--primary), var(--primary-light)); box-shadow: 0 0 15px var(--primary-glow); border-radius: 6px; transition: width 0.3s ease; }
+      .rank-progress-text { font-size: 11px; font-weight: 700; color: var(--primary-light); min-width: 35px; text-align: right; line-height: 1; }
+
+      .footer { text-align: center; margin-top: 30px; color: var(--text-muted); font-size: 13px; opacity: 0.6; width: 100%; }
+      .footer-tag { font-size: 15px; font-weight: 800; color: var(--primary-light); text-shadow: 0 0 15px var(--primary-glow); }
+      .placeholder-text { color: var(--text-muted); text-align: center; padding: 50px; border: 2px dashed var(--border-color); border-radius: var(--border-radius); background: rgba(0,0,0,0.2); }
+      
+      .secret-zone { position: fixed; bottom: 0; right: 0; width: 60px; height: 60px; z-index: 9999; }
+      .secret-popup {
+          position: absolute; bottom: 20px; right: 20px; background: var(--bg-card); border: 1px solid var(--primary-border);
+          padding: 15px 25px; border-radius: 12px; box-shadow: 0 0 20px var(--primary-glow); backdrop-filter: blur(10px);
+          transform: translateY(120%) scale(0.9); opacity: 0; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); pointer-events: none;
+          display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 140px; text-align: center;
+      }
+      .secret-zone:hover .secret-popup { transform: translateY(0) scale(1); opacity: 1; pointer-events: auto; }
+      .secret-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--text-muted); margin-bottom: 5px; font-weight: 600; }
+      .secret-name {
+          font-size: 15px; font-weight: 800; background: linear-gradient(90deg, #fff, var(--primary-light));
+          background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 0 15px var(--primary-glow);
+      }
+
+      .mini-link-btn {
+        background: none; border: none; padding: 0;
+        color: var(--primary-light); font-size: 11px; font-weight: 700;
+        cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em;
+        transition: text-shadow 0.3s, opacity 0.3s; opacity: 0.9;
+      }
+      .mini-link-btn:hover { opacity: 1; text-shadow: 0 0 8px var(--primary-glow); text-decoration: underline; }
+      
+      .back-btn {
+          background: transparent; border: none; color: var(--text-muted);
+          font-weight: 700; cursor: pointer; font-size: 14px; margin-bottom: 20px;
+          display: flex; align-items: center; gap: 6px; transition: color 0.3s ease;
+      }
+      .back-btn:hover { color: var(--primary-light); }
+      
+      .level-input-wrapper { display: flex; align-items: center; gap: 5px; }
+      .level-label { font-size: 9px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+      .compact-input {
+          width: 40px; padding: 2px 0; text-align: center; font-size: 11px; font-family: 'Inter', sans-serif; font-weight: 700;
+          background: rgba(255,255,255,0.05); border: 1px solid var(--border-color);
+          border-radius: 4px; color: var(--primary-light); transition: all 0.2s;
+      }
+      .compact-input:focus { border-color: var(--primary-light); background: rgba(0,0,0,0.3); outline: none; }
+      
+      .magic-eye-label-fix { margin-bottom: 6px !important; }
+      .magic-eye-label-fix > span:first-child { position: relative; top: -2px; }
+      
+      #mastery-potential-view { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+
+      .units-grid { 
+         display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; 
+         flex: 0 1 auto; max-height: 240px; min-height: 0; overflow-y: auto; padding-right: 5px; align-content: start;
+      }
+      .units-grid::-webkit-scrollbar { width: 4px; }
+      .units-grid::-webkit-scrollbar-track { background: transparent; }
+      .units-grid::-webkit-scrollbar-thumb { background-color: var(--border-color); border-radius: 4px; }
+      .units-grid::-webkit-scrollbar-thumb:hover { background-color: var(--primary-border); }
+
+      .add-unit-btn {
+          width: 100%; padding: 10px; background: rgba(255,255,255,0.03); 
+          border: 1px dashed var(--border-color); border-radius: var(--border-radius-sm);
+          color: var(--text-muted); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;
+          cursor: pointer; transition: all 0.3s ease;
+          display: flex; align-items: center; justify-content: center; gap: 5px;
+      }
+      .add-unit-btn:hover { color: var(--primary-light); border-color: var(--primary-light); background: rgba(255,255,255,0.05); }
+      
+      .unit-ui-title {
+          font-size: 11px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--primary-light);
+          margin-bottom: 20px; font-weight: 800; text-align: center; text-shadow: 0 0 10px var(--primary-glow); 
+          border-bottom: 1px solid var(--primary-dim); padding-bottom: 12px;
+      }
+      .unit-input-group { margin-bottom: 0 !important; }
+      .unit-input-group label { color: var(--text-muted); font-size: 10px; margin-bottom: 4px; }
+      
+      .side-panel .numeric-input, .side-panel .select-selected { height: 35px !important; padding: 0 10px; font-size: 13px; }
+      .side-panel input { padding: 0 10px; }
+      
+      #unitsPanel .unit-ui-title { margin-bottom: 10px; padding-bottom: 8px; margin-top: 10px; }
+      #unitsPanel .result-box.mini-highlight { margin-top: 10px; }
+      
+      .compact-row { display: flex; gap: 10px; margin-bottom: 10px; }
+      .compact-row .input-group { flex: 1; margin-bottom: 0; }
+
+      #achievementsPanel .input-group { margin-bottom: 15px; }
+      #achievementsPanel .select-selected { height: 35px; font-size: 13px; }
+
+      #achievementsContainer {
+          max-height: 365px; overflow-y: auto; padding-right: 5px; margin-bottom: 10px; padding-bottom: 50px; 
+          overscroll-behavior: contain;
+      }
+      #achievementsContainer::-webkit-scrollbar { width: 4px; }
+      #achievementsContainer::-webkit-scrollbar-track { background: transparent; }
+      #achievementsContainer::-webkit-scrollbar-thumb { background-color: var(--border-color); border-radius: 4px; }
+      #achievementsContainer::-webkit-scrollbar-thumb:hover { background-color: var(--primary-border); }
+      
+      .map-center-limit { width: 25%; }
+  
+      @media (max-width: 768px) {
+        .map-center-limit {width: 100%; }
+        .mastery-layout { grid-template-columns: 1fr; gap: 25px; }
+        .tab-content { padding: 25px; }
+        .input-row-multi { flex-direction: column; gap: 20px; }
+        .potential-grid, .map-section { grid-template-columns: repeat(2, 1fr); gap: 15px; }
+        .potential-grid.global-grid { grid-template-columns: 1fr; } 
+        .result-grid { grid-template-columns: 1fr; }
+        .result-box.highlight { grid-column: auto; margin-top: 0; height: auto; padding: 20px; min-height: 115px; }
+        .result-box.highlight .value { font-size: 24px; white-space: normal; }
+        .input-group label { font-size: 11px; }
+      }
+    </style>
+</head>
+<body>
+    <div class="bg-glow"></div>
+    <div class="content-wrapper">
+        <div class="main-container">
+            <nav class="tab-nav">
+                <button class="tab-button active" data-tab="rank">Rank</button>
+                <button class="tab-button" data-tab="mastery">Mastery</button>
+                <button class="tab-button" data-tab="damage">Damage</button>
+                <button class="tab-button" data-tab="gacha">Gacha</button>
+            </nav>
+
+            <!-- RANK CALCULATOR -->
+            <div id="rank-content" class="tab-content active">
+                <div class="mastery-layout">
+                    <div>
+                        <div class="input-group">
+                            <label for="rankMpcInput">Mastery per Click</label>
+                            <div class="input-row">
+                                <input id="rankMpcInput" placeholder="0" type="text" class="numeric-input" />
+                                <div class="custom-select" data-id="rankMpcSuffix">
+                                    <div class="select-selected"><span>None</span><div class="select-arrow"></div></div>
+                                    <div class="select-items select-hide"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Click Speed Mode</label>
+                            <div class="mode-toggle">
+                                <button id="rankFastBtn" class="mode-btn active">Fast <span class="small">5.8/s</span></button>
+                                <button id="rankSlowBtn" class="mode-btn">Slow <span class="small">4.5/s</span></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                         <div class="input-group">
+                            <label>Rank Selection</label>
+                            <div class="rank-select-row">
+                                <div class="custom-select compact" data-id="currentRankSelect">
+                                    <div class="select-selected"><span>Rank 0</span><div class="select-arrow"></div></div>
+                                    <div class="select-items select-hide" id="currentRankOptions"></div>
+                                </div>
+                                <div class="rank-arrow">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                                </div>
+                                <div class="custom-select compact" data-id="targetRankSelect">
+                                    <div class="select-selected"><span>Rank 1</span><div class="select-arrow"></div></div>
+                                    <div class="select-items select-hide" id="targetRankOptions"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label for="rankCurrentMasteryInput">Current Mastery</label>
+                            <div class="input-row">
+                                <input id="rankCurrentMasteryInput" placeholder="0" type="text" class="numeric-input" />
+                                <div class="custom-select" data-id="rankCurrentMasterySuffix">
+                                    <div class="select-selected"><span>None</span><div class="select-arrow"></div></div>
+                                    <div class="select-items select-hide"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="result-section">
+                    <div class="result-grid">
+                        <div class="result-box"><div id="rankMpsResult" class="value">--</div><div class="label">Mastery Per Second</div></div>
+                        <div class="result-box"><div id="rankCostResult" class="value">--</div><div class="label">Rank Up Cost</div></div>
+                        <div class="result-box"><div id="rankCostRemainingResult" class="value">--</div><div class="label">Cost Remaining</div></div>
+                        <div class="result-box highlight">
+                            <div id="rankTimeResult" class="value">--</div><div class="label">Time to Rank Up</div>
+                            <div class="rank-progress-container">
+                                <div class="rank-progress-track"><div id="rankProgressBar" class="rank-progress-fill"></div></div>
+                                <div id="rankPercentLabel" class="rank-progress-text">0%</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MASTERY CALCULATOR -->
+            <div id="mastery-content" class="tab-content">
+                <div id="mastery-main-view">
+                    <div class="mastery-layout">
+                        <div>
+                            <div class="input-group">
+                                <label for="dmgInput">Mastery per Click</label>
+                                <div class="input-row">
+                                    <input id="dmgInput" placeholder="0" type="text" class="numeric-input" />
+                                    <div class="custom-select" data-id="suffixSelect">
+                                        <div class="select-selected"><span>None</span><div class="select-arrow"></div></div>
+                                        <div class="select-items select-hide"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <label>Click Speed Mode</label>
+                                <div class="mode-toggle">
+                                    <button id="fastBtn" class="mode-btn active">Fast <span class="small">5.8/s</span></button>
+                                    <button id="slowBtn" class="mode-btn">Slow <span class="small">4.5/s</span></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="input-group">
+                                <label for="currentMasteryInput">
+                                    <span>Current Mastery</span>
+                                    <span id="btnOpenPotential" class="mini-link-btn">Check Potential &rarr;</span>
+                                </label>
+                                <div class="input-row">
+                                    <input id="currentMasteryInput" placeholder="0" type="text" class="numeric-input" />
+                                    <div class="custom-select" data-id="currentMasterySuffixSelect">
+                                        <div class="select-selected"><span>None</span><div class="select-arrow"></div></div>
+                                        <div class="select-items select-hide"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <label>Time Duration (D:H:M)</label>
+                                <div class="time-input-group">
+                                    <div><input id="dayInput" type="number" value="0" min="0" class="numeric-input" /><div class="time-label">Days</div></div>
+                                    <div><input id="hourInput" type="number" value="0" min="0" class="numeric-input" /><div class="time-label">Hours</div></div>
+                                    <div><input id="minuteInput" type="number" value="0" min="0" class="numeric-input" /><div class="time-label">Minutes</div></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="result-section">
+                        <div class="result-grid">
+                            <div class="result-box"><div id="resultBox" class="value">--</div><div class="label">Mastery Per Second</div></div>
+                            <div class="result-box"><div id="perHourResult" class="value">--</div><div class="label">Mastery Per Hour</div></div>
+                            <div class="result-box"><div id="perDayResult" class="value">--</div><div class="label">Mastery Per Day</div></div>
+                            <div class="result-box highlight"><div id="totalMasteryResult" class="value">--</div><div class="label">Total Mastery After Duration</div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="mastery-potential-view" style="display: none;">
+                    <div style="margin-bottom: 20px; margin-top: -20px;">
+                        <button id="btnBackPotential" class="back-btn" style="margin-bottom:0;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                            Back to Calculator
+                        </button>
+                    </div>
+
+                    <div class="potential-grid global-grid">
+                        <div>
+                            <div class="input-group" style="margin-bottom:0;">
+                                <label>Rank</label>
+                                <div class="custom-select full-width" data-id="potRankSelect">
+                                    <div class="select-selected"><span>Rank 0</span><div class="select-arrow"></div></div>
+                                    <div class="select-items select-hide" id="potRankOptions"></div>
+                                </div>
+                                <div class="mode-toggle" style="margin-top: 8px;">
+                                    <button id="pot2xBtn" class="mode-btn">2x Mastery</button>
+                                    <button id="potNo2xBtn" class="mode-btn active">1x Mastery</button>
+                                </div>
+                                <div class="mode-toggle" style="margin-top: 8px;">
+                                    <button id="potPotionBtn" class="mode-btn">1.5x Potion</button>
+                                    <button id="potNoPotionBtn" class="mode-btn active">No Potion</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; flex-direction: column; gap: 15px;">
+                            <div class="input-group" style="margin-bottom:0;">
+                                <label>Yen Upgrade (%)</label>
+                                <input id="potDungeonCoinInput" placeholder="0" value="0" type="number" class="numeric-input" />
+                            </div>
+                            <div class="input-group" style="margin-bottom:0;">
+                                <label>Shinobi Raid</label>
+                                <div class="custom-select full-width" data-id="potShinobiRaidSelect">
+                                    <div class="select-selected"><span>None (+0%)</span><div class="select-arrow"></div></div>
+                                    <div class="select-items select-hide" id="potShinobiRaidOptions"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; flex-direction: column; gap: 15px;">
+                            <div class="input-group" style="margin-bottom:0;">
+                                <label>Token Upgrade (%)</label>
+                                <input id="potDungeonCurrencyInput" placeholder="0" value="0" type="number" class="numeric-input" />
+                            </div>
+                            <div class="input-group" style="margin-bottom:0;">
+                                <label>Dungeon Gacha</label>
+                                <div class="custom-select full-width" data-id="potDungeonSelect">
+                                    <div class="select-selected"><span>None (+0%)</span><div class="select-arrow"></div></div>
+                                    <div class="select-items select-hide" id="potDungeonOptions"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="input-group" style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-color);">
+                        <div style="display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 12px;">
+                            <span style="font-size: 14px; color: var(--primary-light); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; text-shadow: 0 0 10px var(--primary-dim);">Map Selection</span>
+                            <button id="btnMaxAll" class="max-btn" style="height: 24px; font-size: 10px; padding: 0 10px;">⚡ Max All</button>
+                        </div>
+                        <div class="input-row" style="justify-content: center;">
+                            <div class="custom-select map-center-limit" data-id="potMapSelect">
+                                <div class="select-selected"><span>Shinobi Village</span><div class="select-arrow"></div></div>
+                                <div class="select-items select-hide" id="potMapOptions"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="map-ShinobiVillage" class="map-section active">
+                        <div class="input-group" style="margin-bottom:0;">
+                            <label>Bijuu Gacha</label>
+                            <div class="custom-select full-width" data-id="potBijuuSelect">
+                                <div class="select-selected"><span>None (+0%)</span><div class="select-arrow"></div></div>
+                                <div class="select-items select-hide" id="potBijuuOptions"></div>
+                            </div>
+                        </div>
+                        <div class="input-group" style="margin-bottom:0;">
+                            <label class="magic-eye-label-fix">
+                                <span>Magic Eyes</span>
+                                <div class="level-input-wrapper"><span class="level-label">Lvl</span><input id="potMagicEyeLevel" class="compact-input" type="number" value="0" min="0" max="50" placeholder="0" /></div>
+                            </label>
+                            <div class="custom-select full-width" data-id="potMagicEyeSelect">
+                                <div class="select-selected"><span>None (+0%)</span><div class="select-arrow"></div></div>
+                                <div class="select-items select-hide" id="potMagicEyeOptions"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="map-NamekPlanet" class="map-section">
+                        <div class="input-group" style="margin-bottom:0;">
+                            <label>Race Gacha</label>
+                            <div class="custom-select full-width" data-id="potRaceSelect">
+                                <div class="select-selected"><span>None (+0%)</span><div class="select-arrow"></div></div>
+                                <div class="select-items select-hide" id="potRaceOptions"></div>
+                            </div>
+                        </div>
+                        <div class="input-group" style="margin-bottom:0;">
+                            <label>Sayajin Gacha</label>
+                            <div class="custom-select full-width" data-id="potSayajinSelect">
+                                <div class="select-selected"><span>None (+0%)</span><div class="select-arrow"></div></div>
+                                <div class="select-items select-hide" id="potSayajinOptions"></div>
+                            </div>
+                        </div>
+                        <div class="input-group" style="margin-bottom:0;">
+                            <label>Titles</label>
+                            <div class="custom-select full-width" data-id="potTitlesSelect">
+                                <div class="select-selected"><span>None (+0%)</span><div class="select-arrow"></div></div>
+                                <div class="select-items select-hide" id="potTitlesOptions"></div>
+                            </div>
+                        </div>
+                        <div class="input-group" style="margin-bottom:0;">
+                            <label>Wise Trainer (%)</label>
+                            <input id="potWiseTrainerInput" placeholder="0" value="0" type="number" class="numeric-input" />
+                        </div>
+                    </div>
+
+                    <div id="map-DesertLand" class="map-section">
+                        <div class="input-group" style="margin-bottom:0;">
+                            <label>Haki Gacha</label>
+                            <div class="custom-select full-width" data-id="potHakiSelect">
+                                <div class="select-selected"><span>None (+0%)</span><div class="select-arrow"></div></div>
+                                <div class="select-items select-hide" id="potHakiOptions"></div>
+                            </div>
+                        </div>
+                        <div class="input-group" style="margin-bottom:0;">
+                            <label>Fruits Gacha</label>
+                            <div class="custom-select full-width" data-id="potFruitsSelect">
+                                <div class="select-selected"><span>None (+0%)</span><div class="select-arrow"></div></div>
+                                <div class="select-items select-hide" id="potFruitsOptions"></div>
+                            </div>
+                        </div>
+                         <div class="input-group" style="margin-bottom:0;">
+                            <label>Pirate Trainer (%)</label>
+                            <input id="potPirateTrainerInput" placeholder="0" value="0" type="number" class="numeric-input" />
+                        </div>
+                    </div>
+
+                    <div id="map-DemonLand" class="map-section">
+                        <div class="input-group" style="margin-bottom:0;">
+                            <label>Breathing Gacha</label>
+                            <div class="custom-select full-width" data-id="potBreathingSelect">
+                                <div class="select-selected"><span>None (+0%)</span><div class="select-arrow"></div></div>
+                                <div class="select-items select-hide" id="potBreathingOptions"></div>
+                            </div>
+                        </div>
+                        <div class="input-group" style="margin-bottom:0;">
+                            <label>Breath Trainer (%)</label>
+                            <input id="potBreathTrainerInput" placeholder="0" value="0" type="number" class="numeric-input" />
+                        </div>
+                        <div class="input-group" style="margin-bottom:0;">
+                            <label class="magic-eye-label-fix">
+                                <span>Demon Art</span>
+                                <div class="level-input-wrapper"><span class="level-label">Lvl</span><input id="potDemonArtLevel" class="compact-input" type="number" value="0" min="0" max="50" placeholder="0" /></div>
+                            </label>
+                            <div class="custom-select full-width" data-id="potDemonArtSelect">
+                                <div class="select-selected"><span>None (+0%)</span><div class="select-arrow"></div></div>
+                                <div class="select-items select-hide" id="potDemonArtOptions"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="map-Paradis" class="map-section">
+                         <div class="input-group" style="margin-bottom:0;">
+                            <label>Titan Gacha</label>
+                            <div class="custom-select full-width" data-id="potTitanSelect">
+                                <div class="select-selected"><span>None (+0%)</span><div class="select-arrow"></div></div>
+                                <div class="select-items select-hide" id="potTitanOptions"></div>
+                            </div>
+                        </div>
+                         <!-- NEW TITAN PET INPUT STARTS HERE -->
+                        <div class="input-group" style="margin-bottom:0;">
+                            <label>Titan Pet</label>
+                            <div class="custom-select full-width" data-id="potTitanPetSelect">
+                                <div class="select-selected"><span>None (+0%)</span><div class="select-arrow"></div></div>
+                                <div class="select-items select-hide" id="potTitanPetOptions"></div>
+                            </div>
+                        </div>
+                        <!-- NEW TITAN PET INPUT ENDS HERE -->
+                        <div class="input-group" style="margin-bottom:0;">
+                            <label>Leve Trainer (%)</label>
+                            <input id="potLeveTrainerInput" placeholder="0" value="0" type="number" class="numeric-input" />
+                        </div>
+                         <div class="input-group" style="margin-bottom:0;">
+                            <label>Organization</label>
+                            <div class="custom-select full-width" data-id="potOrgSelect">
+                                <div class="select-selected"><span>None (+0%)</span><div class="select-arrow"></div></div>
+                                <div class="select-items select-hide" id="potOrgOptions"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="map-ShadowCity" class="map-section">
+                        <div class="input-group" style="margin-bottom:0;">
+                            <label>Shadows Gacha</label>
+                            <div class="custom-select full-width" data-id="potShadowsSelect">
+                                <div class="select-selected"><span>None (+0%)</span><div class="select-arrow"></div></div>
+                                <div class="select-items select-hide" id="potShadowsOptions"></div>
+                            </div>
+                        </div>
+                        <div class="input-group" style="margin-bottom:0;">
+                            <label>Shadow Gate</label>
+                             <div class="custom-select full-width" data-id="potShadowGateSelect">
+                                <div class="select-selected"><span>None (+0%)</span><div class="select-arrow"></div></div>
+                                <div class="select-items select-hide" id="potShadowGateOptions"></div>
+                            </div>
+                        </div>
+                        <div class="input-group" style="margin-bottom:0;">
+                            <label>Solo Rank</label>
+                             <div class="custom-select full-width" data-id="potSoloRankSelect">
+                                <div class="select-selected"><span>None (+0%)</span><div class="select-arrow"></div></div>
+                                <div class="select-items select-hide" id="potSoloRankOptions"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="result-section">
+                        <div class="result-grid" style="grid-template-columns: 1fr;"> 
+                            <div class="result-box highlight"><div id="potMpcResult" class="value">--</div><div class="label">Potential Mastery Per Click</div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DAMAGE CALCULATOR -->
+            <div id="damage-content" class="tab-content">
+                 <div class="mastery-layout">
+                    <div>
+                        <div class="input-row-multi">
+                            <div class="input-col" style="flex: 2;">
+                                <div class="input-group">
+                                    <label for="damageDmgInput">Damage per Click</label>
+                                    <div class="input-row">
+                                        <input id="damageDmgInput" placeholder="0" type="text" class="numeric-input" />
+                                        <div class="custom-select" data-id="damageSuffixSelect">
+                                            <div class="select-selected"><span>None</span><div class="select-arrow"></div></div>
+                                            <div class="select-items select-hide"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="input-col" style="flex: 1;">
+                                <div class="input-group">
+                                    <label for="critInput">Crit %</label>
+                                    <div class="input-row"><input id="critInput" placeholder="0" type="number" min="0" max="100" class="numeric-input" style="text-align: center;" /></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="input-row-multi">
+                            <div class="input-col">
+                                <div class="input-group">
+                                    <label>Click Speed Mode</label>
+                                    <div class="mode-toggle">
+                                        <button id="dmgFastBtn" class="mode-btn active">Fast <span class="small">5.8/s</span></button>
+                                        <button id="dmgSlowBtn" class="mode-btn">Slow <span class="small">4.5/s</span></button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="input-col">
+                                <div class="input-group">
+                                    <label>Hero % <span style="font-size:9px; opacity:0.7;">(Hits every 0.5s)</span></label>
+                                    <input id="heroDmgInput" placeholder="0" type="number" min="0" class="numeric-input" style="text-align: center;" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="input-row-multi">
+                             <div class="input-col">
+                                <div class="input-group">
+                                    <label>Map Selection</label>
+                                    <div class="custom-select full-width" data-id="mapSelect">
+                                        <div class="select-selected"><span>Select Map</span><div class="select-arrow"></div></div>
+                                        <div class="select-items select-hide" id="mapOptions"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="input-col">
+                                 <div class="input-group">
+                                    <label>Mob Selection</label>
+                                    <div class="custom-select full-width" data-id="mobSelect">
+                                        <div class="select-selected"><span>Select Mob</span><div class="select-arrow"></div></div>
+                                        <div class="select-items select-hide" id="mobOptions"><div data-value="none">Select Map First</div></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="input-row-multi">
+                            <div class="input-col" style="flex: 2;">
+                                <div class="input-group" style="margin-bottom: 0;">
+                                    <label>Selected Mob HP</label>
+                                    <div class="result-box mini-highlight" style="padding: 10px;">
+                                        <div id="mobHpResultBox" class="value" style="font-size: 20px;">--</div><div class="label">Mob HP</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="input-col" style="flex: 1;">
+                                 <div class="input-group" style="margin-bottom: 0;">
+                                    <label>Mob Count</label>
+                                    <div class="custom-select full-width" data-id="mobCountSelect">
+                                        <div class="select-selected"><span>1</span><div class="select-arrow"></div></div>
+                                        <div class="select-items select-hide" id="mobCountOptions"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="result-section">
+                    <div class="result-grid">
+                        <div class="result-box"><div id="dmgPerSecResult" class="value">--</div><div class="label">Damage Per Second</div></div>
+                        <div class="result-box"><div id="mobsPerMinuteResult" class="value">--</div><div class="label">Mobs Killed Per Minute</div></div>
+                        <div class="result-box"><div id="mobsPerHourResult" class="value">--</div><div class="label">Mobs Killed Per Hour</div></div>
+                        <div class="result-box highlight"><div id="timeToKillResult" class="value">Select Mob</div><div class="label">Time to Kill One Mob</div></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GACHA CALCULATOR -->
+            <div id="gacha-content" class="tab-content">
+                <div class="mastery-layout">
+                    <!-- Column 1: Speed, Amount, Gamepass -->
+                    <div>
+                        <div class="input-row-multi">
+                             <div class="input-col" style="flex: 1;">
+                                <div class="input-group">
+                                    <label for="gachaAmountInput">Batch Size</label>
+                                    <input id="gachaAmountInput" placeholder="3" value="3" type="number" class="numeric-input" />
+                                </div>
+                            </div>
+                             <div class="input-col" style="flex: 2;">
+                                <div class="input-group">
+                                    <label>Gamepass Selection</label>
+                                    <div class="mode-toggle">
+                                        <button id="gachaFastBtn" class="mode-btn active">Fast Open <span class="small">1.2s Per Open</span></button>
+                                        <button id="gachaNormalBtn" class="mode-btn">No GP <span class="small">2s Per Open</span></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Opening Duration (D:H:M)</label>
+                            <div class="time-input-group">
+                                <div><input id="gachaDayInput" type="number" value="0" min="0" class="numeric-input" /><div class="time-label">Days</div></div>
+                                <div><input id="gachaHourInput" type="number" value="0" min="0" class="numeric-input" /><div class="time-label">Hours</div></div>
+                                <div><input id="gachaMinuteInput" type="number" value="0" min="0" class="numeric-input" /><div class="time-label">Minutes</div></div>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Map (Egg Cost)</label>
+                            <div class="custom-select full-width" data-id="eggCostSelect">
+                                <div class="select-selected"><span>Shinobi Village (50)</span><div class="select-arrow"></div></div>
+                                <div class="select-items select-hide" id="eggCostOptions"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Column 2: Probabilities -->
+                    <div>
+                        <div class="input-group">
+                            <label for="gachaLegInput">Legendary Chance (%)</label>
+                            <input id="gachaLegInput" placeholder="0.5" type="number" step="0.01" class="numeric-input" />
+                        </div>
+                        <div class="input-group">
+                            <label for="gachaMythInput">Mythic Chance (%)</label>
+                            <input id="gachaMythInput" placeholder="0.1" type="number" step="0.01" class="numeric-input" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="result-section">
+                    <div class="result-grid">
+                        <div class="result-box"><div id="gachaRealSpeedResult" class="value">--</div><div class="label">Opens / Second</div></div>
+                        <div class="result-box"><div id="gachaPerHourResult" class="value">--</div><div class="label">Opens Per Hour</div></div>
+                        <div class="result-box"><div id="gachaTotalCostResult" class="value">0</div><div class="label" id="gachaTotalCostLabel">Total Cost</div></div>
+                        <div class="result-box highlight"><div id="gachaTotalOpensResult" class="value">0</div><div class="label">Total Opens</div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="side-column left-aligned">
+            <div id="statsPanel" class="side-panel">
+                <h3 class="unit-ui-title">Player Stats</h3>
+                <div class="compact-row">
+                    <div class="input-group"><label>Weapon</label><input id="itemWeaponInput" type="number" class="numeric-input" placeholder="1" value="1" style="text-align:center;"></div>
+                    <div class="input-group"><label>Accessory (%)</label><input id="itemAccessoryInput" type="number" class="numeric-input" placeholder="0" style="text-align:center;"></div>
+                </div>
+                <div class="compact-row">
+                    <div class="input-group"><label>Stats (%)</label><input id="playerStatsInput" type="number" class="numeric-input" placeholder="0" style="text-align:center;"></div>
+                    <div class="input-group"><label>Aura (%)</label><input id="playerAuraInput" type="number" class="numeric-input" placeholder="0" style="text-align:center;"></div>
+                </div>
+                <div class="compact-row">
+                    <div class="input-group"><label style="justify-content: center;">Avatar (%)</label><input id="playerAvatarInput" type="number" class="numeric-input" placeholder="0" style="text-align:center;"></div>
+                </div>
+            </div>
+
+            <div id="unitsPanel" class="side-panel">
+                <h3 class="unit-ui-title">Units</h3>
+                <div id="unitInputsContainer" class="units-grid"></div>
+                <button id="addUnitBtn" class="add-unit-btn">+ Add Unit</button>
+                <div class="result-box mini-highlight"><div id="unitsTotalResult" class="value">0%</div><div class="label">Total Unit Bonus</div></div>
+            </div>
+        </div>
+
+        <div class="side-column right-aligned">
+            <div id="sidePanel" class="side-panel drop-theme">
+                <h3 class="sub-ui-title">Drops Calculator</h3>
+                <div class="input-group"><label>Drop Multiplier (%)</label><input id="dropMultiInput" type="number" placeholder="100" value="100" min="0" class="numeric-input" style="text-align:center;" /></div>
+                <div class="input-group"><label>Drop Chance (%)</label><input id="dropChanceInput" type="number" placeholder="10" value="10" min="0" max="100" class="numeric-input" style="text-align:center;" /></div>
+                <div class="input-group"><label>Drop Amount</label><input id="dropAmountInput" type="number" placeholder="5" value="5" min="0" class="numeric-input" style="text-align:center;" /></div>
+                <div class="result-box mini-highlight"><div id="dropsPerMinuteResult" class="value">--</div><div class="label">Drops Per Minute</div></div>
+                <div class="result-box mini-highlight" style="margin-top: 10px;"><div id="dropsPerHourResult" class="value">--</div><div class="label">Drops Per Hour</div></div>
+            </div>
+
+            <div id="achievementsPanel" class="side-panel">
+                <h3 class="unit-ui-title">Achievements</h3>
+                <div id="achievementsContainer"></div>
+                <div class="result-box mini-highlight" style="margin-top: 15px;">
+                    <div id="achievementsTotalResult" class="value">0%</div>
+                    <div class="label">Total Achievement Bonus</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">Designed & Built by <span class="footer-tag">@xking.</span></div>
+    <div class="secret-zone"><div class="secret-popup"><div class="secret-label">Secret Helper</div><div class="secret-name">@xauroraflare</div></div></div>
+
+    <script src="Data.js"></script>
+
+    <script>
+        const dom = {
+            // Rank Tab
+            rankMpc: document.getElementById('rankMpcInput'),
+            rankCur: document.getElementById('rankCurrentMasteryInput'),
+            rankMps: document.getElementById('rankMpsResult'),
+            rankCost: document.getElementById('rankCostResult'),
+            rankRem: document.getElementById('rankCostRemainingResult'),
+            rankTime: document.getElementById('rankTimeResult'),
+            rankBar: document.getElementById('rankProgressBar'),
+            rankPcnt: document.getElementById('rankPercentLabel'),
+            
+            // Mastery Tab
+            dmg: document.getElementById('dmgInput'),
+            masCur: document.getElementById('currentMasteryInput'),
+            masRes: document.getElementById('resultBox'),
+            masHr: document.getElementById('perHourResult'),
+            masDay: document.getElementById('perDayResult'),
+            masTot: document.getElementById('totalMasteryResult'),
+            dInput: document.getElementById('dayInput'),
+            hInput: document.getElementById('hourInput'),
+            mInput: document.getElementById('minuteInput'),
+            
+            // Potential Tab
+            potCoin: document.getElementById('potDungeonCoinInput'),
+            potCurr: document.getElementById('potDungeonCurrencyInput'),
+            potEyeLvl: document.getElementById('potMagicEyeLevel'),
+            potWise: document.getElementById('potWiseTrainerInput'),
+            potPirate: document.getElementById('potPirateTrainerInput'), 
+            potBreathTrainer: document.getElementById('potBreathTrainerInput'), 
+            potDemonArtLvl: document.getElementById('potDemonArtLevel'), 
+            potLeveTrainer: document.getElementById('potLeveTrainerInput'),
+            potRes: document.getElementById('potMpcResult'),
+            
+            // Potential - Units Panel
+            uContainer: document.getElementById('unitInputsContainer'),
+            uAddBtn: document.getElementById('addUnitBtn'),
+            uRes: document.getElementById('unitsTotalResult'),
+            unitsPanel: document.getElementById('unitsPanel'),
+
+            // Potential - Stats Panel
+            statsPanel: document.getElementById('statsPanel'),
+            itemWeapon: document.getElementById('itemWeaponInput'),
+            itemAccessory: document.getElementById('itemAccessoryInput'),
+            playerStats: document.getElementById('playerStatsInput'),
+            playerAura: document.getElementById('playerAuraInput'),
+            playerAvatar: document.getElementById('playerAvatarInput'),
+            
+            // Achievements
+            achievementsPanel: document.getElementById('achievementsPanel'),
+            achieveContainer: document.getElementById('achievementsContainer'),
+
+            // Damage Tab
+            dmgDmg: document.getElementById('damageDmgInput'),
+            crit: document.getElementById('critInput'),
+            dmgHero: document.getElementById('heroDmgInput'),
+            mobHp: document.getElementById('mobHpResultBox'),
+            dpsRes: document.getElementById('dmgPerSecResult'),
+            mpmRes: document.getElementById('mobsPerMinuteResult'),
+            mphRes: document.getElementById('mobsPerHourResult'),
+            ttkRes: document.getElementById('timeToKillResult'),
+            
+            // Drops
+            dropAmt: document.getElementById('dropAmountInput'),
+            dropMul: document.getElementById('dropMultiInput'),
+            dropChn: document.getElementById('dropChanceInput'),
+            dropMin: document.getElementById('dropsPerMinuteResult'),
+            dropHr: document.getElementById('dropsPerHourResult'),
+            panel: document.getElementById('sidePanel'),
+            
+            // Gacha Tab
+            gachaAmt: document.getElementById('gachaAmountInput'),
+            gachaLeg: document.getElementById('gachaLegInput'),
+            gachaMyth: document.getElementById('gachaMythInput'),
+            gachaSpd: document.getElementById('gachaRealSpeedResult'),
+            gachaHr: document.getElementById('gachaPerHourResult'),
+            
+            gDay: document.getElementById('gachaDayInput'),
+            gHour: document.getElementById('gachaHourInput'),
+            gMin: document.getElementById('gachaMinuteInput'),
+            gachaCostRes: document.getElementById('gachaTotalCostResult'),
+            gachaCostLabel: document.getElementById('gachaTotalCostLabel'),
+            gachaOpensRes: document.getElementById('gachaTotalOpensResult')
+        };
+
+        const state = { rankCps: 5.8, masteryCps: 5.8, damageCps: 5.8, unitCount: 0, isPotentialOpen: false, potentialMult: 1, potentialPotionMult: 1, gachaFast: true };
+        
+        const suffixMap = suffixList.reduce((acc, v) => ({...acc, [v]: v[0].toUpperCase() + v.slice(1)}), {});
+        const suffixes = { "none": 0 }; 
+        suffixList.forEach((k, i) => suffixes[suffixMap[k]] = i + 1);
+
+        // NOTE: eggData is now loaded from Data.js
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const inputsToClear = [ dom.itemAccessory, dom.playerStats, dom.playerAura, dom.playerAvatar ];
+            inputsToClear.forEach(input => input.value = "");
+            setTheme('rank');
+            initSuffixDropdowns(); initRankDropdowns(); initMapDropdown(); initMobCountDropdown(); initPotentialRankDropdown(); 
+            initBijuuDropdown(); initMagicEyeDropdown(); initTitlesDropdown(); initRaceDropdown(); initSayajinDropdown(); 
+            initHakiDropdown(); initFruitsDropdown(); initBreathingDropdown(); initDemonArtDropdown(); initOrganizationDropdown(); 
+            initTitanDropdown(); initTitanPetDropdown(); initShinobiRaidDropdown(); initDungeonDropdown(); initPotentialMapDropdown(); initShadowsDropdown(); 
+            initShadowGateDropdown(); initSoloRankDropdown(); initAchievementsDropdowns(); initEggCostDropdown();
+
+            document.querySelectorAll('.custom-select').forEach(setupCustomSelect);
+            setupSpeedToggle('fastBtn', 'slowBtn', 'masteryCps', updateMastery);
+            setupSpeedToggle('dmgFastBtn', 'dmgSlowBtn', 'damageCps', updateDamage);
+            setupSpeedToggle('rankFastBtn', 'rankSlowBtn', 'rankCps', updateRank);
+            setupMultiplierToggle('pot2xBtn', 'potNo2xBtn', 'potentialMult', updatePotential);
+
+            const potPotionBtn = document.getElementById('potPotionBtn');
+            const potNoPotionBtn = document.getElementById('potNoPotionBtn');
+            potPotionBtn.addEventListener('click', () => { state.potentialPotionMult = 1.5; potPotionBtn.classList.add('active'); potNoPotionBtn.classList.remove('active'); updatePotential(); });
+            potNoPotionBtn.addEventListener('click', () => { state.potentialPotionMult = 1; potNoPotionBtn.classList.add('active'); potPotionBtn.classList.remove('active'); updatePotential(); });
+            
+            // Gacha Toggle
+            const gFast = document.getElementById('gachaFastBtn');
+            const gNorm = document.getElementById('gachaNormalBtn');
+            gFast.addEventListener('click', () => { state.gachaFast = true; gFast.classList.add('active'); gNorm.classList.remove('active'); updateGacha(); });
+            gNorm.addEventListener('click', () => { state.gachaFast = false; gNorm.classList.add('active'); gFast.classList.remove('active'); updateGacha(); });
+
+            const inputs = [dom.dmg, dom.masCur, dom.dInput, dom.hInput, dom.mInput, dom.dmgDmg, dom.crit, dom.dmgHero, dom.dropAmt, dom.dropMul, dom.dropChn, dom.rankMpc, dom.rankCur, dom.gachaAmt, dom.gachaLeg, dom.gachaMyth, dom.gDay, dom.gHour, dom.gMin];
+            inputs.forEach(el => el.addEventListener('input', updateAll));
+
+            setupSuffixInput(dom.dmg, 'suffixSelect', updateMastery);
+            setupSuffixInput(dom.masCur, 'currentMasterySuffixSelect', updateMastery);
+            setupSuffixInput(dom.dmgDmg, 'damageSuffixSelect', updateDamage);
+            setupSuffixInput(dom.rankMpc, 'rankMpcSuffix', updateRank);
+            setupSuffixInput(dom.rankCur, 'rankCurrentMasterySuffix', updateRank);
+
+            const btnOpenPot = document.getElementById('btnOpenPotential'), btnBackPot = document.getElementById('btnBackPotential');
+            const masterMain = document.getElementById('mastery-main-view'), masterSub = document.getElementById('mastery-potential-view');
+
+            btnOpenPot.addEventListener('click', (e) => {
+                e.preventDefault(); state.isPotentialOpen = true; 
+                masterMain.style.display = 'none'; masterSub.style.display = 'block'; 
+                dom.unitsPanel.classList.add('active'); dom.statsPanel.classList.add('active'); dom.achievementsPanel.classList.add('active'); dom.panel.classList.remove('active');
+                document.querySelectorAll('.custom-select').forEach(el => fitTextToContainer(el.querySelector('.select-selected span')));
+            });
+            btnBackPot.addEventListener('click', () => {
+                state.isPotentialOpen = false; masterSub.style.display = 'none'; masterMain.style.display = 'block';
+                dom.unitsPanel.classList.remove('active'); dom.statsPanel.classList.remove('active'); dom.achievementsPanel.classList.remove('active');
+            });
+
+            [dom.potCoin, dom.potCurr, dom.potEyeLvl, dom.potWise, dom.potPirate, dom.potBreathTrainer, dom.potDemonArtLvl, dom.potLeveTrainer, 
+             dom.itemWeapon, dom.itemAccessory, dom.playerStats, dom.playerAura, dom.playerAvatar].forEach(el => el.addEventListener('input', updatePotential));
+
+            for(let i=0; i<8; i++) addUnitInput();
+            dom.uAddBtn.addEventListener('click', () => { if (state.unitCount >= 16) return; addUnitInput(); if (state.unitCount < 16) addUnitInput(); dom.uContainer.scrollTop = 0; updateAddButtonState(); });
+
+            document.addEventListener('click', (e) => { if (!e.target.closest('.select-selected') && !e.target.closest('.portal-dropdown')) closeAllPortals(); });
+
+            document.getElementById('btnMaxAll').addEventListener('click', () => {
+                const mapSelect = document.querySelector('[data-id="potMapSelect"]');
+                const currentMapKey = mapSelect.getAttribute('data-value'); 
+                const activeSection = document.getElementById(`map-${currentMapKey}`);
+                if (!activeSection) return;
+                activeSection.querySelectorAll('.custom-select').forEach(sel => {
+                    const optionsContainer = sel.querySelector('.select-items');
+                    if (optionsContainer && optionsContainer.children.length > 0) {
+                        const lastOption = optionsContainer.lastElementChild;
+                        sel.setAttribute('data-value', lastOption.getAttribute('data-value'));
+                        const span = sel.querySelector('.select-selected span');
+                        span.textContent = lastOption.textContent;
+                        Array.from(optionsContainer.children).forEach(child => child.classList.remove('same-as-selected'));
+                        lastOption.classList.add('same-as-selected');
+                        fitTextToContainer(span);
+                    }
+                });
+                activeSection.querySelectorAll('input.numeric-input, input.compact-input').forEach(input => {
+                    input.value = input.id.toLowerCase().includes('level') ? 50 : 200; 
+                });
+                updatePotential();
+            });
+
+            updateAll();
+            document.querySelectorAll('.custom-select').forEach(el => fitTextToContainer(el.querySelector('.select-selected span')));
+        });
+
+        // ==========================================
+        // 4. CALCULATION LOGIC
+        // ==========================================
+
+        function addUnitInput() {
+            if (state.unitCount >= 16) return;
+            state.unitCount++;
+            const div = document.createElement('div');
+            div.className = 'input-group unit-input-group';
+            div.innerHTML = `<label>Unit ${state.unitCount} (%)</label><input type="number" class="numeric-input unit-input" placeholder="0">`;
+            div.querySelector('input').addEventListener('input', updatePotential);
+            dom.uContainer.appendChild(div);
+        }
+
+        function updateAddButtonState() {
+             if (state.unitCount >= 16) { dom.uAddBtn.textContent = "Max Limit Reached (16)"; dom.uAddBtn.style.opacity = "0.5"; dom.uAddBtn.style.cursor = "not-allowed"; }
+        }
+
+        function updateMastery() {
+            const base = parseInput(dom.dmg, 'suffixSelect');
+            const cur = parseInput(dom.masCur, 'currentMasterySuffixSelect');
+            let dps = (base > 0n) ? base * BigInt(Math.round(state.masteryCps * 100)) / 100n : 0n;
+            dom.masRes.innerHTML = dps ? formatNumber(dps) : "--";
+            dom.masHr.innerHTML = dps ? formatNumber(dps * 3600n) : "--";
+            dom.masDay.innerHTML = dps ? formatNumber(dps * 86400n) : "--";
+            const sec = BigInt((parseInt(dom.dInput.value)||0)*86400 + (parseInt(dom.hInput.value)||0)*3600 + (parseInt(dom.mInput.value)||0)*60);
+            dom.masTot.innerHTML = (base > 0n || cur > 0n) ? formatNumber(cur + (dps * sec)) : "--";
+        }
+
+        function updatePotential() {
+            [dom.potWise, dom.potPirate, dom.potBreathTrainer, dom.potLeveTrainer].forEach(input => { if(input && parseInt(input.value) > 200) input.value = 200; });
+            const wVal = parseFloat(dom.itemWeapon.value);
+            const safeWVal = (isNaN(wVal) || wVal === 0) ? 1 : wVal;
+            const base = BigInt(Math.round(safeWVal * 100)); 
+            const rankSel = document.querySelector('[data-id="potRankSelect"]');
+            const rank = BigInt(rankSel.getAttribute('data-value') || 0);
+            let rankBonus = 0n; if (rank > 0n) rankBonus = 100n * (2n ** (rank - 1n));
+            const rankFactor = 100n + rankBonus;
+
+            const coinFactor = BigInt((parseInt(dom.potCoin.value) || 0) + 100);
+            const currFactor = BigInt((parseInt(dom.potCurr.value) || 0) + 100);
+            const wiseFactor = BigInt((parseInt(dom.potWise.value) || 0) + 100);
+            const pirateFactor = BigInt((parseInt(dom.potPirate.value) || 0) + 100);
+            const breathTrainerFactor = BigInt((parseInt(dom.potBreathTrainer.value) || 0) + 100);
+            const leveTrainerFactor = BigInt((parseInt(dom.potLeveTrainer.value) || 0) + 100);
+            const itemAccessoryFactor = BigInt((parseInt(dom.itemAccessory.value) || 0) + 100);
+            const playerStatsFactor = BigInt((parseInt(dom.playerStats.value) || 0) + 100);
+            const auraFactor = BigInt((parseInt(dom.playerAura.value) || 0) + 100);
+            const avatarFactor = BigInt((parseInt(dom.playerAvatar.value) || 0) + 100);
+            
+            const bijuuFactor = BigInt(document.querySelector('[data-id="potBijuuSelect"]').getAttribute('data-value') || 100);
+            const titlesFactor = BigInt(document.querySelector('[data-id="potTitlesSelect"]').getAttribute('data-value') || 100);
+            const raceFactor = BigInt(document.querySelector('[data-id="potRaceSelect"]').getAttribute('data-value') || 100);
+            const sayajinFactor = BigInt(document.querySelector('[data-id="potSayajinSelect"]').getAttribute('data-value') || 100);
+            const hakiFactor = BigInt(document.querySelector('[data-id="potHakiSelect"]').getAttribute('data-value') || 100);
+            const fruitFactor = BigInt(document.querySelector('[data-id="potFruitsSelect"]').getAttribute('data-value') || 100);
+            const breathingFactor = BigInt(document.querySelector('[data-id="potBreathingSelect"]').getAttribute('data-value') || 100);
+            const orgFactor = BigInt(document.querySelector('[data-id="potOrgSelect"]').getAttribute('data-value') || 100);
+            const titanFactor = BigInt(document.querySelector('[data-id="potTitanSelect"]').getAttribute('data-value') || 100);
+            const titanPetFactor = BigInt(document.querySelector('[data-id="potTitanPetSelect"]').getAttribute('data-value') || 100);
+            const shinobiRaidFactor = BigInt(document.querySelector('[data-id="potShinobiRaidSelect"]').getAttribute('data-value') || 100);
+            const dungeonFactor = BigInt(document.querySelector('[data-id="potDungeonSelect"]').getAttribute('data-value') || 100);
+            const shadowsFactor = BigInt(document.querySelector('[data-id="potShadowsSelect"]').getAttribute('data-value') || 100);
+            const shadowGateFactor = BigInt(document.querySelector('[data-id="potShadowGateSelect"]').getAttribute('data-value') || 100);
+            const soloRankFactor = BigInt(document.querySelector('[data-id="potSoloRankSelect"]').getAttribute('data-value') || 100);
+
+            const secretBossEl = document.querySelector(`[data-id="achieveSelect1"]`);
+            const secretBossVal = BigInt(secretBossEl ? secretBossEl.getAttribute('data-value') || 100 : 100);
+            let otherAchievePercent = 0;
+            for(let i=2; i<=achievementsData.length; i++){
+                const achSel = document.querySelector(`[data-id="achieveSelect${i}"]`);
+                if(achSel) otherAchievePercent += (parseInt(achSel.getAttribute('data-value')) || 100) - 100;
+            }
+            const generalAchievementFactor = BigInt(Math.round(100 + otherAchievePercent));
+            document.getElementById('achievementsTotalResult').textContent = otherAchievePercent.toLocaleString() + "%";
+
+            const eyeSel = document.querySelector('[data-id="potMagicEyeSelect"]');
+            const eyeBase = parseFloat(eyeSel.getAttribute('data-value')) || 0;
+            let eyeLvl = parseInt(dom.potEyeLvl.value); if (eyeLvl > 50) { eyeLvl = 50; dom.potEyeLvl.value = 50; } if (isNaN(eyeLvl) || eyeLvl < 0) eyeLvl = 0;
+            let eyePercentBonus = eyeBase + (eyeBase * 0.1 * eyeLvl);
+            if (Math.round(eyePercentBonus) === 1098 && eyeLvl === 50) eyePercentBonus = 1100;
+            
+            const eyeFactor = BigInt(Math.round(100 + eyePercentBonus));
+            const eyeObj = magicEyeData.find(e => e.base === eyeBase);
+            if (eyeObj) {
+                const newLabel = `${eyeObj.name.split(' (')[0]} (+${Math.round(eyePercentBonus)}%)`;
+                const span = eyeSel.querySelector('.select-selected span');
+                span.textContent = newLabel; fitTextToContainer(span); 
+            }
+
+            const daSel = document.querySelector('[data-id="potDemonArtSelect"]');
+            const daBase = parseFloat(daSel.getAttribute('data-value')) || 0;
+            let daLvl = parseInt(dom.potDemonArtLvl.value); if (daLvl > 50) { daLvl = 50; dom.potDemonArtLvl.value = 50; } if (isNaN(daLvl) || daLvl < 0) daLvl = 0;
+            let daPercentBonus = daBase + (daBase * 0.1 * daLvl);
+            if (Math.round(daPercentBonus) === 1098 && daLvl === 50) daPercentBonus = 1100;
+
+            const daFactor = BigInt(Math.round(100 + daPercentBonus));
+            const daObj = demonArtData.find(e => e.base === daBase);
+            if (daObj) {
+                const newLabel = `${daObj.name.split(' (')[0]} (+${Math.round(daPercentBonus)}%)`;
+                const span = daSel.querySelector('.select-selected span');
+                span.textContent = newLabel; fitTextToContainer(span); 
+            }
+
+            let totalUnitPercent = 0;
+            document.querySelectorAll('.unit-input').forEach(input => totalUnitPercent += parseFloat(input.value) || 0);
+            dom.uRes.innerHTML = totalUnitPercent.toLocaleString() + "%";
+            const unitFactor = BigInt(Math.round(100 + totalUnitPercent));
+            
+            let result = (base * rankFactor * coinFactor * currFactor * wiseFactor * bijuuFactor * eyeFactor * titlesFactor * raceFactor * sayajinFactor * unitFactor * hakiFactor * fruitFactor * pirateFactor * breathingFactor * breathTrainerFactor * daFactor * orgFactor * titanFactor * titanPetFactor * leveTrainerFactor * shinobiRaidFactor * dungeonFactor * itemAccessoryFactor * playerStatsFactor * secretBossVal * generalAchievementFactor * auraFactor * avatarFactor * shadowGateFactor * shadowsFactor * soloRankFactor) / 100000000000000000000000000000000000000000000000000000000000000n;
+            result = result * BigInt(state.potentialMult);
+            if (state.potentialPotionMult === 1.5) result = (result * 15n) / 10n;
+            dom.potRes.innerHTML = (result > 0n) ? formatNumber(result) : "0";
+        }
+
+        function updateDamage() {
+            const baseDmg = parseInput(dom.dmgDmg, 'damageSuffixSelect');
+            const critPercent = parseFloat(dom.crit.value) || 0;
+            const heroPercent = parseFloat(dom.dmgHero.value) || 0;
+            
+            const mobSel = document.querySelector('[data-id="mobSelect"]');
+            const hpString = mobSel.getAttribute('data-hp');
+            const mobHp = parseSuffixedString(hpString);
+            
+            dom.mobHp.textContent = hpString || "--";
+            const mobCountVal = parseInt(document.querySelector('[data-id="mobCountSelect"]').getAttribute('data-value')) || 1;
+
+            const multiplierScaled = BigInt(Math.round(1000 + (critPercent * 5))); 
+            const cpsScaled = BigInt(Math.round(state.damageCps * 100)); 
+            
+            const numeratorClick = baseDmg * cpsScaled * multiplierScaled;
+            const numeratorHero = baseDmg * BigInt(Math.round(heroPercent * 2000));
+            const totalNumerator = numeratorClick + numeratorHero; 
+
+            if (baseDmg > 0n) {
+                 dom.dpsRes.innerHTML = formatNumber(totalNumerator / 100000n);
+            } else {
+                 dom.dpsRes.innerHTML = "--"; dom.mpmRes.innerHTML = "--"; dom.mphRes.innerHTML = "--"; dom.ttkRes.innerHTML = "0s"; dom.dropMin.innerHTML = "--"; dom.dropHr.innerHTML = "--"; return;
+            }
+
+            if (mobHp <= 0n) {
+                dom.ttkRes.innerHTML = "Select Mob"; dom.mpmRes.innerHTML = "--"; dom.mphRes.innerHTML = "--"; dom.dropMin.innerHTML = "--"; dom.dropHr.innerHTML = "--"; return;
+            }
+
+            let timeSeconds = 0;
+            const oneHitDmgScaled = baseDmg * multiplierScaled; 
+            const mobHpScaledForHit = mobHp * 1000n; 
+
+            if (oneHitDmgScaled >= mobHpScaledForHit) { timeSeconds = 0; } 
+            else {
+                if (totalNumerator === 0n) { dom.ttkRes.innerHTML = "Forever"; dom.mpmRes.innerHTML = "0"; dom.mphRes.innerHTML = "0"; dom.dropMin.innerHTML = "0"; dom.dropHr.innerHTML = "0"; return; }
+                const mobHpScaledForTime = mobHp * 100000n;
+                timeSeconds = Number(mobHpScaledForTime * 100n / totalNumerator) / 100;
+            }
+
+            dom.ttkRes.innerHTML = (timeSeconds < 60) ? timeSeconds.toFixed(2) + "s" : formatTime(timeSeconds);
+
+            const respawnTime = 2.0;
+            const spawnsPerMinute = 60 / respawnTime; 
+            let killsPerMin = 0;
+            
+            if (mobCountVal === 1) {
+                const totalCycleTime = timeSeconds + respawnTime;
+                if (totalCycleTime > 0) killsPerMin = 60 / totalCycleTime;
+            } else {
+                let mobLimit = (timeSeconds > 0) ? (respawnTime / timeSeconds) : 999999;
+                const effectiveKillsPerWave = Math.min(mobCountVal, mobLimit);
+                killsPerMin = effectiveKillsPerWave * spawnsPerMinute;
+            }
+
+            const killsPerHour = killsPerMin * 60;
+            dom.mpmRes.innerHTML = killsPerMin.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+            dom.mphRes.innerHTML = killsPerHour.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+
+            const dAmount = parseFloat(dom.dropAmt.value) || 0;
+            const dMulti = (parseFloat(dom.dropMul.value) || 100) / 100;
+            const dChance = parseFloat(dom.dropChn.value) || 0;
+
+            const effectiveAmount = dAmount * dMulti;
+            const chanceFactor = dChance / 100;
+            
+            const totalDropsPerMin = killsPerMin * chanceFactor * effectiveAmount;
+            const totalDropsPerHour = killsPerHour * chanceFactor * effectiveAmount;
+            
+            dom.dropMin.innerHTML = totalDropsPerMin.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+            dom.dropHr.innerHTML = totalDropsPerHour.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+        }
+
+        function updateRank() {
+            const mpc = parseInput(dom.rankMpc, 'rankMpcSuffix');
+            const cur = parseInput(dom.rankCur, 'rankCurrentMasterySuffix');
+            const start = parseInt(document.querySelector('[data-id="currentRankSelect"]').getAttribute('data-value')) || 0;
+            const end = parseInt(document.querySelector('[data-id="targetRankSelect"]').getAttribute('data-value')) || 1;
+            let mps = (mpc > 0n) ? mpc * BigInt(Math.round(state.rankCps * 100)) / 100n : 0n;
+            dom.rankMps.innerHTML = mps ? formatNumber(mps) : "--";
+
+            if (start >= end) {
+                dom.rankCost.innerHTML = "--"; dom.rankRem.innerHTML = "--"; dom.rankTime.innerHTML = "Target Rank must be higher";
+                dom.rankBar.style.width = "0%"; dom.rankPcnt.innerHTML = "0%"; return;
+            }
+
+            let cost = 0n;
+            for(let i=start+1; i<=end; i++) if(i < rankCostsData.length) cost += parseSuffixedString(rankCostsData[i]);
+            dom.rankCost.innerHTML = formatNumber(cost);
+            const rem = (cost > cur) ? cost - cur : 0n;
+            dom.rankRem.innerHTML = formatNumber(rem);
+            const pct = (cost > 0n) ? Math.min(100, Number((cur * 10000n) / cost) / 100) : 0;
+            dom.rankBar.style.width = pct + "%"; dom.rankPcnt.innerHTML = pct.toFixed(1) + "%";
+            if (rem === 0n) dom.rankTime.innerHTML = "0.00s";
+            else if (mps > 0n) { const s = Number(rem) / Number(mps); dom.rankTime.innerHTML = (s < 60) ? s.toFixed(2)+"s" : formatTime(s); } 
+            else dom.rankTime.innerHTML = "Infinite";
+        }
+        
+function updateGacha() {
+            // -- CONSTANTS --
+            const TIME_NORMAL = 2.0;    
+            const TIME_FAST = 1.2;      
+            const SLOW_DELAY = 1.0;     
+
+            // -- INPUTS --
+            const batchSize = parseInt(dom.gachaAmt.value) || 1;
+            const legChance = (parseFloat(dom.gachaLeg.value) || 0) / 100;
+            const mythChance = (parseFloat(dom.gachaMyth.value) || 0) / 100;
+            
+            const days = parseInt(dom.gDay.value) || 0;
+            const hours = parseInt(dom.gHour.value) || 0;
+            const mins = parseInt(dom.gMin.value) || 0;
+
+            const eggSel = document.querySelector('[data-id="eggCostSelect"]');
+            
+            // --- CHANGE 1: Use parseSuffixedString to handle "1.5m", "50", etc. ---
+            const costPerEgg = parseSuffixedString(eggSel.getAttribute('data-cost') || "0");
+            
+            const currency = eggSel.getAttribute('data-curr') || "Yen";
+
+            // -- CALCULATIONS --
+            
+            // 1. Time per Batch
+            const baseTimePerBatch = state.gachaFast ? TIME_FAST : TIME_NORMAL;
+
+            // 2. Probability of slowdown
+            const pRare = legChance + mythChance;
+            const pAnyRareInBatch = 1 - Math.pow(1 - pRare, batchSize);
+            
+            // 3. Average time per batch
+            const averageTimePerBatch = baseTimePerBatch + (pAnyRareInBatch * SLOW_DELAY);
+
+            // 4. Rate: Opens (Eggs) Per Second
+            let eggsPerSecond = 0;
+            if (averageTimePerBatch > 0) {
+                eggsPerSecond = batchSize / averageTimePerBatch;
+            }
+
+            // 5. Total Opens over Duration
+            const totalDurationSeconds = (days * 86400) + (hours * 3600) + (mins * 60);
+            const totalOpens = Math.floor(eggsPerSecond * totalDurationSeconds);
+
+            // 6. Total Cost
+            // --- CHANGE 2: Removed "* 100n" because parseSuffixedString already scales by 100 ---
+            const totalCost = BigInt(totalOpens) * costPerEgg;
+
+            // -- DISPLAY --
+            dom.gachaSpd.innerHTML = eggsPerSecond.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 2 });
+            dom.gachaHr.innerHTML = Math.floor(eggsPerSecond * 3600).toLocaleString();
+            
+            dom.gachaCostRes.innerHTML = formatNumber(totalCost);
+            dom.gachaCostLabel.innerHTML = `Total ${currency} Cost`;
+            dom.gachaOpensRes.innerHTML = totalOpens.toLocaleString();
+        }
+
+        function updateAll() { updateMastery(); updateDamage(); updateRank(); updatePotential(); updateGacha(); }
+
+        function setTheme(name) {
+            const t = themes[name]; if(!t) return;
+            const r = document.documentElement.style;
+            r.setProperty('--primary', t.primary); r.setProperty('--primary-light', t.light);
+            r.setProperty('--primary-border', t.border); r.setProperty('--primary-dim', t.dim); r.setProperty('--primary-glow', t.glow);
+        }
+
+        document.querySelectorAll('.tab-button').forEach(b => {
+            b.addEventListener('click', () => {
+                document.querySelectorAll('.tab-button, .tab-content').forEach(el => el.classList.remove('active'));
+                b.classList.add('active');
+                const tab = b.dataset.tab;
+                document.getElementById(tab + '-content').classList.add('active');
+                setTheme(tab);
+                dom.panel.classList.toggle('active', tab === 'damage');
+                if (tab !== 'mastery') { dom.unitsPanel.classList.remove('active'); dom.statsPanel.classList.remove('active'); dom.achievementsPanel.classList.remove('active'); } 
+                else if (state.isPotentialOpen) { dom.unitsPanel.classList.add('active'); dom.statsPanel.classList.add('active'); dom.achievementsPanel.classList.add('active'); dom.panel.classList.remove('active'); }
+            });
+        });
+
+        function initSuffixDropdowns() {
+            const ids = ['suffixSelect', 'currentMasterySuffixSelect', 'damageSuffixSelect', 'rankMpcSuffix', 'rankCurrentMasterySuffix'];
+            ids.forEach(id => {
+                const s = document.querySelector(`[data-id="${id}"] .select-items`);
+                s.innerHTML = '<div data-value="none" class="same-as-selected">None</div>';
+                Object.values(suffixMap).forEach(v => s.innerHTML += `<div data-value="${v}">${v}</div>`);
+                s.parentElement.setAttribute('data-value', 'none');
+            });
+        }
+
+        function initRankDropdowns() {
+            const ids = ['currentRankSelect', 'targetRankSelect'];
+            ids.forEach(id => {
+                const s = document.querySelector(`[data-id="${id}"] .select-items`);
+                rankCostsData.forEach((_, i) => s.innerHTML += `<div data-value="${i}" class="${(id === 'currentRankSelect' && i === 0) || (id === 'targetRankSelect' && i === 1) ? 'same-as-selected' : ''}">Rank ${i}</div>`);
+                const defVal = id === 'currentRankSelect' ? '0' : '1';
+                s.parentElement.setAttribute('data-value', defVal);
+                s.previousElementSibling.querySelector('span').textContent = `Rank ${defVal}`;
+            });
+            updateDisabledTargetRanks(0);
+        }
+
+        function initPotentialRankDropdown() {
+            const el = document.getElementById('potRankOptions');
+            const parent = document.querySelector('[data-id="potRankSelect"]');
+            rankCostsData.forEach((_, i) => el.innerHTML += `<div data-value="${i}" class="${i===0?'same-as-selected':''}">Rank ${i}</div>`);
+            parent.setAttribute('data-value', '0');
+        }
+
+        function initPotentialMapDropdown() {
+            const el = document.getElementById('potMapOptions');
+            const parent = document.querySelector('[data-id="potMapSelect"]');
+            const maps = Object.keys(gameData);
+            maps.forEach((map, i) => el.innerHTML += `<div data-value="${map.replace(/\s+/g, '')}" class="${i===0?'same-as-selected':''}">${map}</div>`);
+            if(maps.length > 0) { parent.setAttribute('data-value', maps[0].replace(/\s+/g, '')); parent.querySelector('span').textContent = maps[0]; }
+        }
+
+        function initAchievementsDropdowns() {
+            achievementsData.forEach((achievement, index) => {
+                const i = index + 1; 
+                const div = document.createElement('div');
+                div.className = 'input-group';
+                div.innerHTML = `<label>${achievement.title}</label><div class="custom-select full-width" data-id="achieveSelect${i}"><div class="select-selected"><span>None (+0%)</span><div class="select-arrow"></div></div><div class="select-items select-hide" id="achieveOptions${i}"></div></div>`;
+                dom.achieveContainer.appendChild(div);
+                const el = document.getElementById(`achieveOptions${i}`);
+                achievement.options.forEach((opt, idx) => el.innerHTML += `<div data-value="${opt.val}" class="${idx===0?'same-as-selected':''}">${opt.name}</div>`);
+                document.querySelector(`[data-id="achieveSelect${i}"]`).setAttribute('data-value', '100');
+            });
+        }
+        
+        function initBijuuDropdown() { const el = document.getElementById('potBijuuOptions'); bijuuData.forEach((b, i) => el.innerHTML += `<div data-value="${b.val}" class="${i===0?'same-as-selected':''}">${b.name}</div>`); document.querySelector('[data-id="potBijuuSelect"]').setAttribute('data-value', '100'); }
+        function initMagicEyeDropdown() { const el = document.getElementById('potMagicEyeOptions'); magicEyeData.forEach((e, i) => el.innerHTML += `<div data-value="${e.base}" class="${i===0?'same-as-selected':''}">${e.name}</div>`); document.querySelector('[data-id="potMagicEyeSelect"]').setAttribute('data-value', '0'); }
+        function initTitlesDropdown() { const el = document.getElementById('potTitlesOptions'); titlesData.forEach((t, i) => el.innerHTML += `<div data-value="${t.val}" class="${i===0?'same-as-selected':''}">${t.name}</div>`); document.querySelector('[data-id="potTitlesSelect"]').setAttribute('data-value', '100'); }
+        function initRaceDropdown() { const el = document.getElementById('potRaceOptions'); raceData.forEach((r, i) => el.innerHTML += `<div data-value="${r.val}" class="${i===0?'same-as-selected':''}">${r.name}</div>`); document.querySelector('[data-id="potRaceSelect"]').setAttribute('data-value', '100'); }
+        function initSayajinDropdown() { const el = document.getElementById('potSayajinOptions'); sayajinData.forEach((s, i) => el.innerHTML += `<div data-value="${s.val}" class="${i===0?'same-as-selected':''}">${s.name}</div>`); document.querySelector('[data-id="potSayajinSelect"]').setAttribute('data-value', '100'); }
+        function initHakiDropdown() { const el = document.getElementById('potHakiOptions'); hakiData.forEach((h, i) => el.innerHTML += `<div data-value="${h.val}" class="${i===0?'same-as-selected':''}">${h.name}</div>`); document.querySelector('[data-id="potHakiSelect"]').setAttribute('data-value', '100'); }
+        function initFruitsDropdown() { const el = document.getElementById('potFruitsOptions'); fruitsData.forEach((f, i) => el.innerHTML += `<div data-value="${f.val}" class="${i===0?'same-as-selected':''}">${f.name}</div>`); document.querySelector('[data-id="potFruitsSelect"]').setAttribute('data-value', '100'); }
+        function initBreathingDropdown() { const el = document.getElementById('potBreathingOptions'); breathingData.forEach((b, i) => el.innerHTML += `<div data-value="${b.val}" class="${i===0?'same-as-selected':''}">${b.name}</div>`); document.querySelector('[data-id="potBreathingSelect"]').setAttribute('data-value', '100'); }
+        function initDemonArtDropdown() { const el = document.getElementById('potDemonArtOptions'); demonArtData.forEach((e, i) => el.innerHTML += `<div data-value="${e.base}" class="${i===0?'same-as-selected':''}">${e.name}</div>`); document.querySelector('[data-id="potDemonArtSelect"]').setAttribute('data-value', '0'); }
+        function initOrganizationDropdown() { const el = document.getElementById('potOrgOptions'); organizationData.forEach((o, i) => el.innerHTML += `<div data-value="${o.val}" class="${i===0?'same-as-selected':''}">${o.name}</div>`); document.querySelector('[data-id="potOrgSelect"]').setAttribute('data-value', '100'); }
+        function initTitanDropdown() { const el = document.getElementById('potTitanOptions'); titanData.forEach((t, i) => el.innerHTML += `<div data-value="${t.val}" class="${i===0?'same-as-selected':''}">${t.name}</div>`); document.querySelector('[data-id="potTitanSelect"]').setAttribute('data-value', '100'); }
+        function initTitanPetDropdown() { const el = document.getElementById('potTitanPetOptions'); titanPetData.forEach((t, i) => el.innerHTML += `<div data-value="${t.val}" class="${i===0?'same-as-selected':''}">${t.name}</div>`); document.querySelector('[data-id="potTitanPetSelect"]').setAttribute('data-value', '100'); }
+        function initShinobiRaidDropdown() { const el = document.getElementById('potShinobiRaidOptions'); shinobiRaidData.forEach((t, i) => el.innerHTML += `<div data-value="${t.val}" class="${i===0?'same-as-selected':''}">${t.name}</div>`); document.querySelector('[data-id="potShinobiRaidSelect"]').setAttribute('data-value', '100'); }
+        function initDungeonDropdown() { const el = document.getElementById('potDungeonOptions'); dungeonData.forEach((t, i) => el.innerHTML += `<div data-value="${t.val}" class="${i===0?'same-as-selected':''}">${t.name}</div>`); document.querySelector('[data-id="potDungeonSelect"]').setAttribute('data-value', '100'); }
+        function initShadowsDropdown() { const el = document.getElementById('potShadowsOptions'); shadowsData.forEach((t, i) => el.innerHTML += `<div data-value="${t.val}" class="${i===0?'same-as-selected':''}">${t.name}</div>`); document.querySelector('[data-id="potShadowsSelect"]').setAttribute('data-value', '100'); }
+        function initShadowGateDropdown() { const el = document.getElementById('potShadowGateOptions'); shadowGateData.forEach((t, i) => el.innerHTML += `<div data-value="${t.val}" class="${i===0?'same-as-selected':''}">${t.name}</div>`); document.querySelector('[data-id="potShadowGateSelect"]').setAttribute('data-value', '100'); }
+        function initSoloRankDropdown() { const el = document.getElementById('potSoloRankOptions'); soloRanksData.forEach((t, i) => el.innerHTML += `<div data-value="${t.val}" class="${i===0?'same-as-selected':''}">${t.name}</div>`); document.querySelector('[data-id="potSoloRankSelect"]').setAttribute('data-value', '100'); }
+
+        function initMapDropdown() {
+            const mapSelect = document.getElementById('mapOptions');
+            Object.keys(gameData).forEach(k => mapSelect.innerHTML += `<div data-value="${k}">${k}</div>`);
+        }
+
+function initEggCostDropdown() {
+            const el = document.getElementById('eggCostOptions');
+            const parent = document.querySelector('[data-id="eggCostSelect"]');
+            
+            eggData.forEach((d, i) => {
+                // --- CHANGE: Removed .toLocaleString(), just use d.cost directly ---
+                const label = `${d.name} (${d.cost})`;
+                el.innerHTML += `<div data-value="${d.name}" data-cost="${d.cost}" data-curr="${d.currency}" class="${i===0?'same-as-selected':''}">${label}</div>`;
+            });
+            
+            if(eggData.length > 0) {
+                const first = eggData[0];
+                parent.setAttribute('data-value', first.name);
+                parent.setAttribute('data-cost', first.cost);
+                parent.setAttribute('data-curr', first.currency);
+                // --- CHANGE: Update default label ---
+                parent.querySelector('span').textContent = `${first.name} (${first.cost})`;
+            }
+        }
+
+        function initMobCountDropdown() {
+            const mobCountSelect = document.getElementById('mobCountOptions');
+            for(let i=1; i<=10; i++) mobCountSelect.innerHTML += `<div data-value="${i}" class="${i===1?'same-as-selected':''}">${i}</div>`;
+        }
+
+        function parseSuffixedString(str) {
+            const m = (str || "").match(/^([\d\.]+)\s*([a-zA-Z]+)?$/);
+            if (!m) return 0n;
+            const exp = suffixes[suffixMap[(m[2] || "none").toLowerCase()] || "none"] || 0;
+            return BigInt(Math.round(parseFloat(m[1]) * 100)) * (10n ** BigInt(exp * 3));
+        }
+
+        function parseInput(inEl, selId) {
+            const raw = parseFloat(inEl.value);
+            if (isNaN(raw) || raw < 0) return 0n;
+            const suf = document.querySelector(`[data-id="${selId}"]`).getAttribute('data-value');
+            return BigInt(Math.round(raw * 100)) * (10n ** BigInt((suffixes[suf] || 0) * 3));
+        }
+
+        function formatNumber(n) {
+            if (n === 0n) return "0";
+            let val = Number(n) / 100, idx = 0;
+            while (val >= 1000 && idx < Object.keys(suffixMap).length) { val /= 1000; idx++; }
+            
+            // To prevent rounding up (e.g. 439.6T becoming 440T), we floor the decimal representation 
+            // before formatting.
+            if (idx === 0) return val.toLocaleString(undefined, {maxFractionDigits: 2});
+            
+            val = Math.floor(val * 100) / 100;
+            return val.toFixed(2) + Object.values(suffixMap)[idx-1];
+        }
+
+        function formatTime(s) {
+            if (s === Infinity) return "Forever"; if (s === 0) return "Instant";
+            const y = Math.floor(s/31536000), d = Math.floor((s%31536000)/86400), h = Math.floor((s%86400)/3600), m = Math.floor((s%3600)/60), sec = Math.floor(s%60);
+            if (y>=1000) return "1000+ y";
+            if (y+d+h+m === 0 && s < 1) return s.toFixed(2)+"s";
+            return `${y?y+'y ':''}${d?d+'d ':''}${h?h+'h ':''}${m?m+'m ':''}${(y+d===0)?sec+'s':''}`.trim();
+        }
+
+        function setupSpeedToggle(fastId, slowId, key, cb) {
+            const f = document.getElementById(fastId), s = document.getElementById(slowId);
+            f.onclick = () => { state[key] = 5.8; f.classList.add('active'); s.classList.remove('active'); cb(); };
+            s.onclick = () => { state[key] = 4.5; s.classList.add('active'); f.classList.remove('active'); cb(); };
+        }
+
+        function setupMultiplierToggle(onBtnId, offBtnId, stateKey, cb) {
+            const onBtn = document.getElementById(onBtnId), offBtn = document.getElementById(offBtnId);
+            onBtn.onclick = () => { state[stateKey] = 2; onBtn.classList.add('active'); offBtn.classList.remove('active'); cb(); };
+            offBtn.onclick = () => { state[stateKey] = 1; offBtn.classList.add('active'); onBtn.classList.remove('active'); cb(); };
+        }
+
+        function setupSuffixInput(inp, selId, cb) {
+            const h = () => {
+                const m = inp.value.trim().match(/^([\d\.]+)\s*([a-zA-Z]+)$/);
+                if (m && suffixMap[m[2].toLowerCase()]) {
+                    inp.value = m[1];
+                    const sel = document.querySelector(`[data-id="${selId}"]`);
+                    const val = suffixMap[m[2].toLowerCase()];
+                    sel.setAttribute('data-value', val);
+                    sel.querySelector('span').textContent = val;
+                    sel.querySelectorAll('.select-items div').forEach(d => d.classList.remove('same-as-selected'));
+                    sel.querySelector(`.select-items div[data-value="${val}"]`).classList.add('same-as-selected');
+                }
+                cb();
+            };
+            inp.addEventListener('blur', h); inp.addEventListener('keydown', e => { if(e.key==='Enter') { e.preventDefault(); h(); inp.blur(); }});
+        }
+
+        let activePortal = null;
+        function closeAllPortals() { if (activePortal) { activePortal.remove(); activePortal = null; } document.querySelectorAll('.select-selected').forEach(el => el.classList.remove('select-arrow-active')); }
+
+        function setupCustomSelect(sel) {
+            const selected = sel.querySelector('.select-selected');
+            const items = sel.querySelector('.select-items'); 
+            
+            selected.addEventListener('click', e => { 
+                e.stopPropagation(); 
+                if (selected.classList.contains('select-arrow-active')) { closeAllPortals(); return; }
+                closeAllPortals(); selected.classList.add('select-arrow-active'); 
+                const rect = selected.getBoundingClientRect();
+                const portal = document.createElement('div');
+                portal.className = 'portal-dropdown';
+                portal.style.width = rect.width + 'px';
+                portal.style.left = rect.left + 'px';
+                
+                const spaceBelow = window.innerHeight - rect.bottom;
+                const spaceAbove = rect.top;
+                if (spaceBelow < 200 && spaceAbove > spaceBelow) {
+                    portal.style.bottom = (window.innerHeight - rect.top) + 'px';
+                    portal.style.maxHeight = Math.min(250, spaceAbove - 10) + 'px';
+                    portal.style.flexDirection = 'column-reverse'; 
+                } else {
+                    portal.style.top = (rect.bottom + 5) + 'px';
+                    portal.style.maxHeight = Math.min(250, spaceBelow - 10) + 'px';
+                }
+
+                portal.innerHTML = items.innerHTML;
+                document.body.appendChild(portal);
+                activePortal = portal;
+
+                portal.querySelectorAll('div').forEach(div => {
+                    div.addEventListener('click', (evt) => {
+                        evt.stopPropagation();
+                        const val = div.getAttribute('data-value');
+                        const txt = div.textContent;
+                        sel.setAttribute('data-value', val);
+                        if(div.hasAttribute('data-hp')) sel.setAttribute('data-hp', div.getAttribute('data-hp'));
+                        if(div.hasAttribute('data-cost')) sel.setAttribute('data-cost', div.getAttribute('data-cost'));
+                        if(div.hasAttribute('data-curr')) sel.setAttribute('data-curr', div.getAttribute('data-curr'));
+
+                        const span = selected.querySelector('span');
+                        span.textContent = txt; fitTextToContainer(span);
+
+                        const id = sel.getAttribute('data-id');
+                        if (id === 'mapSelect') updateMobDropdown(val);
+                        if (id === 'currentRankSelect' || id === 'targetRankSelect') handleRankLogic(id, parseInt(val));
+                        if (id === 'potRankSelect') span.textContent = `Rank ${val}`;
+                        if (id === 'potMapSelect') {
+                            const mapKey = val; 
+                            document.querySelectorAll('.map-section').forEach(sec => sec.classList.remove('active'));
+                            const targetSec = document.getElementById(`map-${mapKey}`);
+                            if(targetSec) targetSec.classList.add('active');
+                        }
+
+                        items.querySelectorAll('div').forEach(d => d.classList.remove('same-as-selected'));
+                        const origItem = Array.from(items.children).find(c => c.textContent === txt);
+                        if(origItem) origItem.classList.add('same-as-selected');
+
+                        closeAllPortals();
+                        updateAll();
+                    });
+                });
+            });
+        }
+
+        window.addEventListener('resize', closeAllPortals);
+        window.addEventListener('scroll', (e) => { if (activePortal && (e.target === activePortal || activePortal.contains(e.target))) return; closeAllPortals(); }, true);
+
+        function fitTextToContainer(span) {
+            if(!span) return;
+            let size = 16; span.style.fontSize = size + 'px';
+            const parent = span.parentElement; if(!parent || parent.clientWidth === 0) return; 
+            const maxWidth = parent.clientWidth - 45; 
+            while (span.scrollWidth > maxWidth && size > 9) { size--; span.style.fontSize = size + 'px'; }
+        }
+
+        function updateMobDropdown(map) {
+            const sel = document.querySelector('[data-id="mobSelect"]');
+            const items = document.getElementById('mobOptions');
+            const mobs = gameData[map] || [];
+            items.innerHTML = mobs.length ? '' : '<div data-value="none">No Mobs</div>';
+            mobs.forEach((m, i) => items.innerHTML += `<div data-value="${m.name}" data-hp="${m.hp}" class="${i===0?'same-as-selected':''}">${m.name}</div>`);
+            const first = mobs[0] || {name:'No Mobs', hp:''};
+            sel.setAttribute('data-value', first.name); sel.setAttribute('data-hp', first.hp);
+            sel.querySelector('span').textContent = first.name;
+        }
+
+        function handleRankLogic(id, val) {
+            const curSel = document.querySelector('[data-id="currentRankSelect"]');
+            const tgtSel = document.querySelector('[data-id="targetRankSelect"]');
+            const cur = parseInt(curSel.getAttribute('data-value')) || 0;
+            const tgt = parseInt(tgtSel.getAttribute('data-value')) || 0;
+
+            if (id === 'currentRankSelect') {
+                updateDisabledTargetRanks(val);
+                if (tgt <= val) setSelect(tgtSel, Math.min(val + 1, rankCostsData.length - 1));
+            } else if (tgt <= cur) setSelect(tgtSel, Math.min(cur + 1, rankCostsData.length - 1));
+        }
+
+        function setSelect(el, idx) {
+            el.setAttribute('data-value', idx); el.querySelector('span').textContent = `Rank ${idx}`;
+            el.querySelectorAll('.select-items div').forEach(d => d.classList.toggle('same-as-selected', d.getAttribute('data-value') == idx));
+        }
+
+        function updateDisabledTargetRanks(cur) {
+            document.querySelectorAll('#targetRankOptions div').forEach(d => d.classList.toggle('disabled', parseInt(d.getAttribute('data-value')) <= cur));
+        }
+    </script>
+</body>
+</html>
