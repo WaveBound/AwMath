@@ -1,9 +1,9 @@
 /* --- Data.js --- */
 
 const suffixList = [
-    'k', 'm', 'b', 't', 'qa', 'qi', 'sx', 'sp', 'oc', 'no', 
-    'dc', 'ud', 'dd', 'td', 'qad', 'qid', 'sxd', 'spd', 'ocd', 'nod', 
-    'dec', 'und', 'duo', 'tri', 'qua', 'qui', 'six', 'sep', 'oct', 'nuo'
+    'K', 'M', 'B', 'T', 'Qa', 'Qi', 'Sx', 'Sp', 'Oc', 'No', 
+    'Dc', 'Ud', 'Dd', 'Td', 'Qad', 'Qid', 'Sxd', 'Spd', 'Ocd', 'Nod', 
+    'Dec', 'Und', 'Duo', 'Tri', 'Qua', 'Qui', 'Six', 'Sep', 'Oct', 'Nuo'
 ];
 
 const rankCostsData = [
@@ -343,6 +343,25 @@ const gameData = {
         { name: "TangFak", hp: "8Td" }, { name: "Sunly", hp: "400Qad" }, { name: "Haler", hp: "20Qid" }, 
         { name: "Thomas", hp: "2Sxd" }, { name: "Frieze", hp: "50Spd" }, { name: "Belu", hp: "100Dc" }
     ]
+};
+
+const waveScalingData = {
+    "Shinobi": { 
+        base: "300B", 
+        increment: "4T", // Set this to whatever you want for Wave 6+
+        overrides: null 
+    },
+    "Shadow Gate": { 
+        base: "375No", 
+        increment: "5Dc", // Set this to whatever you want for Wave 6+
+        overrides: null 
+    },
+    "AoT Defense": {
+        base: "6Oc",
+        increment: "6Oc", 
+        overrides: null 
+    },
+    "None": { base: "0", increment: "0", overrides: null }
 };
 
 const eggData = [
