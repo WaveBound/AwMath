@@ -896,10 +896,24 @@
 
 <div id="wavePanel" class="side-panel">
                 <h3 class="unit-ui-title">Wave Calculator</h3>
-                <div class="input-group">
-                    <label>Wave</label>
-                    <input id="waveInput" type="number" class="numeric-input" placeholder="1" value="1" style="text-align:center;">
+                
+                <!-- NEW: Split Wave and Player Count into two columns -->
+                <div class="compact-row" style="margin-bottom: 0;">
+                    <div class="input-group">
+                        <label>Wave</label>
+                        <input id="waveInput" type="number" class="numeric-input" placeholder="1" value="1" style="text-align:center;">
+                    </div>
+                    <div class="input-group">
+                        <label>Players</label>
+                        <div class="custom-select full-width" data-id="wavePlayerSelect">
+                            <div class="select-selected"><span>1</span><div class="select-arrow"></div></div>
+                            <div class="select-items select-hide" id="wavePlayerOptions">
+                                <!-- Populated by JS -->
+                            </div>
+                        </div>
+                    </div>
                 </div>
+
                 <div class="input-group">
                     <label>Selected Mode</label>
                     <div class="custom-select full-width" data-id="waveModeSelect">
@@ -915,7 +929,6 @@
                 <div class="input-group">
                     <label>Calculation Type</label>
                     <div class="mode-toggle">
-                        <!-- Swapped Order: Obtain first and Active by default -->
                         <button id="waveObtainBtn" class="mode-btn active">Obtain Wave</button>
                         <button id="waveClearBtn" class="mode-btn">Clear Wave</button>
                     </div>
@@ -1084,7 +1097,7 @@
             initBijuuDropdown(); initMagicEyeDropdown(); initTitlesDropdown(); initRaceDropdown(); initSayajinDropdown(); 
             initHakiDropdown(); initFruitsDropdown(); initBreathingDropdown(); initDemonArtDropdown(); initOrganizationDropdown(); 
             initTitanDropdown(); initTitanPetDropdown(); initShinobiRaidDropdown(); initDungeonDropdown(); initPotentialMapDropdown(); initShadowsDropdown(); 
-            initShadowGateDropdown(); initSoloRankDropdown(); initAchievementsDropdowns(); initEggCostDropdown();
+            initShadowGateDropdown(); initSoloRankDropdown(); initAchievementsDropdowns(); initEggCostDropdown(); initWavePlayerDropdown();
 
             document.querySelectorAll('.custom-select').forEach(setupCustomSelect);
             setupSpeedToggle('fastBtn', 'slowBtn', 'masteryCps', updateMastery);
@@ -1428,7 +1441,7 @@
         }
 
 function updateWave() {
-            // 1. Get current wave
+            // 1. Get current wave from input
             let wave = parseInt(dom.waveIn.value) || 1;
 
             // --- SAFETY LIMIT: Max Wave 1000 ---
@@ -1440,7 +1453,15 @@ function updateWave() {
                 wave = 1;
                 dom.waveIn.value = "1";
             }
-            // ------------------------------------
+            
+            // --- FIX: OBTAIN MODE LOGIC ---
+            // If "Obtain Wave" is active, we calculate based on (Input - 1)
+            // unless the input is 1.
+            const isObtainMode = document.getElementById('waveObtainBtn').classList.contains('active');
+            if (isObtainMode && wave > 1) {
+                wave = wave - 1;
+            }
+            // ------------------------------
 
             const modeKey = dom.waveMode.getAttribute('data-value') || "None";
             const data = waveScalingData[modeKey];
@@ -1495,6 +1516,18 @@ function updateWave() {
                         currentInc = currentInc * 10n;
                     }
                 }
+            }
+
+            // --- PLAYER COUNT SCALING ---
+            // 1 Player = Base HP (100%)
+            // Every extra player adds 25% base HP
+            const playerSel = document.querySelector('[data-id="wavePlayerSelect"]');
+            const playerCount = parseInt(playerSel ? playerSel.getAttribute('data-value') : 1) || 1;
+            
+            if (playerCount > 1) {
+                // Example: 2 players = 125% (100 + 25)
+                const bonusPercent = BigInt((playerCount - 1) * 25);
+                currentHp = (currentHp * (100n + bonusPercent)) / 100n;
             }
 
             // Calculate Result Boxes
@@ -1649,6 +1682,16 @@ function updateWave() {
             for(let i=1; i<=10; i++) mobCountSelect.innerHTML += `<div data-value="${i}" class="${i===1?'same-as-selected':''}">${i}</div>`;
         }
 
+        function initWavePlayerDropdown() {
+            const el = document.getElementById('wavePlayerOptions');
+            const parent = document.querySelector('[data-id="wavePlayerSelect"]');
+            // Populate for 1 to 12 players
+            for(let i=1; i<=12; i++) {
+                el.innerHTML += `<div data-value="${i}" class="${i===1?'same-as-selected':''}">${i}</div>`;
+            }
+            parent.setAttribute('data-value', '1');
+        }
+
         function parseSuffixedString(str) {
             const m = (str || "").match(/^([\d\.]+)\s*([a-zA-Z]+)?$/);
             if (!m) return 0n;
@@ -1765,6 +1808,7 @@ function updateWave() {
                             if(targetSec) targetSec.classList.add('active');
                         }
                         if (id === 'waveModeSelect') updateWave();
+                        if (id === 'wavePlayerSelect') updateWave();
 
                         items.querySelectorAll('div').forEach(d => d.classList.remove('same-as-selected'));
                         const origItem = Array.from(items.children).find(c => c.textContent === txt);
