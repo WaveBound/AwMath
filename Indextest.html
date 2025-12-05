@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Calculator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="bg-glow"></div>
+    <div class="content-wrapper">
+        <div class="main-container">
+            <nav class="tab-nav">
+                <button class="tab-button active" data-tab="rank">Rank</button>
+                <button class="tab-button" data-tab="mastery">Mastery</button>
+                <button class="tab-button" data-tab="damage">Damage</button>
+                <button class="tab-button" data-tab="gacha">Gacha</button>
+            </nav>
+
+            <!-- RANK CALCULATOR -->
+            <div id="rank-content" class="tab-content active">
+                <div class="mastery-layout">
+                    <div>
+                        <div class="input-group">
+                            <label for="rankMpcInput">Mastery per Click</label>
+                            <div class="input-row">
+                                <input id="rankMpcInput" placeholder="0" type="text" class="numeric-input" />
+                                <div class="custom-select" data-id="rankMpcSuffix">
+                                    <div class="select-selected"><span>None</span><div class="select-arrow"></div></div>
+                                    <div class="select-items select-hide"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Click Speed Mode</label>
+                            <div class="mode-toggle">
+                                <button id="rankFastBtn" class="mode-btn active">Fast <span class="small">5.8/s</span></button>
+                                <button id="rankSlowBtn" class="mode-btn">Slow <span class="small">4.5/s</span></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                         <div class="input-group">
+                            <label>Rank Selection</label>
+                            <div class="rank-select-row">
+                                <div class="custom-select compact" data-id="currentRankSelect">
+                                    <div class="select-selected"><span>Rank 0</span><div class="select-arrow"></div></div>
+                                    <div class="select-items select-hide" id="currentRankOptions"></div>
+                                </div>
+                                <div class="rank-arrow">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                                </div>
+                                <div class="custom-select compact" data-id="targetRankSelect">
+                                    <div class="select-selected"><span>Rank 1</span><div class="select-arrow"></div></div>
+                                    <div class="select-items select-hide" id="targetRankOptions"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label for="rankCurrentMasteryInput">Current Mastery</label>
+                            <div class="input-row">
+                                <input id="rankCurrentMasteryInput" placeholder="0" type="text" class="numeric-input" />
+                                <div class="custom-select" data-id="rankCurrentMasterySuffix">
+                                    <div class="select-selected"><span>None</span><div class="select-arrow"></div></div>
+                                    <div class="select-items select-hide"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="result-section">
+                    <div class="result-grid">
+                        <div class="result-box"><div id="rankMpsResult" class="value">--</div><div class="label">Mastery Per Second</div></div>
+                        <div class="result-box"><div id="rankCostResult" class="value">--</div><div class="label">Rank Up Cost</div></div>
+                        <div class="result-box"><div id="rankCostRemainingResult" class="value">--</div><div class="label">Cost Remaining</div></div>
+                        <div class="result-box highlight">
+                            <div id="rankTimeResult" class="value">--</div><div class="label">Time to Rank Up</div>
+                            <div class="rank-progress-container">
+                                <div class="rank-progress-track"><div id="rankProgressBar" class="rank-progress-fill"></div></div>
+                                <div id="rankPercentLabel" class="rank-progress-text">0%</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MASTERY CALCULATOR -->
+            <div id="mastery-content" class="tab-content">
+                <div id="mastery-main-view">
+                    <div class="mastery-layout">
+                        <div>
+                            <div class="input-group">
+                                <label for="dmgInput">Mastery per Click</label>
+                                <div class="input-row">
+                                    <input id="dmgInput" placeholder="0" type="text" class="numeric-input" />
+                                    <div class="custom-select" data-id="suffixSelect">
+                                        <div class="select-selected"><span>None</span><div class="select-arrow"></div></div>
+                                        <div class="select-items select-hide"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <label>Click Speed Mode</label>
+                                <div class="mode-toggle">
+                                    <button id="fastBtn" class="mode-btn active">Fast <span class="small">5.8/s</span></button>
+                                    <button id="slowBtn" class="mode-btn">Slow <span class="small">4.5/s</span></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="input-group">
+                                <label for="currentMasteryInput">
+                                    <span>Current Mastery</span>
+                                    <span id="btnOpenPotential" class="mini-link-btn">Check Potential &rarr;</span>
+                                </label>
+                                <div class="input-row">
+                                    <input id="currentMasteryInput" placeholder="0" type="text" class="numeric-input" />
+                                    <div class="custom-select" data-id="currentMasterySuffixSelect">
+                                        <div class="select-selected"><span>None</span><div class="select-arrow"></div></div>
+                                        <div class="select-items select-hide"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <label>Time Duration (D:H:M)</label>
+                                <div class="time-input-group">
+                                    <div><input id="dayInput" type="number" value="0" min="0" class="numeric-input" /><div class="time-label">Days</div></div>
+                                    <div><input id="hourInput" type="number" value="0" min="0" class="numeric-input" /><div class="time-label">Hours</div></div>
+                                    <div><input id="minuteInput" type="number" value="0" min="0" class="numeric-input" /><div class="time-label">Minutes</div></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="result-section">
+                        <div class="result-grid">
+                            <div class="result-box"><div id="resultBox" class="value">--</div><div class="label">Mastery Per Second</div></div>
+                            <div class="result-box"><div id="perHourResult" class="value">--</div><div class="label">Mastery Per Hour</div></div>
+                            <div class="result-box"><div id="perDayResult" class="value">--</div><div class="label">Mastery Per Day</div></div>
+                            <div class="result-box highlight"><div id="totalMasteryResult" class="value">--</div><div class="label">Total Mastery After Duration</div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="mastery-potential-view" style="display: none;">
+                    <div style="margin-bottom: 20px; margin-top: -20px;">
+                        <button id="btnBackPotential" class="back-btn" style="margin-bottom:0;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                            Back to Calculator
+                        </button>
+                    </div>
+
+                    <div class="potential-grid global-grid">
+                        <div>
+                            <div class="input-group" style="margin-bottom:0;">
+                                <label>Rank</label>
+                                <div class="custom-select full-width" data-id="potRankSelect">
+                                    <div class="select-selected"><span>Rank 0</span><div class="select-arrow"></div></div>
+                                    <div class="select-items select-hide" id="potRankOptions"></div>
+                                </div>
+                                <div class="mode-toggle" style="margin-top: 8px;">
+                                    <button id="pot2xBtn" class="mode-btn">2x Mastery</button>
+                                    <button id="potNo2xBtn" class="mode-btn active">1x Mastery</button>
+                                </div>
+                                <div class="mode-toggle" style="margin-top: 8px;">
+                                    <button id="potPotionBtn" class="mode-btn">1.5x Potion</button>
+                                    <button id="potNoPotionBtn" class="mode-btn active">No Potion</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; flex-direction: column; gap: 15px;">
+                            <div class="input-group" style="margin-bottom:0;">
+                                <label>Yen Upgrade (%)</label>
+                                <input id="potDungeonCoinInput" placeholder="0" value="0" type="number" class="numeric-input" />
+                            </div>
+                            <div class="input-group" style="margin-bottom:0;">
+                                <label>Shinobi Raid</label>
+                                <div class="custom-select full-width" data-id="potShinobiRaidSelect">
+                                    <div class="select-selected"><span>None (+0%)</span><div class="select-arrow"></div></div>
+                                    <div class="select-items select-hide" id="potShinobiRaidOptions"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; flex-direction: column; gap: 15px;">
+                            <div class="input-group" style="margin-bottom:0;">
+                                <label>Token Upgrade (%)</label>
+                                <input id="potDungeonCurrencyInput" placeholder="0" value="0" type="number" class="numeric-input" />
+                            </div>
+                            <div class="input-group" style="margin-bottom:0;">
+                                <label>Dungeon Gacha</label>
+                                <div class="custom-select full-width" data-id="potDungeonSelect">
+                                    <div class="select-selected"><span>None (+0%)</span><div class="select-arrow"></div></div>
+                                    <div class="select-items select-hide" id="potDungeonOptions"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="input-group" style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-color);">
+                        <div style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap;">
+                            <span style="font-size: 14px; color: var(--primary-light); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; text-shadow: 0 0 10px var(--primary-dim);">Map Selection</span>
+                            <button id="btnMaxMap" class="max-btn" style="height: 24px; font-size: 10px; padding: 0 10px;">Max Map</button>
+                            <button id="btnMaxGlobal" class="max-btn" style="height: 24px; font-size: 10px; padding: 0 10px;">Max All Maps</button>
+                        </div>
+                        <div class="input-row" style="justify-content: center;">
+                            <div class="custom-select map-center-limit" data-id="potMapSelect">
+                                <div class="select-selected"><span>Shinobi Village</span><div class="select-arrow"></div></div>
+                                <div class="select-items select-hide" id="potMapOptions"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="map-ShinobiVillage" class="map-section active">
+                        <div class="input-group" style="margin-bottom:0;">
+                            <label>Bijuu Gacha</label>
+                            <div class="custom-select full-width" data-id="potBijuuSelect">
+                                <div class="select-selected"><span>None (+0%)</span><div class="select-arrow"></div></div>
+                                <div class="select-items select-hide" id="potBijuuOptions"></div>
+                            </div>
+                        </div>
+                        <div class="input-group" style="margin-bottom:0;">
+                            <label class="magic-eye-label-fix">
+                                <span>Magic Eyes</span>
+                                <div class="level-input-wrapper"><span class="level-label">Lvl</span><input id="potMagicEyeLevel" class="compact-input" type="number" value="0" min="0" max="50" placeholder="0" /></div>
+                            </label>
+                            <div class="custom-select full-width" data-id="potMagicEyeSelect">
+                                <div class="select-selected"><span>None (+0%)</span><div class="select-arrow"></div></div>
+                                <div class="select-items select-hide" id="potMagicEyeOptions"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="map-NamekPlanet" class="map-section">
+                        <div class="input-group" style="margin-bottom:0;">
+                            <label>Race Gacha</label>
+                            <div class="custom-select full-width" data-id="potRaceSelect">
+                                <div class="select-selected"><span>None (+0%)</span><div class="select-arrow"></div></div>
+                                <div class="select-items select-hide" id="potRaceOptions"></div>
+                            </div>
+                        </div>
+                        <div class="input-group" style="margin-bottom:0;">
+                            <label>Sayajin Gacha</label>
+                            <div class="custom-select full-width" data-id="potSayajinSelect">
+                                <div class="select-selected"><span>None (+0%)</span><div class="select-arrow"></div></div>
+                                <div class="select-items select-hide" id="potSayajinOptions"></div>
+                            </div>
+                        </div>
+                        <div class="input-group" style="margin-bottom:0;">
+                            <label>Titles</label>
+                            <div class="custom-select full-width" data-id="potTitlesSelect">
+                                <div class="select-selected"><span>None (+0%)</span><div class="select-arrow"></div></div>
+                                <div class="select-items select-hide" id="potTitlesOptions"></div>
+                            </div>
+                        </div>
+                        <div class="input-group" style="margin-bottom:0;">
+                            <label>Wise Trainer (%)</label>
+                            <input id="potWiseTrainerInput" placeholder="0" value="0" type="number" class="numeric-input" />
+                        </div>
+                    </div>
+
+                    <div id="map-DesertLand" class="map-section">
+                        <div class="input-group" style="margin-bottom:0;">
+                            <label>Haki Gacha</label>
+                            <div class="custom-select full-width" data-id="potHakiSelect">
+                                <div class="select-selected"><span>None (+0%)</span><div class="select-arrow"></div></div>
+                                <div class="select-items select-hide" id="potHakiOptions"></div>
+                            </div>
+                        </div>
+                        <div class="input-group" style="margin-bottom:0;">
+                            <label>Fruits Gacha</label>
+                            <div class="custom-select full-width" data-id="potFruitsSelect">
+                                <div class="select-selected"><span>None (+0%)</span><div class="select-arrow"></div></div>
+                                <div class="select-items select-hide" id="potFruitsOptions"></div>
+                            </div>
+                        </div>
+                         <div class="input-group" style="margin-bottom:0;">
+                            <label>Pirate Trainer (%)</label>
+                            <input id="potPirateTrainerInput" placeholder="0" value="0" type="number" class="numeric-input" />
+                        </div>
+                    </div>
+
+                    <div id="map-DemonLand" class="map-section">
+                        <div class="input-group" style="margin-bottom:0;">
+                            <label>Breathing Gacha</label>
+                            <div class="custom-select full-width" data-id="potBreathingSelect">
+                                <div class="select-selected"><span>None (+0%)</span><div class="select-arrow"></div></div>
+                                <div class="select-items select-hide" id="potBreathingOptions"></div>
+                            </div>
+                        </div>
+                        <div class="input-group" style="margin-bottom:0;">
+                            <label>Breath Trainer (%)</label>
+                            <input id="potBreathTrainerInput" placeholder="0" value="0" type="number" class="numeric-input" />
+                        </div>
+                        <div class="input-group" style="margin-bottom:0;">
+                            <label class="magic-eye-label-fix">
+                                <span>Demon Art</span>
+                                <div class="level-input-wrapper"><span class="level-label">Lvl</span><input id="potDemonArtLevel" class="compact-input" type="number" value="0" min="0" max="50" placeholder="0" /></div>
+                            </label>
+                            <div class="custom-select full-width" data-id="potDemonArtSelect">
+                                <div class="select-selected"><span>None (+0%)</span><div class="select-arrow"></div></div>
+                                <div class="select-items select-hide" id="potDemonArtOptions"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="map-Paradis" class="map-section">
+                         <div class="input-group" style="margin-bottom:0;">
+                            <label>Titan Gacha</label>
+                            <div class="custom-select full-width" data-id="potTitanSelect">
+                                <div class="select-selected"><span>None (+0%)</span><div class="select-arrow"></div></div>
+                                <div class="select-items select-hide" id="potTitanOptions"></div>
+                            </div>
+                        </div>
+                        <div class="input-group" style="margin-bottom:0;">
+                            <label>Titan Pet</label>
+                            <div class="custom-select full-width" data-id="potTitanPetSelect">
+                                <div class="select-selected"><span>None (+0%)</span><div class="select-arrow"></div></div>
+                                <div class="select-items select-hide" id="potTitanPetOptions"></div>
+                            </div>
+                        </div>
+                        <div class="input-group" style="margin-bottom:0;">
+                            <label>Leve Trainer (%)</label>
+                            <input id="potLeveTrainerInput" placeholder="0" value="0" type="number" class="numeric-input" />
+                        </div>
+                         <div class="input-group" style="margin-bottom:0;">
+                            <label>Organization</label>
+                            <div class="custom-select full-width" data-id="potOrgSelect">
+                                <div class="select-selected"><span>None (+0%)</span><div class="select-arrow"></div></div>
+                                <div class="select-items select-hide" id="potOrgOptions"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="map-ShadowCity" class="map-section">
+                        <div class="input-group" style="margin-bottom:0;">
+                            <label>Shadows Gacha</label>
+                            <div class="custom-select full-width" data-id="potShadowsSelect">
+                                <div class="select-selected"><span>None (+0%)</span><div class="select-arrow"></div></div>
+                                <div class="select-items select-hide" id="potShadowsOptions"></div>
+                            </div>
+                        </div>
+                        <div class="input-group" style="margin-bottom:0;">
+                            <label>Shadow Gate</label>
+                             <div class="custom-select full-width" data-id="potShadowGateSelect">
+                                <div class="select-selected"><span>None (+0%)</span><div class="select-arrow"></div></div>
+                                <div class="select-items select-hide" id="potShadowGateOptions"></div>
+                            </div>
+                        </div>
+                        <div class="input-group" style="margin-bottom:0;">
+                            <label>Solo Rank</label>
+                             <div class="custom-select full-width" data-id="potSoloRankSelect">
+                                <div class="select-selected"><span>None (+0%)</span><div class="select-arrow"></div></div>
+                                <div class="select-items select-hide" id="potSoloRankOptions"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="result-section">
+                        <div class="result-grid" style="grid-template-columns: 1fr;"> 
+                            <div class="result-box highlight"><div id="potMpcResult" class="value">--</div><div class="label">Potential Mastery Per Click</div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DAMAGE CALCULATOR -->
+            <div id="damage-content" class="tab-content">
+                 <div class="mastery-layout">
+                    <div>
+                        <div class="input-row-multi">
+                            <div class="input-col" style="flex: 2;">
+                                <div class="input-group">
+                                    <label for="damageDmgInput">Damage per Click</label>
+                                    <div class="input-row">
+                                        <input id="damageDmgInput" placeholder="0" type="text" class="numeric-input" />
+                                        <div class="custom-select" data-id="damageSuffixSelect">
+                                            <div class="select-selected"><span>None</span><div class="select-arrow"></div></div>
+                                            <div class="select-items select-hide"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="input-col" style="flex: 1;">
+                                <div class="input-group">
+                                    <label for="critInput">Crit %</label>
+                                    <div class="input-row"><input id="critInput" placeholder="0" type="number" min="0" max="100" class="numeric-input" style="text-align: center;" /></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="input-row-multi">
+                            <div class="input-col">
+                                <div class="input-group">
+                                    <label>Click Speed Mode</label>
+                                    <div class="mode-toggle">
+                                        <button id="dmgFastBtn" class="mode-btn active">Fast <span class="small">5.8/s</span></button>
+                                        <button id="dmgSlowBtn" class="mode-btn">Slow <span class="small">4.5/s</span></button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="input-col">
+                                <div class="input-group">
+                                    <label>Hero % <span style="font-size:9px; opacity:0.7;">(Hits every 0.5s)</span></label>
+                                    <input id="heroDmgInput" placeholder="0" type="number" min="0" class="numeric-input" style="text-align: center;" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="input-row-multi">
+                             <div class="input-col">
+                                <div class="input-group">
+                                    <label>Map Selection</label>
+                                    <div class="custom-select full-width" data-id="mapSelect">
+                                        <div class="select-selected"><span>Select Map</span><div class="select-arrow"></div></div>
+                                        <div class="select-items select-hide" id="mapOptions"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="input-col">
+                                 <div class="input-group">
+                                    <label>Mob Selection</label>
+                                    <div class="custom-select full-width" data-id="mobSelect">
+                                        <div class="select-selected"><span>Select Mob</span><div class="select-arrow"></div></div>
+                                        <div class="select-items select-hide" id="mobOptions"><div data-value="none">Select Map First</div></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="input-row-multi">
+                            <div class="input-col" style="flex: 2;">
+                                <div class="input-group" style="margin-bottom: 0;">
+                                    <label>Selected Mob HP</label>
+                                    <div class="result-box mini-highlight" style="padding: 10px;">
+                                        <div id="mobHpResultBox" class="value" style="font-size: 20px;">--</div><div class="label">Mob HP</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="input-col" style="flex: 1;">
+                                 <div class="input-group" style="margin-bottom: 0;">
+                                    <label>Mob Count</label>
+                                    <div class="custom-select full-width" data-id="mobCountSelect">
+                                        <div class="select-selected"><span>1</span><div class="select-arrow"></div></div>
+                                        <div class="select-items select-hide" id="mobCountOptions"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="result-section">
+                    <div class="result-grid">
+                        <div class="result-box"><div id="dmgPerSecResult" class="value">--</div><div class="label">Damage Per Second</div></div>
+                        <div class="result-box"><div id="mobsPerMinuteResult" class="value">--</div><div class="label">Mobs Killed Per Minute</div></div>
+                        <div class="result-box"><div id="mobsPerHourResult" class="value">--</div><div class="label">Mobs Killed Per Hour</div></div>
+                        <div class="result-box highlight"><div id="timeToKillResult" class="value">Select Mob</div><div class="label">Time to Kill One Mob</div></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GACHA CALCULATOR -->
+            <div id="gacha-content" class="tab-content">
+                <div class="mastery-layout">
+                    <!-- Column 1: Speed, Amount, Gamepass -->
+                    <div>
+                        <div class="input-row-multi">
+                             <div class="input-col" style="flex: 1;">
+                                <div class="input-group">
+                                    <label for="gachaAmountInput">Batch Size</label>
+                                    <input id="gachaAmountInput" placeholder="3" value="3" type="number" class="numeric-input" />
+                                </div>
+                            </div>
+                             <div class="input-col" style="flex: 2;">
+                                <div class="input-group">
+                                    <label>Gamepass Selection</label>
+                                    <div class="mode-toggle">
+                                        <button id="gachaFastBtn" class="mode-btn active">Fast Open <span class="small">1.2s Per Open</span></button>
+                                        <button id="gachaNormalBtn" class="mode-btn">No GP <span class="small">2s Per Open</span></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Opening Duration (D:H:M)</label>
+                            <div class="time-input-group">
+                                <div><input id="gachaDayInput" type="number" value="0" min="0" class="numeric-input" /><div class="time-label">Days</div></div>
+                                <div><input id="gachaHourInput" type="number" value="0" min="0" class="numeric-input" /><div class="time-label">Hours</div></div>
+                                <div><input id="gachaMinuteInput" type="number" value="0" min="0" class="numeric-input" /><div class="time-label">Minutes</div></div>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Map (Egg Cost)</label>
+                            <div class="custom-select full-width" data-id="eggCostSelect">
+                                <div class="select-selected"><span>Shinobi Village (50)</span><div class="select-arrow"></div></div>
+                                <div class="select-items select-hide" id="eggCostOptions"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Column 2: Probabilities -->
+                    <div>
+                        <div class="input-group">
+                            <label for="gachaLegInput">Legendary Chance (%)</label>
+                            <input id="gachaLegInput" placeholder="0.5" type="number" step="0.01" class="numeric-input" />
+                        </div>
+                        <div class="input-group">
+                            <label for="gachaMythInput">Mythic Chance (%)</label>
+                            <input id="gachaMythInput" placeholder="0.1" type="number" step="0.01" class="numeric-input" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="result-section">
+                    <div class="result-grid">
+                        <div class="result-box"><div id="gachaRealSpeedResult" class="value">--</div><div class="label">Opens / Second</div></div>
+                        <div class="result-box"><div id="gachaPerHourResult" class="value">--</div><div class="label">Opens Per Hour</div></div>
+                        <div class="result-box"><div id="gachaTotalCostResult" class="value">0</div><div class="label" id="gachaTotalCostLabel">Total Cost</div></div>
+                        <div class="result-box highlight"><div id="gachaTotalOpensResult" class="value">0</div><div class="label">Total Opens</div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="side-column left-aligned">
+            <div id="statsPanel" class="side-panel">
+                <h3 class="unit-ui-title">Player Stats</h3>
+                <div class="compact-row">
+                    <div class="input-group"><label>Weapon</label><input id="itemWeaponInput" type="number" class="numeric-input" placeholder="1" value="1" style="text-align:center;"></div>
+                    <div class="input-group"><label>Accessory (%)</label><input id="itemAccessoryInput" type="number" class="numeric-input" placeholder="0" style="text-align:center;"></div>
+                </div>
+                <div class="compact-row">
+                    <div class="input-group"><label>Stats (%)</label><input id="playerStatsInput" type="number" class="numeric-input" placeholder="0" style="text-align:center;"></div>
+                    <div class="input-group"><label>Aura (%)</label><input id="playerAuraInput" type="number" class="numeric-input" placeholder="0" style="text-align:center;"></div>
+                </div>
+                <div class="compact-row">
+                    <div class="input-group"><label style="justify-content: center;">Avatar (%)</label><input id="playerAvatarInput" type="number" class="numeric-input" placeholder="0" style="text-align:center;"></div>
+                </div>
+            </div>
+
+            <div id="unitsPanel" class="side-panel">
+                <h3 class="unit-ui-title">Units</h3>
+                <div id="unitInputsContainer" class="units-grid"></div>
+                <button id="addUnitBtn" class="add-unit-btn">+ Add Unit</button>
+                <div class="result-box mini-highlight"><div id="unitsTotalResult" class="value">0%</div><div class="label">Total Unit Bonus</div></div>
+            </div>
+
+<div id="wavePanel" class="side-panel">
+                <h3 class="unit-ui-title">Wave Calculator</h3>
+                
+                <!-- NEW: Split Wave and Player Count into two columns -->
+                <div class="compact-row" style="margin-bottom: 0;">
+                    <div class="input-group">
+                        <label>Wave</label>
+                        <input id="waveInput" type="number" class="numeric-input" placeholder="1" value="1" style="text-align:center;">
+                    </div>
+                    <div class="input-group">
+                        <label>Players</label>
+                        <div class="custom-select full-width" data-id="wavePlayerSelect">
+                            <div class="select-selected"><span>1</span><div class="select-arrow"></div></div>
+                            <div class="select-items select-hide" id="wavePlayerOptions">
+                                <!-- Populated by JS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Selected Mode</label>
+                    <div class="custom-select full-width" data-id="waveModeSelect">
+                        <div class="select-selected"><span>None</span><div class="select-arrow"></div></div>
+                        <div class="select-items select-hide">
+                            <div data-value="None" class="same-as-selected">None</div>
+                            <div data-value="Shinobi">Shinobi</div>
+                            <div data-value="AoT Defense">AoT Defense</div>
+                            <div data-value="Shadow Gate">Shadow Gate</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Calculation Type</label>
+                    <div class="mode-toggle">
+                        <button id="waveObtainBtn" class="mode-btn active">Obtain Wave</button>
+                        <button id="waveClearBtn" class="mode-btn">Clear Wave</button>
+                    </div>
+                </div>
+                
+                <div class="units-grid" style="margin-top: 15px; max-height: none; overflow: visible;">
+                    <!-- 1. DPS Needed (Full Width) -->
+                    <div class="result-box mini-highlight" style="margin-top: 0; padding: 12px 10px; grid-column: span 2;">
+                        <div id="waveDpsResult" class="value" style="font-size: 15px;">--</div>
+                        <div class="label" style="font-size: 9px;">DPS Needed</div>
+                    </div>
+
+                    <!-- 2. Total HP (Full Width) -->
+                    <div class="result-box mini-highlight" style="margin-top: 0; padding: 12px 10px; grid-column: span 2;">
+                        <div id="waveTotalHpResult" class="value" style="font-size: 15px;">--</div>
+                        <div class="label" style="font-size: 9px;">Total HP</div>
+                    </div>
+
+                    <!-- 3. Boss HP (Left) -->
+                    <div class="result-box mini-highlight" style="margin-top: 0; padding: 12px 10px;">
+                        <div id="waveBossHpResult" class="value" style="font-size: 15px;">--</div>
+                        <div class="label" style="font-size: 9px;">Boss HP</div>
+                    </div>
+
+                    <!-- 4. Mob HP (Right) -->
+                    <div class="result-box mini-highlight" style="margin-top: 0; padding: 12px 10px;">
+                        <div id="waveMobHpResult" class="value" style="font-size: 15px;">--</div>
+                        <div class="label" style="font-size: 9px;">Mob HP</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="side-column right-aligned">
+            <div id="sidePanel" class="side-panel drop-theme">
+                <h3 class="sub-ui-title">Drops Calculator</h3>
+                <div class="input-group"><label>Drop Multiplier (%)</label><input id="dropMultiInput" type="number" placeholder="100" value="100" min="0" class="numeric-input" style="text-align:center;" /></div>
+                <div class="input-group"><label>Drop Chance (%)</label><input id="dropChanceInput" type="number" placeholder="10" value="10" min="0" max="100" class="numeric-input" style="text-align:center;" /></div>
+                <div class="input-group"><label>Drop Amount</label><input id="dropAmountInput" type="number" placeholder="5" value="5" min="0" class="numeric-input" style="text-align:center;" /></div>
+                <div class="result-box mini-highlight"><div id="dropsPerMinuteResult" class="value">--</div><div class="label">Drops Per Minute</div></div>
+                <div class="result-box mini-highlight" style="margin-top: 10px;"><div id="dropsPerHourResult" class="value">--</div><div class="label">Drops Per Hour</div></div>
+            </div>
+
+            <div id="achievementsPanel" class="side-panel">
+                <h3 class="unit-ui-title">Achievements</h3>
+                <div id="achievementsContainer"></div>
+                <div class="result-box mini-highlight" style="margin-top: 15px;">
+                    <div id="achievementsTotalResult" class="value">0%</div>
+                    <div class="label">Total Achievement Bonus</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">Designed & Built by <span class="footer-tag">@xking.</span></div>
+    <div class="secret-zone"><div class="secret-popup"><div class="secret-label">Secret Helper</div><div class="secret-name">@xauroraflare</div></div></div>
+
+    <script src="Data.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

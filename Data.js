@@ -349,17 +349,14 @@ const waveScalingData = {
     "Shinobi": { 
         base: "300B", 
         increment: "4T", // Set this to whatever you want for Wave 6+
-        overrides: null 
     },
     "Shadow Gate": { 
         base: "375No", 
         increment: "5Dc", // Set this to whatever you want for Wave 6+
-        overrides: null 
     },
     "AoT Defense": {
         base: "6Oc",
         increment: "6Oc", 
-        overrides: null 
     },
     "None": { base: "0", increment: "0", overrides: null }
 };
