@@ -51,7 +51,7 @@ input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-app
 }
 /* Focus States */
 .numeric-input:focus, .select-selected:hover, .select-selected.select-arrow-active, 
-.compact-input:focus, .max-btn:hover, .add-unit-btn:hover, .tab-button:hover {
+.compact-input:focus, .max-btn:hover, .add-unit-btn:hover {
   border-color: var(--primary-light); outline: none;
 }
 .numeric-input:focus, .compact-input:focus, .select-selected:hover, .select-selected.select-arrow-active { background: #202023; }
@@ -105,9 +105,19 @@ input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-app
   flex: 1; padding: 10px; background: transparent; border: 1px solid transparent; border-radius: 8px;
   color: var(--text-muted); font-size: 13px; font-weight: 600; cursor: pointer;
 }
+/* Hover State: Subtle feedback when moving mouse over tabs */
+.tab-button:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-main);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Active State: Strong gradient & Glow (The tab you are on) */
 .tab-button.active {
-  background: #000 var(--active-gradient); border: 1px solid var(--primary-border);
-  color: var(--text-main); text-shadow: var(--glow);
+  background: #000 var(--active-gradient); 
+  border: 1px solid var(--primary-border);
+  color: var(--text-main); 
+  text-shadow: var(--glow);
 }
 .tab-content { display: none; padding: 30px; animation: entryFade 0.4s cubic-bezier(0.16, 1, 0.3, 1); --ty: 10px; }
 .tab-content.active, #mastery-potential-view { display: block; }
