@@ -10,7 +10,14 @@
   --trans: all 0.2s ease; --glow: 0 0 15px var(--primary-glow);
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+* { 
+  box-sizing: border-box; 
+  margin: 0; 
+  padding: 0; 
+  
+  /* Add this line: */
+  -webkit-tap-highlight-color: transparent; 
+}
 body {
   background: var(--bg-app); color: var(--text-main); font-family: 'Inter', sans-serif;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
