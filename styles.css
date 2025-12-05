@@ -331,15 +331,89 @@ input[type=number] { -moz-appearance: textfield; appearance: textfield; }
 
 .map-center-limit { width: 25%; }
 
+/* --- MOBILE STICKY STAT BAR (FIXED) --- */
 @media (max-width: 768px) {
-  .map-center-limit {width: 100%; }
-  .mastery-layout { grid-template-columns: 1fr; gap: 25px; }
-  .tab-content { padding: 25px; }
-  .input-row-multi { flex-direction: column; gap: 20px; }
-  .potential-grid, .map-section { grid-template-columns: repeat(2, 1fr); gap: 15px; }
-  .potential-grid.global-grid { grid-template-columns: 1fr; } 
-  .result-grid { grid-template-columns: 1fr; }
-  .result-box.highlight { grid-column: auto; margin-top: 0; height: auto; padding: 20px; min-height: 115px; }
-  .result-box.highlight .value { font-size: 24px; white-space: normal; }
-  .input-group label { font-size: 11px; }
+
+  /* 1. DISABLE PARENT TRAPS 
+     We must remove filters and animations from parents on mobile, 
+     otherwise the sticky bar gets trapped inside the card. */
+  .main-container {
+    backdrop-filter: none !important;
+    transform: none !important;
+    will-change: auto !important;
+  }
+  
+  .tab-content {
+    animation: none !important;
+    transform: none !important;
+  }
+
+  /* 2. ADD SCROLL PADDING
+     Ensure you can scroll down to see the footer without the bar covering it */
+  body {
+    padding-bottom: 100px !important;
+  }
+
+  /* 3. THE STICKY BAR
+     Now that parents are neutralized, this will stick to the screen bottom */
+  .tab-content.active .result-box.highlight {
+    position: fixed !important;
+    bottom: 20px;
+    left: 15px;
+    right: 15px;
+    width: auto;
+    height: 65px;
+    z-index: 2147483647; /* Maximum priority */
+    
+    /* Reset margins and sizing */
+    margin: 0 !important;
+    padding: 0 20px;
+    grid-column: auto !important;
+    
+    /* Flex Layout: Label Left, Value Right */
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    
+    /* Design */
+    background-color: #000; /* Solid background since glass is off */
+    background-image: var(--active-gradient);
+    border: 1px solid var(--primary-light);
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+  }
+
+  /* 4. TEXT FORMATTING */
+  .tab-content.active .result-box.highlight .label {
+    order: 1;
+    font-size: 11px;
+    text-align: left;
+    margin: 0;
+    color: rgba(255,255,255,0.7);
+  }
+
+  .tab-content.active .result-box.highlight .value {
+    order: 2;
+    font-size: 22px;
+    text-align: right;
+    margin: 0;
+    white-space: nowrap;
+  }
+
+  /* 5. HIDE/FIX EXTRA ELEMENTS */
+  /* Hide the % text for rank, turn bar into a bottom border */
+  .tab-content.active .rank-progress-text { display: none; }
+  
+  .tab-content.active .rank-progress-container {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 4px;
+    margin: 0;
+  }
+  .rank-progress-track { background: transparent; }
+  .rank-progress-fill { border-radius: 0 0 0 12px; }
+
+  /* Move the Secret Helper up */
+  .secret-zone { bottom: 100px; }
 }
