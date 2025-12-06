@@ -127,7 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
     generateMapUI();
 
     // Clear specific inputs
-    ['itemAccessoryInput', 'playerStatsInput', 'playerAuraInput', 'playerAvatarInput'].forEach(id => {
+    ['itemAccessoryInput', 'playerStatsInput', 'playerAuraInput', 'playerAvatarInput', 'playerArtifactInput'].forEach(id => {
         const el = getEl(id); if(el) el.value = "";
     });
 
@@ -450,6 +450,7 @@ function updatePotential() {
         {id:'potDungeonCoinInput',t:'n'}, {id:'potDungeonCurrencyInput',t:'n'},
         {id:'itemAccessoryInput',t:'n'}, {id:'playerStatsInput',t:'n'},
         {id:'playerAuraInput',t:'n'}, {id:'playerAvatarInput',t:'n'},
+        {id:'playerArtifactInput',t:'n'},
         {id:'potShinobiRaidSelect',t:'v'}, {id:'potDungeonSelect',t:'v'}
     ];
 

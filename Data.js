@@ -16,7 +16,7 @@ const rankCostsData = [
     "1.30Sx", "10.93Sx", "91.77Sx", "770.88Sx", "6.48Sp", "54.29Sp", "456.90Sp", "3.84Oc", "32.24Oc", 
     "270.81Oc", "2.27No", "19.11No", "160.51No", "1.35Dc", "11.33Dc", "95.13Dc", "799.13Dc", "6.71Ud", 
     "56.39Ud", "473.65Ud", "3.98Dd", "131.33Dd", "2.84Td", "25.24Td", "224.65Td", "752.4Td", "6.55Qad", 
-    "56.95Qad", "2.36Qid", "???", "???", "???", "???"
+    "56.95Qad", "1.41Qid", "12.54Qid", "111.65Qid", "993.65Qid", "???", "???"
 ];
 
 const bijuuData = mk(
@@ -104,16 +104,32 @@ const shadowGateData = mk(
     [0, 50, 100, 200, 400, 1000]
 );
 
+// --- NEW DATA ADDED HERE ---
+const captainsData = mk(
+    ["None", "Morgom", "Nezani", "Tagishi", "Helmego", "Copy", "Rima", "Smoky"],
+    [0, 50, 100, 200, 300, 400, 600, 1000]
+);
+
+const pirateTowerData = mk(
+    ["None", "Ghoul Soul", "Strong Punch", "Earthquake Punch", "Ice Aura", "Gear 5"],
+    [0, 50, 100, 200, 400, 800]
+);
+// ----------------------------
+
 const achievementsData = [
-    ach("Secret Boss (Multiplier)", ["None", "World 1", "World 2", "World 3", "World 4", "World 5", "World 6"], [0, 25, 50, 75, 100, 125, 150]),
-    ach("Mastery", ["None", "500K Mastery", "500M Mastery", "500B Mastery", "5Qi Mastery", "50Sx Mastery", "50Sp Mastery", "100Sp Mastery", "600Sp Mastery", "4Oc Mastery", "50Oc Mastery", "200Oc Mastery", "4No Mastery", "40No Mastery", "600No Mastery", "2Dc Mastery"], [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75]),
-    ach("Master Slayer", ["None", "1K Kills!", "10k Kills!", "100k Kills!", "1M Kills!", "10M Kills!", "100M Kills!"], [0, 5, 10, 15, 20, 25, 30]),
+    ach("Secret Boss (Multiplier)", ["None", "World 1", "World 2", "World 3", "World 4", "World 5", "World 6", "World 7"], [0, 25, 50, 75, 100, 125, 150, 175]),
+    ach("Mastery", ["None", "500K Mastery", "500M Mastery", "500B Mastery", "5Qi Mastery", "50Sx Mastery", "50Sp Mastery", "100Sp Mastery", "600Sp Mastery",
+    "4Oc Mastery", "50Oc Mastery", "200Oc Mastery", "4No Mastery", "40No Mastery", "600No Mastery", "2Dc Mastery", "80Dc Mastery", "5Ud Mastery",
+    "90Ud Mastery", "1Dd Mastery", "10Dd Maastery"], 
+    [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100]),
+    ach("Master Slayer", ["None", "1K Kills!", "10k Kills!", "100k Kills!", "1M Kills!", "10M Kills!", "20M Kills!", "30M Kills!"], [0, 5, 10, 15, 20, 25, 30, 35, 40]),
     ach("Easy Dungeon", ["None", "Room 5!", "Room 15!", "Room 30!", "Room 40!", "Complete 25 times!"], [0, 5, 10, 15, 20, 30]),
     ach("Medium Dungeon", ["None", "Room 5!", "Room 15!", "Room 30!", "Room 40!", "Room 50!", "Complete 25 times!"], [0, 5, 10, 15, 20, 25, 35]),
     ach("Hard Dungeon", ["None", "Room 5!", "Room 15!", "Room 30!", "Room 40!", "Room 50!", "Complete 25 times!"], [0, 5, 10, 15, 20, 25, 35]),
     ach("Shinobi Raid", ["None", "Wave 25!", "Wave 50!", "Wave 125!", "Wave 175!", "Wave 200!", "Wave 250!", "Wave 275!", "Wave 325!", "Wave 350!", "Wave 400!", "Wave 425!"], [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110]),
     ach("Defense", ["None", "Wave 10!", "Wave 20!", "Wave 40!", "Wave 50!", "Wave 60!", "Wave 90!", "Wave 100!", "Wave 130!", "Wave 150!", "Wave 160!"], [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50]),
-    ach("Shadow Gate", ["None", "Wave 10!", "Wave 25!", "Wave 75!", "Wave 100!", "Wave 125!", "Wave 175!", "Wave 225!", "Wave 275!", "Wave 325!", "Wave 375!", "Wave 400!", "Wave 450!", "Wave 475!"], [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130])
+    ach("Shadow Gate", ["None", "Wave 10!", "Wave 25!", "Wave 75!", "Wave 100!", "Wave 125!", "Wave 175!", "Wave 225!", "Wave 275!", "Wave 325!", "Wave 375!", "Wave 400!", "Wave 450!", "Wave 475!"], [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130]),
+    ach("Pirate Tower", ["None", "Floor 5!", "Floor 10!", "Floor 20!", "Floor 25!", "Floor 30!", "Floor 35!", "Floor 45!", "Floor 60!", "Floor 65", "Floor 80!", "Floor 90!", "Floor 95!"], [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120])
 ];
 
 const gameData = {
@@ -122,7 +138,8 @@ const gameData = {
     "Desert Land": [ {name:"Cobinha",hp:"40Qa"}, {name:"Buguinho",hp:"600Qa"}, {name:"Marcao",hp:"80Qi"}, {name:"Cometa",hp:"3Sx"}, {name:"Edmundo",hp:"50Sx"}, {name:"Leopardo",hp:"80No"} ],
     "Demon Land": [ {name:"Demon",hp:"500Sx"}, {name:"Lyokko",hp:"80Sp"}, {name:"Jyutaro",hp:"4Oc"}, {name:"Dola",hp:"300Oc"}, {name:"Mokushibo",hp:"10No"}, {name:"Alaza",hp:"6Dd"} ],
     "Paradis": [ {name:"Richala",hp:"700Dc"}, {name:"Famale Titan",hp:"80Ud"}, {name:"Mandile",hp:"5.5Dd"}, {name:"Blind",hp:"100Dd"}, {name:"Colosso",hp:"5Td"} , {name:"Elen yage",hp:"200Qid"} ],
-    "Shadow City": [ {name:"TangFak",hp:"8Td"}, {name:"Sunly",hp:"400Qad"}, {name:"Haler",hp:"20Qid"}, {name:"Thomas",hp:"2Sxd"}, {name:"Frieze",hp:"50Spd"}, {name:"Belu",hp:"100Dc"} ]
+    "Shadow City": [ {name:"TangFak",hp:"8Td"}, {name:"Sunly",hp:"400Qad"}, {name:"Haler",hp:"20Qid"}, {name:"Thomas",hp:"2Sxd"}, {name:"Frieze",hp:"50Spd"}, {name:"Belu",hp:"100Dc"} ],
+    "Marine Island": [ {name:"Soldier",hp:"10Spd"}, {name:"Captain",hp:"50Ocd"}, {name:"Vice Admiral",hp:"2Nod"}, {name:"Admiral",hp:"500Vg"} ]
 };
 
 const waveScalingData = {
@@ -138,7 +155,8 @@ const eggData = [
     { name: "Desert Land", cost: "5k", currency: "Yen" },
     { name: "Demon Land", cost: "500k", currency: "Yen" },
     { name: "Paradis", cost: "500m", currency: "Yen" },
-    { name: "Shadow City", cost: "50b", currency: "Yen" }
+    { name: "Shadow City", cost: "50b", currency: "Yen" },
+    { name: "Marine Island", cost: "500b", currency: "Yen" }
 ];
 
 const themes = {
@@ -196,6 +214,14 @@ const mapUIConfig = [
             { type: 'select', label: 'Shadows Gacha', id: 'potShadowsSelect', source: shadowsData },
             { type: 'select', label: 'Shadow Gate', id: 'potShadowGateSelect', source: shadowGateData },
             { type: 'select', label: 'Solo Rank', id: 'potSoloRankSelect', source: soloRanksData }
+        ]
+    },
+    {
+        mapId: "MarineIsland",
+        items: [
+            { type: 'select', label: 'Captains Gacha', id: 'potCaptainsSelect', source: captainsData },
+            { type: 'select', label: 'Pirate Tower', id: 'potPirateTowerSelect', source: pirateTowerData },
+            { type: 'trainer', label: 'Sanji Trainer (%)', id: 'potSanjiTrainerInput' }
         ]
     }
 ];
