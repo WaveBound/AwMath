@@ -9,11 +9,12 @@
   --active-gradient: radial-gradient(circle at center, var(--primary-dim) 0%, transparent 75%);
   --trans: all 0.2s ease; --glow: 0 0 15px var(--primary-glow);
   
-  /* Status Colors */
-  --status-bg: rgba(220, 38, 38, 0.1);
-  --status-border: rgba(220, 38, 38, 0.25);
+  /* Status Bar Colors */
+  --status-grad-start: rgba(239, 68, 68, 0.15); /* Red tint */
+  --status-grad-end: rgba(239, 68, 68, 0.02);
+  --status-border: rgba(239, 68, 68, 0.2);
   --status-text: #fca5a5;
-  --status-glow: rgba(220, 38, 38, 0.4);
+  --status-highlight: #ef4444;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -30,23 +31,33 @@ input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-app
 .input-row, .input-row-multi, .rank-select-row, .time-input-group, .compact-row, .select-selected, .tab-nav, .mode-toggle { display: flex; align-items: center; }
 .bg-glow { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100vw; height: 100vh; background: radial-gradient(circle at center, var(--primary-glow) 0%, transparent 65%); opacity: 0.25; filter: blur(120px); z-index: -1; pointer-events: none; }
 
-/* Status Bar (Discontinued) */
+/* Status Bar (New) */
 .status-bar {
   width: 100%;
-  background: var(--status-bg);
+  /* Clean Gradient from left (reddish) to right (transparent) */
+  background: linear-gradient(90deg, var(--status-grad-start) 0%, var(--status-grad-end) 100%);
   border-bottom: 1px solid var(--status-border);
-  padding: 12px 20px;
+  padding: 14px 24px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 10px;
+  gap: 12px;
   border-radius: var(--radius) var(--radius) 0 0;
+  position: relative;
+  overflow: hidden;
 }
-.status-icon { color: var(--status-text); filter: drop-shadow(0 0 5px var(--status-glow)); }
-.status-text { color: var(--status-text); font-size: 13px; font-weight: 600; letter-spacing: 0.02em; }
-.status-tag { 
-  font-size: 10px; background: rgba(0,0,0,0.3); padding: 3px 8px; border-radius: 6px; 
-  text-transform: uppercase; letter-spacing: 0.05em; border: 1px solid var(--status-border);
+/* A subtle accent line on the left */
+.status-bar::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--status-highlight);
+  box-shadow: 0 0 10px var(--status-highlight);
+}
+.status-content { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.status-title { color: #fff; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 8px; }
+.status-desc { color: var(--status-text); font-size: 12px; font-weight: 500; opacity: 0.9; }
+.status-badge { 
+  background: rgba(0,0,0,0.4); border: 1px solid var(--status-border); 
+  color: var(--status-text); font-size: 10px; font-weight: 700; 
+  padding: 4px 10px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.1em;
+  white-space: nowrap;
 }
 
 /* Containers */
@@ -85,7 +96,7 @@ input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-app
 @keyframes entryFade { from { opacity: 0; transform: translate(var(--tx, 0), var(--ty, 0)); } to { opacity: 1; transform: translate(0, 0); } }
 
 /* Tabs & Layout */
-/* Updated radius to 0 for top corners to sit flush with status bar */
+/* NOTE: Border radius set to 0 here to sit flush under status bar */
 .tab-nav { padding: 12px; gap: 8px; border-bottom: 1px solid var(--border-color); background: rgba(0,0,0,0.2); border-radius: 0; }
 .tab-button { flex: 1; padding: 10px; background: transparent; border: 1px solid transparent; border-radius: 8px; color: var(--text-muted); font-size: 13px; font-weight: 600; cursor: pointer; }
 .tab-button:hover { background: rgba(255, 255, 255, 0.05); color: var(--text-main); border-color: rgba(255, 255, 255, 0.1); }
@@ -166,4 +177,4 @@ input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-app
 .secret-name { font-size: 15px; font-weight: 800; background: linear-gradient(90deg, #fff, var(--primary-light)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: var(--glow); }
 
 @media (max-width: 1650px) { .side-column { position: relative; top: auto; transform: none !important; margin: 20px auto 0; width: 100%; min-width: 0; max-width: 600px; align-items: stretch !important; } .side-column.left-aligned, .side-column.right-aligned { left: auto; right: auto; margin: 0 auto; } .side-panel.active { --tx: 0; --ty: -10px; } }
-@media (max-width: 768px) { .map-center-limit { width: 100%; } .mastery-layout { grid-template-columns: 1fr; gap: 20px; } .tab-content { padding: 20px; } .input-row-multi { flex-direction: column; gap: 15px; } .input-col { width: 100%; } .potential-grid, .map-section { grid-template-columns: repeat(2, 1fr); gap: 12px; } .potential-grid.global-grid { grid-template-columns: 1fr; } .result-grid { grid-template-columns: 1fr 1fr; gap: 10px; } .result-box.highlight { grid-column: 1 / -1; margin-top: 5px; height: auto; padding: 20px; min-height: 100px; } .result-box.highlight .value { font-size: 24px; white-space: normal; } .input-group label { font-size: 11px; } .mode-btn { padding: 10px 5px; font-size: 12px; } .mode-btn .small { font-size: 10px; } }
+@media (max-width: 768px) { .status-bar { flex-direction: column; align-items: flex-start; gap: 8px; } .status-badge { align-self: flex-start; } .map-center-limit { width: 100%; } .mastery-layout { grid-template-columns: 1fr; gap: 20px; } .tab-content { padding: 20px; } .input-row-multi { flex-direction: column; gap: 15px; } .input-col { width: 100%; } .potential-grid, .map-section { grid-template-columns: repeat(2, 1fr); gap: 12px; } .potential-grid.global-grid { grid-template-columns: 1fr; } .result-grid { grid-template-columns: 1fr 1fr; gap: 10px; } .result-box.highlight { grid-column: 1 / -1; margin-top: 5px; height: auto; padding: 20px; min-height: 100px; } .result-box.highlight .value { font-size: 24px; white-space: normal; } .input-group label { font-size: 11px; } .mode-btn { padding: 10px 5px; font-size: 12px; } .mode-btn .small { font-size: 10px; } }
